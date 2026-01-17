@@ -22,7 +22,8 @@ graph TB
     end
     
     subgraph Services["业务服务层<br/>gRPC 服务"]
-        US[User Service<br/>:50051]
+        AS[Auth Service<br/>:50050<br/>认证授权服务]
+        US[User Service<br/>:50051<br/>用户数据管理]
         MS[Message Service<br/>:50052]
         PS[Presence Service<br/>:50053]
     end
@@ -37,13 +38,17 @@ graph TB
     Mobile -->|WebSocket| WS
     API -->|HTTP| HTTP
     
+    WS -->|gRPC| AS
     WS -->|gRPC| US
     WS -->|gRPC| MS
     WS -->|gRPC| PS
+    HTTP -->|gRPC| AS
     
     MS -->|Producer| MQ
     WS -->|Consumer| MQ
     
+    AS --> DB
+    AS --> Redis
     US --> DB
     MS --> DB
     PS --> Redis
@@ -74,18 +79,43 @@ graph TB
 
 **数据**：无持久化数据，仅内存连接管理
 
-#### 2. User Service
+#### 2. Auth Service
+
+**职责**：
+- 用户登录和认证
+- JWT Token 生成和验证
+- Token 刷新和撤销
+- 用户权限验证
+- 认证中间件支持
+
+**技术栈**：
+- gRPC Server
+- JWT
+- Redis（Token 缓存和黑名单）
+- GORM（可选，用于用户状态查询）
+
+**端口**：50050
+
+**数据**：
+- Redis（Token 缓存、黑名单）
+- 数据库（可选，用于查询用户状态）
+
+**特点**：
+- 无状态服务（可水平扩展）
+- 高性能 Token 验证
+- 支持多种认证方式（JWT、OAuth2 等）
+
+#### 3. User Service
 
 **职责**：
 - 用户注册
-- 用户登录和认证
-- JWT Token 生成和验证
 - 用户信息查询和更新
+- 用户资料管理
+- 用户状态管理
 
 **技术栈**：
 - gRPC Server
 - GORM
-- JWT
 
 **端口**：50051
 
@@ -95,8 +125,9 @@ graph TB
 **特点**：
 - 有状态服务（数据库）
 - 支持数据库迁移
+- 专注于用户数据管理
 
-#### 3. Message Service
+#### 4. Message Service
 
 **职责**：
 - 单聊消息发送
@@ -123,7 +154,7 @@ graph TB
 - 消息队列生产者
 - 支持数据库迁移
 
-#### 4. Presence Service
+#### 5. Presence Service
 
 **职责**：
 - 用户在线状态管理
@@ -178,6 +209,12 @@ cmd/
 │       ├── root.go          # 根命令
 │       ├── serve.go         # serve 命令
 │       └── version.go       # version 命令
+├── auth-service/
+│   ├── main.go
+│   └── cmd/
+│       ├── root.go
+│       ├── serve.go
+│       └── version.go
 ├── user-service/
 │   ├── main.go
 │   └── cmd/
@@ -405,6 +442,12 @@ func main() {
 **示例**：
 
 ```bash
+# Auth Service
+export AUTH_SERVICE_SERVER_PORT=50050
+export AUTH_SERVICE_JWT_SECRET=your-secret-key
+export AUTH_SERVICE_JWT_EXPIRE_HOURS=24
+export AUTH_SERVICE_REDIS_ADDR=localhost:6379
+
 # User Service
 export USER_SERVICE_SERVER_PORT=50051
 export USER_SERVICE_DATABASE_HOST=localhost
@@ -416,6 +459,7 @@ export USER_SERVICE_DATABASE_DBNAME=beehive
 # Gateway
 export GATEWAY_SERVER_GATEWAY_PORT=8080
 export GATEWAY_RABBITMQ_URL=amqp://guest:guest@localhost:5672/
+export GATEWAY_GRPC_AUTH_SERVICE_ADDR=localhost:50050
 ```
 
 #### 配置文件示例
@@ -429,9 +473,39 @@ rabbitmq:
   url: amqp://guest:guest@localhost:5672/
 
 grpc:
+  auth_service_addr: localhost:50050
   user_service_addr: localhost:50051
   message_service_addr: localhost:50052
   presence_service_addr: localhost:50053
+
+log:
+  level: info
+  format: json
+```
+
+```yaml
+# configs/auth-service.yaml
+server:
+  auth_service_port: 50050
+
+jwt:
+  secret: your-secret-key-change-in-production
+  expire_hours: 24
+  refresh_expire_hours: 168  # 7 days
+
+redis:
+  addr: localhost:6379
+  password: ""
+  db: 0
+
+# 可选：如果需要查询用户状态
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  dbname: beehive
+  sslmode: disable
 
 log:
   level: info
@@ -451,10 +525,6 @@ database:
   dbname: beehive
   sslmode: disable
 
-jwt:
-  secret: your-secret-key
-  expire_hours: 24
-
 log:
   level: info
   format: json
@@ -467,6 +537,9 @@ log:
 ```bash
 # 启动 Gateway
 go run cmd/gateway/main.go serve
+
+# 启动 Auth Service
+go run cmd/auth-service/main.go serve
 
 # 启动 User Service
 go run cmd/user-service/main.go serve
@@ -486,12 +559,14 @@ go run cmd/gateway/main.go serve --config configs/gateway.yaml
 ```bash
 # 构建
 go build -o bin/gateway cmd/gateway/main.go
+go build -o bin/auth-service cmd/auth-service/main.go
 go build -o bin/user-service cmd/user-service/main.go
 go build -o bin/message-service cmd/message-service/main.go
 go build -o bin/presence-service cmd/presence-service/main.go
 
 # 运行
 ./bin/gateway serve --config /etc/beehive/gateway.yaml
+./bin/auth-service serve --config /etc/beehive/auth-service.yaml
 ./bin/user-service serve --config /etc/beehive/user-service.yaml
 ./bin/user-service migrate --config /etc/beehive/user-service.yaml
 ```
@@ -515,7 +590,7 @@ go build -o bin/presence-service cmd/presence-service/main.go
 # Makefile
 .PHONY: build run migrate test clean
 
-SERVICES = gateway user-service message-service presence-service
+SERVICES = gateway auth-service user-service message-service presence-service
 
 # 构建所有服务
 build:
@@ -529,6 +604,7 @@ run:
 	@echo "Starting services..."
 	@docker-compose -f docker/docker-compose.yml up -d
 	@./bin/gateway serve --config configs/gateway.yaml &
+	@./bin/auth-service serve --config configs/auth-service.yaml &
 	@./bin/user-service serve --config configs/user-service.yaml &
 	@./bin/message-service serve --config configs/message-service.yaml &
 	@./bin/presence-service serve --config configs/presence-service.yaml &
@@ -564,12 +640,19 @@ import (
 )
 
 type Client struct {
+    authService    pb.AuthServiceClient
     userService    pb.UserServiceClient
     messageService pb.MessageServiceClient
     presenceService pb.PresenceServiceClient
 }
 
 func NewClient(cfg *config.Config) (*Client, error) {
+    // 连接 Auth Service
+    authConn, err := grpc.Dial(cfg.GRPC.AuthServiceAddr, grpc.WithInsecure())
+    if err != nil {
+        return nil, err
+    }
+    
     // 连接 User Service
     userConn, err := grpc.Dial(cfg.GRPC.UserServiceAddr, grpc.WithInsecure())
     if err != nil {
@@ -589,6 +672,7 @@ func NewClient(cfg *config.Config) (*Client, error) {
     }
     
     return &Client{
+        authService:    pb.NewAuthServiceClient(authConn),
         userService:    pb.NewUserServiceClient(userConn),
         messageService: pb.NewMessageServiceClient(msgConn),
         presenceService: pb.NewPresenceServiceClient(presConn),

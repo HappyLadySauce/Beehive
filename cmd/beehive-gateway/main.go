@@ -15,7 +15,7 @@ const (
 
 func main() {
 	ctx := context.TODO()
-	cmd := beehivegateway.NewAPICommand(basename, ctx)
+	cmd := beehiveGateway.NewAPICommand(basename, ctx)
 	code := cli.Run(cmd)
 	os.Exit(code)
 }

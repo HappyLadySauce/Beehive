@@ -1,4 +1,4 @@
-package beehivegateway
+package beehiveGateway
 
 import (
 	"context"

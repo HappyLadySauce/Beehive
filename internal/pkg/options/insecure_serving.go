@@ -18,7 +18,7 @@ type InsecureServingOptions struct {
 // No one should be using these anymore.
 func NewInsecureServingOptions() *InsecureServingOptions {
 	return &InsecureServingOptions{
-		BindAddress: "127.0.0.1",
+		BindAddress: "0.0.0.0",
 		BindPort:    8080,
 	}
 }

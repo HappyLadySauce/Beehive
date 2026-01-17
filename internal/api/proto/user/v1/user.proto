@@ -1,0 +1,76 @@
+// internal/api/proto/v1/user.proto
+syntax = "proto3";
+
+package v1;
+
+option go_package = "github.com/HappyLadySauce/Beehive/internal/api/proto/v1";
+
+service UserService {
+    rpc Register(RegisterRequest) returns (RegisterResponse);
+    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+}
+
+message RegisterRequest {
+    string nickname = 1;
+    string avatar = 2;
+    string email = 3;
+    string description = 4;
+    string password = 5;
+}
+
+message RegisterResponse {
+    string id = 1;
+    string token = 2;
+}
+
+message LoginRequest {
+    string id = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string id = 1;
+    string token = 2;
+    UserInfo user = 3;
+}
+
+message ValidateTokenRequest {
+    string token = 1;
+}
+
+message ValidateTokenResponse {
+    string id = 1;
+    bool valid = 3;
+}
+
+message GetUserRequest {
+    string id = 1;
+}
+
+message GetUserResponse {
+    UserInfo user = 1;
+}
+
+message UpdateUserRequest {
+    string id = 1;
+    string nickname = 2;
+    string avatar = 3;
+    string description = 4;
+}
+
+message UpdateUserResponse {
+    UserInfo user = 1;
+}
+
+message UserInfo {
+    string id = 1;
+    string nickname = 2;
+    string avatar = 3;
+    string email = 4;
+    string description = 5;
+    int32 level = 6;
+    string status = 7;
+}

@@ -1,0 +1,111 @@
+// internal/api/proto/v1/message.proto
+syntax = "proto3";
+
+package v1;
+
+option go_package = "github.com/HappyLadySauce/Beehive/internal/api/proto/v1";
+
+service MessageService {
+    rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+    rpc SendGroupMessage(SendGroupMessageRequest) returns (SendGroupMessageResponse);
+    rpc GetMessageHistory(GetMessageHistoryRequest) returns (GetMessageHistoryResponse);
+    rpc GetGroupMessageHistory(GetGroupMessageHistoryRequest) returns (GetGroupMessageHistoryResponse);
+    rpc GetUnreadMessages(GetUnreadMessagesRequest) returns (GetUnreadMessagesResponse);
+    rpc MarkAsRead(MarkAsReadRequest) returns (MarkAsReadResponse);
+}
+
+message SendMessageRequest {
+    string id = 1;
+    string type = 2; // single, group
+    string from_user_id = 3;
+    string to_user_id = 4;
+    string group_id = 5;
+    string content = 6;
+    string message_type = 7; // text, image, file
+    string status = 8;
+}
+
+message SendMessageResponse {
+    string message_id = 1;
+    int64 created_at = 2;
+}
+
+message SendGroupMessageRequest {
+    string id = 1;
+    string type = 2; // group
+    string from_user_id = 3;
+    string group_id = 4;
+    string content = 5;
+    string message_type = 6;
+    string status = 7;
+}
+
+message SendGroupMessageResponse {
+    string message_id = 1;
+    int64 created_at = 2;
+}
+
+message GetMessageHistoryRequest {
+    string id = 1;
+    string type = 2; // single, group
+    string from_user_id = 3;
+    string to_user_id = 4;
+    string group_id = 5;
+    int32 limit = 6;
+    int32 offset = 7;
+}
+
+message GetMessageHistoryResponse {
+    repeated Message messages = 1;
+    int32 total = 2;
+}
+
+message GetGroupMessageHistoryRequest {
+    string id = 1;
+    string type = 2; // group
+    string group_id = 3;
+    int32 limit = 4;
+    int32 offset = 5;
+}
+
+message GetGroupMessageHistoryResponse {
+    repeated Message messages = 1;
+    int32 total = 2;
+}
+
+message GetUnreadMessagesRequest {
+    string id = 1;
+    string type = 2; // single, group
+    string from_user_id = 3;
+    string to_user_id = 4;
+    string group_id = 5;
+}
+
+message GetUnreadMessagesResponse {
+    repeated Message messages = 1;
+}
+
+message MarkAsReadRequest {
+    string id = 1;
+    string type = 2; // single, group
+    string from_user_id = 3;
+    string to_user_id = 4;
+    string group_id = 5;
+    repeated string ids = 6;
+}
+
+message MarkAsReadResponse {
+    bool success = 1;
+}
+
+message Message {
+    string id = 1;
+    string type = 2; // single, group
+    string from_user_id = 3;
+    string to_user_id = 4;
+    string group_id = 5;
+    string content = 6;
+    string message_type = 7;
+    string status = 8;
+    int64 created_at = 9;
+}

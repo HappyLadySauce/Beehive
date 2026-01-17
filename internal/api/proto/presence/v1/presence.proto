@@ -1,0 +1,45 @@
+// internal/api/proto/v1/presence.proto
+syntax = "proto3";
+
+package v1;
+
+option go_package = "github.com/HappyLadySauce/Beehive/internal/api/proto/v1";
+
+service PresenceService {
+    rpc UserOnline(UserOnlineRequest) returns (UserOnlineResponse);
+    rpc UserOffline(UserOfflineRequest) returns (UserOfflineResponse);
+    rpc GetOnlineUsers(GetOnlineUsersRequest) returns (GetOnlineUsersResponse);
+    rpc IsUserOnline(IsUserOnlineRequest) returns (IsUserOnlineResponse);
+}
+
+message UserOnlineRequest {
+    string id = 1;
+}
+
+message UserOnlineResponse {
+    bool success = 1;
+}
+
+message UserOfflineRequest {
+    string id = 1;
+}
+
+message UserOfflineResponse {
+    bool success = 1;
+}
+
+message GetOnlineUsersRequest {
+    repeated string ids = 1;
+}
+
+message GetOnlineUsersResponse {
+    repeated string ids = 1;
+}
+
+message IsUserOnlineRequest {
+    string id = 1;
+}
+
+message IsUserOnlineResponse {
+    bool online = 1;
+}

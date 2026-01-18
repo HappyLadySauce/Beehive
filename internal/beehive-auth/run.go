@@ -92,6 +92,13 @@ func Run(ctx context.Context, opts *options.Options) error {
 		if err != nil {
 			klog.Warningf("Failed to create etcd registry, service registration disabled: %v", err)
 		} else {
+			// Ensure registry is closed even if registration fails
+			defer func() {
+				if serviceRegistry != nil {
+					serviceRegistry.Close()
+				}
+			}()
+
 			// 生成实例 ID
 			instanceID = fmt.Sprintf("%s-%s", "auth", uuid.New().String()[:8])
 
@@ -113,13 +120,13 @@ func Run(ctx context.Context, opts *options.Options) error {
 				klog.Warningf("Failed to register service to etcd: %v", err)
 			} else {
 				klog.Infof("Service registered to etcd: %s", instanceID)
+				// Set up defer for deregistration only if registration succeeded
 				defer func() {
 					if err := serviceRegistry.Deregister("beehive-auth", instanceID); err != nil {
 						klog.Errorf("Failed to deregister service from etcd: %v", err)
 					} else {
 						klog.Info("Service deregistered from etcd")
 					}
-					serviceRegistry.Close()
 				}()
 			}
 		}

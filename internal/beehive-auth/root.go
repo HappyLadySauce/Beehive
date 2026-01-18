@@ -55,7 +55,7 @@ func NewAPICommand(basename string, ctx context.Context) *cobra.Command {
 				}
 				os.Exit(1)
 			}
-			return run(ctx, opts)
+			return Run(ctx, opts)
 		},
 	}
 
@@ -64,9 +64,3 @@ func NewAPICommand(basename string, ctx context.Context) *cobra.Command {
 
 	return cmd
 }
-
-func run(ctx context.Context, opts *options.Options) error {
-
-	return nil
-}
-

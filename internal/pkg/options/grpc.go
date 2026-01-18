@@ -8,17 +8,17 @@ import (
 
 // GrpcOptions is the options for the gRPC server.
 type GrpcOptions struct {
-	BindAddress string `json:"bind-address" 	mapstructure:"bind-address"` 
-	BindPort 	int 	`json:"bind-port"		mapstructure:"bind-port"` 
-	MaxMsgSize 	int 	`json:"max-msg-size" 	mapstructure:"max-msg-size"` 
+	BindAddress string `json:"bind-address" mapstructure:"bind-address"`
+	BindPort    int    `json:"bind-port" mapstructure:"bind-port"`
+	MaxMsgSize  int    `json:"max-msg-size" mapstructure:"max-msg-size"`
 }
 
 // NewGrpcOptions creates a new GrpcOptions.
 func NewGrpcOptions() *GrpcOptions {
 	return &GrpcOptions{
 		BindAddress: "0.0.0.0",
-		BindPort: 50051,
-		MaxMsgSize: 4 * 1024 * 1024,
+		BindPort:    50050, // 默认端口，可以在使用时覆盖
+		MaxMsgSize:  4 * 1024 * 1024,
 	}
 }
 

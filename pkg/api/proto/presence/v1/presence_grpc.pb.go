@@ -4,7 +4,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.0
 // - protoc             v3.12.4
-// source: presence.proto
+// source: presence/v1/presence.proto
 
 package v1
 
@@ -285,5 +285,5 @@ var PresenceService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "presence.proto",
+	Metadata: "presence/v1/presence.proto",
 }

@@ -3,3 +3,9 @@
 .trae
 .cursorrules
 .cursorignore
+
+.env
+
+# 配置文件（包含敏感信息，不应提交到 git）
+configs/beehive-user.yaml
+configs/beehive-auth.yaml

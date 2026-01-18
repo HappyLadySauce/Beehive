@@ -1,0 +1,41 @@
+# beehive-auth 服务配置文件
+
+# gRPC 服务器配置
+grpc:
+  bind-address: "0.0.0.0"
+  bind-port: 50050
+  max-msg-size: 4194304  # 4MB
+
+# JWT 配置
+jwt:
+  secret: "your-secret-key-change-in-production"  # 生产环境请修改为强密钥
+  expire-hours: 24  # Access Token 过期时间（小时）
+  refresh-expire-hours: 168  # Refresh Token 过期时间（小时，7天）
+
+# Redis 配置
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+# etcd 配置（服务注册中心）
+etcd:
+  endpoints: ["localhost:2379"]
+  dial-timeout: 5s
+  username: "Beehive"
+  password: "Beehive"
+  prefix: "/beehive/services"
+
+# User Service 配置
+user-service:
+  addr: "etcd://beehive-user"  # 使用 etcd 服务发现，或直接地址 "localhost:50051"
+
+# 日志配置
+log:
+  level: info
+  format: json
+  log-file: ""
+  max-size: 100
+  max-backups: 3
+  max-age: 28
+  compress: true

@@ -10,19 +10,19 @@ import (
 
 type Options struct {
 	Name     string
-	Log      *options.LogOptions  `json:"log" mapstructure:"log"`
-	Grpc     *options.GrpcOptions `json:"grpc" mapstructure:"grpc"`
-	Database *options.DatabaseOptions     `json:"database" mapstructure:"database"`
+	Log      *options.LogOptions      `json:"log" mapstructure:"log"`
+	Grpc     *options.GrpcOptions     `json:"grpc" mapstructure:"grpc"`
+	Postgresql *options.PostgresqlOptions `json:"postgresql" mapstructure:"postgresql"`
+	Etcd     *options.EtcdOptions     `json:"etcd" mapstructure:"etcd"`
 }
-
-
 
 func NewOptions(basename string) *Options {
 	return &Options{
 		Name:     basename,
 		Log:      options.NewLogOptions(),
 		Grpc:     options.NewGrpcOptions(),
-		Database: options.NewDatabaseOptions(),
+		Postgresql: options.NewPostgresqlOptions(),
+		Etcd:     options.NewEtcdOptions(),
 	}
 }
 
@@ -43,8 +43,12 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) *flag.NamedFlagSets {
 	o.Grpc.AddFlags(grpcFlagSet)
 
 	// add database flags to the NamedFlagSets
-	databaseFlagSet := nfs.FlagSet("Database")
-	o.Database.AddFlags(databaseFlagSet)
+	postgresqlFlagSet := nfs.FlagSet("Postgresql")
+	o.Postgresql.AddFlags(postgresqlFlagSet)
+
+	// add etcd flags to the NamedFlagSets
+	etcdFlagSet := nfs.FlagSet("Etcd")
+	o.Etcd.AddFlags(etcdFlagSet)
 
 	return nfs
 }

@@ -51,14 +51,14 @@ grpc.gen.%: grpc.verify service.validate.%
 	fi; \
 	echo "Proto file: $$proto_file"; \
 	echo "Output directory: $$output_dir"; \
-	$(PROTOC) \
-		--proto_path=$$proto_dir \
+	cd $(PROTO_BASE_DIR) && $(PROTOC) \
+		--proto_path=. \
 		--proto_path=$(ROOT_DIR) \
-		--go_out=$$output_dir \
+		--go_out=. \
 		--go_opt=paths=source_relative \
-		--go-grpc_out=$$output_dir \
+		--go-grpc_out=. \
 		--go-grpc_opt=paths=source_relative \
-		$$proto_file; \
+		$*/v1/$*.proto; \
 	if [ $$? -eq 0 ]; then \
 		echo "Successfully generated gRPC code for $*"; \
 	else \

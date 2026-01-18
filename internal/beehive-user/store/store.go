@@ -24,7 +24,7 @@ func NewStore(cfg *config.Config) (*Store, error) {
 	// 构建 DSN
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=%s",
-		cfg.Database.Host, cfg.Database.User, cfg.Database.Password, cfg.Database.DBName, cfg.Database.Port, cfg.Database.SSLMode,
+		cfg.Postgresql.Host, cfg.Postgresql.User, cfg.Postgresql.Password, cfg.Postgresql.DBName, cfg.Postgresql.Port, cfg.Postgresql.SSLMode,
 	)
 
 	// 连接数据库
@@ -44,8 +44,8 @@ func NewStore(cfg *config.Config) (*Store, error) {
 		return nil, fmt.Errorf("failed to get database instance: %w", err)
 	}
 
-	sqlDB.SetMaxIdleConns(cfg.Database.MaxIdleConns)
-	sqlDB.SetMaxOpenConns(cfg.Database.MaxOpenConns)
+	sqlDB.SetMaxIdleConns(cfg.Postgresql.MaxIdleConns)
+	sqlDB.SetMaxOpenConns(cfg.Postgresql.MaxOpenConns)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	store := &Store{

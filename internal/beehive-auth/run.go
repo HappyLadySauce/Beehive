@@ -1,4 +1,4 @@
-package beehiveUser
+package beehiveAuth
 
 import (
 	"context"
@@ -11,12 +11,13 @@ import (
 	"google.golang.org/grpc"
 	"k8s.io/klog/v2"
 
-	"github.com/HappyLadySauce/Beehive/internal/beehive-user/config"
-	"github.com/HappyLadySauce/Beehive/internal/beehive-user/options"
-	"github.com/HappyLadySauce/Beehive/internal/beehive-user/service"
-	"github.com/HappyLadySauce/Beehive/internal/beehive-user/store"
+	"github.com/HappyLadySauce/Beehive/internal/beehive-auth/client"
+	"github.com/HappyLadySauce/Beehive/internal/beehive-auth/config"
+	"github.com/HappyLadySauce/Beehive/internal/beehive-auth/options"
+	"github.com/HappyLadySauce/Beehive/internal/beehive-auth/service"
+	"github.com/HappyLadySauce/Beehive/internal/beehive-auth/store"
 	"github.com/HappyLadySauce/Beehive/internal/pkg/registry"
-	pb "github.com/HappyLadySauce/Beehive/pkg/api/proto/user/v1"
+	pb "github.com/HappyLadySauce/Beehive/pkg/api/proto/auth/v1"
 	"github.com/google/uuid"
 )
 
@@ -27,31 +28,43 @@ func Run(ctx context.Context, opts *options.Options) error {
 		return fmt.Errorf("failed to create config: %w", err)
 	}
 
-	// 2. 创建数据库连接
-	klog.Info("Creating database connection...")
-	dbStore, err := store.NewStore(cfg)
+	// 2. 创建 Redis 连接
+	klog.Info("Creating Redis connection...")
+	redisStore, err := store.NewStore(cfg)
 	if err != nil {
-		return fmt.Errorf("failed to initialize database: %w", err)
+		return fmt.Errorf("failed to initialize Redis: %w", err)
 	}
 	defer func() {
-		if err := dbStore.Close(); err != nil {
-			klog.Errorf("Failed to close database connection: %v", err)
+		if err := redisStore.Close(); err != nil {
+			klog.Errorf("Failed to close Redis connection: %v", err)
 		}
 	}()
 
-	// 3. 创建 User Service 实例
-	userService := service.NewService(dbStore)
+	// 3. 创建 User Service gRPC 客户端
+	klog.Info("Creating User Service gRPC client...")
+	userClient, err := client.NewClient(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to initialize User Service client: %w", err)
+	}
+	defer func() {
+		if err := userClient.Close(); err != nil {
+			klog.Errorf("Failed to close User Service client: %v", err)
+		}
+	}()
 
-	// 4. 创建 gRPC 服务器
+	// 4. 创建 Auth Service 实例
+	authService := service.NewService(cfg, redisStore, userClient)
+
+	// 5. 创建 gRPC 服务器
 	grpcServer := grpc.NewServer(
 		grpc.MaxRecvMsgSize(cfg.Grpc.MaxMsgSize),
 		grpc.MaxSendMsgSize(cfg.Grpc.MaxMsgSize),
 	)
 
-	// 5. 注册 User Service
-	pb.RegisterUserServiceServer(grpcServer, userService)
+	// 6. 注册 Auth Service
+	pb.RegisterAuthServiceServer(grpcServer, authService)
 
-	// 6. 启动 gRPC 服务器
+	// 7. 启动 gRPC 服务器
 	addr := fmt.Sprintf("%s:%d", cfg.Grpc.BindAddress, cfg.Grpc.BindPort)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -63,9 +76,9 @@ func Run(ctx context.Context, opts *options.Options) error {
 		}
 	}()
 
-	klog.Infof("Starting User Service gRPC server on %s", addr)
+	klog.Infof("Starting Auth Service gRPC server on %s", addr)
 
-	// 7. 注册服务到 etcd（如果配置了 etcd）
+	// 8. 注册服务到 etcd（如果配置了 etcd）
 	var serviceRegistry *registry.Registry
 	var instanceID string
 	if len(cfg.Etcd.Endpoints) > 0 && cfg.Etcd.Endpoints[0] != "" {
@@ -80,7 +93,7 @@ func Run(ctx context.Context, opts *options.Options) error {
 			klog.Warningf("Failed to create etcd registry, service registration disabled: %v", err)
 		} else {
 			// 生成实例 ID
-			instanceID = fmt.Sprintf("%s-%s", "user", uuid.New().String()[:8])
+			instanceID = fmt.Sprintf("%s-%s", "auth", uuid.New().String()[:8])
 
 			// 获取实际监听地址
 			host := cfg.Grpc.BindAddress
@@ -89,7 +102,7 @@ func Run(ctx context.Context, opts *options.Options) error {
 			}
 
 			serviceInfo := &registry.ServiceInfo{
-				ServiceName: "beehive-user",
+				ServiceName: "beehive-auth",
 				Address:     host,
 				Port:        cfg.Grpc.BindPort,
 				InstanceID:  instanceID,
@@ -101,7 +114,7 @@ func Run(ctx context.Context, opts *options.Options) error {
 			} else {
 				klog.Infof("Service registered to etcd: %s", instanceID)
 				defer func() {
-					if err := serviceRegistry.Deregister("beehive-user", instanceID); err != nil {
+					if err := serviceRegistry.Deregister("beehive-auth", instanceID); err != nil {
 						klog.Errorf("Failed to deregister service from etcd: %v", err)
 					} else {
 						klog.Info("Service deregistered from etcd")
@@ -112,7 +125,7 @@ func Run(ctx context.Context, opts *options.Options) error {
 		}
 	}
 
-	// 8. 优雅关闭处理
+	// 9. 优雅关闭处理
 	errChan := make(chan error, 1)
 	go func() {
 		if err := grpcServer.Serve(lis); err != nil {
@@ -120,7 +133,7 @@ func Run(ctx context.Context, opts *options.Options) error {
 		}
 	}()
 
-	// 9. 等待中断信号
+	// 10. 等待中断信号
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
@@ -132,7 +145,7 @@ func Run(ctx context.Context, opts *options.Options) error {
 	case sig := <-sigChan:
 		klog.Infof("Received signal %v, shutting down gracefully...", sig)
 		grpcServer.GracefulStop()
-		klog.Info("User Service stopped successfully")
+		klog.Info("Auth Service stopped successfully")
 		return nil
 	case <-ctx.Done():
 		klog.Info("Context cancelled, shutting down...")

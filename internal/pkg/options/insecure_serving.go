@@ -11,7 +11,7 @@ import (
 // No one should be using these anymore.
 type InsecureServingOptions struct {
 	BindAddress string `json:"bind-address" mapstructure:"bind-address"`
-	BindPort    int    `json:"bind-port"    mapstructure:"bind-port"`
+	BindPort    int    `json:"bind-port" mapstructure:"bind-port"`
 }
 
 // NewInsecureServingOptions is for creating an unauthenticated, unauthorized, insecure port.

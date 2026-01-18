@@ -1,0 +1,135 @@
+services:
+  etcd-init:
+    image: alpine:latest
+    container_name: etcd-init
+    depends_on:
+      etcd-0:
+        condition: service_started
+      etcd-1:
+        condition: service_started
+      etcd-2:
+        condition: service_started
+    environment:
+      - ETCD_ENDPOINTS=http://etcd-0:2379,http://etcd-1:2379,http://etcd-2:2379
+      - ETCD_USER=${ETCD_USER:-Beehive}
+      - ETCD_PASSWORD=${ETCD_PASSWORD:-Beehive}
+    volumes:
+      - ./init-auth.sh:/init-auth.sh:ro
+    networks:
+      - etcd-network
+    entrypoint: ["/bin/sh"]
+    restart: "no"
+    # Install wget for downloading etcdctl
+    command: >
+      -c "
+      apk add --no-cache wget tar &&
+      /init-auth.sh
+      "
+
+  etcd-0:
+    image: quay.io/coreos/etcd:v3.5.9
+    container_name: etcd-0
+    environment:
+      - ETCD_NAME=etcd-0
+      - ETCD_DATA_DIR=/etcd-data
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd-0:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd-0:2380
+      - ETCD_INITIAL_CLUSTER=etcd-0=http://etcd-0:2380,etcd-1=http://etcd-1:2380,etcd-2=http://etcd-2:2380
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-token
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_ENABLE_V2=true
+      - ETCD_USER=${ETCD_USER:-Beehive}
+      - ETCD_PASSWORD=${ETCD_PASSWORD:-Beehive}
+    ports:
+      - "2379:2379"  # Client port
+      - "2380:2380"  # Peer port
+    volumes:
+      - etcd-0-data:/etcd-data
+    networks:
+      - etcd-network
+    healthcheck:
+      # Health check works before auth is enabled
+      # After auth is enabled, health check may fail but cluster will still work
+      test: ["CMD", "etcdctl", "--endpoints=http://localhost:2379", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  etcd-1:
+    image: quay.io/coreos/etcd:v3.5.9
+    container_name: etcd-1
+    environment:
+      - ETCD_NAME=etcd-1
+      - ETCD_DATA_DIR=/etcd-data
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd-1:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd-1:2380
+      - ETCD_INITIAL_CLUSTER=etcd-0=http://etcd-0:2380,etcd-1=http://etcd-1:2380,etcd-2=http://etcd-2:2380
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-token
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_ENABLE_V2=true
+      - ETCD_USER=${ETCD_USER:-Beehive}
+      - ETCD_PASSWORD=${ETCD_PASSWORD:-Beehive}
+    ports:
+      - "23790:2379"  # Client port
+      - "23800:2380"  # Peer port
+    volumes:
+      - etcd-1-data:/etcd-data
+    networks:
+      - etcd-network
+    healthcheck:
+      # Health check works before auth is enabled
+      # After auth is enabled, health check may fail but cluster will still work
+      test: ["CMD", "etcdctl", "--endpoints=http://localhost:2379", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  etcd-2:
+    image: quay.io/coreos/etcd:v3.5.9
+    container_name: etcd-2
+    environment:
+      - ETCD_NAME=etcd-2
+      - ETCD_DATA_DIR=/etcd-data
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd-2:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd-2:2380
+      - ETCD_INITIAL_CLUSTER=etcd-0=http://etcd-0:2380,etcd-1=http://etcd-1:2380,etcd-2=http://etcd-2:2380
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-token
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_ENABLE_V2=true
+      - ETCD_USER=${ETCD_USER:-Beehive}
+      - ETCD_PASSWORD=${ETCD_PASSWORD:-Beehive}
+    ports:
+      - "23791:2379"  # Client port
+      - "23801:2380"  # Peer port
+    volumes:
+      - etcd-2-data:/etcd-data
+    networks:
+      - etcd-network
+    healthcheck:
+      # Health check works before auth is enabled
+      # After auth is enabled, health check may fail but cluster will still work
+      test: ["CMD", "etcdctl", "--endpoints=http://localhost:2379", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  etcd-0-data:
+    driver: local
+  etcd-1-data:
+    driver: local
+  etcd-2-data:
+    driver: local
+
+networks:
+  etcd-network:
+    driver: bridge

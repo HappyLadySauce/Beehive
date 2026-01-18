@@ -2,21 +2,25 @@ package options
 
 import (
 	"encoding/json"
+
+	"github.com/HappyLadySauce/Beehive/internal/pkg/options"
 	"github.com/spf13/pflag"
 	"k8s.io/component-base/cli/flag"
-	"github.com/HappyLadySauce/Beehive/internal/pkg/options"
 )
 
 type Options struct {
-	Name 	string
-	Log		*options.LogOptions `json:"log" mapstructure:"log"`
+	Name string
+	Log  *options.LogOptions  `json:"log" mapstructure:"log"`
+	Grpc *options.GrpcOptions `json:"grpc" mapstructure:"grpc"`
+	Etcd *options.EtcdOptions `json:"etcd" mapstructure:"etcd"`
 }
-
 
 func NewOptions(basename string) *Options {
 	return &Options{
 		Name: basename,
-		Log: options.NewLogOptions(),
+		Log:  options.NewLogOptions(),
+		Grpc: options.NewGrpcOptions(),
+		Etcd: options.NewEtcdOptions(),
 	}
 }
 
@@ -31,6 +35,14 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) *flag.NamedFlagSets {
 	// add log flags to the NamedFlagSets
 	logsFlagSet := nfs.FlagSet("Logs")
 	o.Log.AddFlags(logsFlagSet)
+
+	// add grpc flags to the NamedFlagSets
+	grpcFlagSet := nfs.FlagSet("gRPC")
+	o.Grpc.AddFlags(grpcFlagSet)
+
+	// add etcd flags to the NamedFlagSets
+	etcdFlagSet := nfs.FlagSet("Etcd")
+	o.Etcd.AddFlags(etcdFlagSet)
 
 	return nfs
 }

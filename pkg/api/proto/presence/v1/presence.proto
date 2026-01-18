@@ -1,45 +1,86 @@
-// internal/api/proto/v1/presence.proto
+// pkg/api/proto/presence/v1/presence.proto
 syntax = "proto3";
 
-package v1;
+package presence.v1;
 
-option go_package = "github.com/HappyLadySauce/Beehive/internal/api/proto/v1";
+option go_package = "github.com/HappyLadySauce/Beehive/pkg/api/proto/presence/v1";
 
+// PresenceService 提供用户在线状态相关的服务
 service PresenceService {
+    // UserOnline 用户上线
     rpc UserOnline(UserOnlineRequest) returns (UserOnlineResponse);
+    
+    // UserOffline 用户下线
     rpc UserOffline(UserOfflineRequest) returns (UserOfflineResponse);
+    
+    // GetOnlineUsers 批量获取用户在线状态
     rpc GetOnlineUsers(GetOnlineUsersRequest) returns (GetOnlineUsersResponse);
+    
+    // IsUserOnline 检查单个用户是否在线
     rpc IsUserOnline(IsUserOnlineRequest) returns (IsUserOnlineResponse);
+    
+    // GetUserPresence 获取用户详细在线状态
+    rpc GetUserPresence(GetUserPresenceRequest) returns (GetUserPresenceResponse);
 }
 
+// UserOnlineRequest 用户上线请求
 message UserOnlineRequest {
-    string id = 1;
+    string id = 1;  // 用户ID
 }
 
+// UserOnlineResponse 用户上线响应
 message UserOnlineResponse {
-    bool success = 1;
+    bool success = 1;        // 是否成功
+    int64 online_at = 2;     // 上线时间（Unix 时间戳）
 }
 
+// UserOfflineRequest 用户下线请求
 message UserOfflineRequest {
-    string id = 1;
+    string id = 1;  // 用户ID
 }
 
+// UserOfflineResponse 用户下线响应
 message UserOfflineResponse {
-    bool success = 1;
+    bool success = 1;         // 是否成功
+    int64 offline_at = 2;     // 下线时间（Unix 时间戳）
 }
 
+// GetOnlineUsersRequest 批量获取用户在线状态请求
 message GetOnlineUsersRequest {
-    repeated string ids = 1;
+    repeated string user_ids = 1;  // 用户ID列表
 }
 
+// GetOnlineUsersResponse 批量获取用户在线状态响应
 message GetOnlineUsersResponse {
-    repeated string ids = 1;
+    repeated UserPresenceInfo users = 1;  // 用户在线状态列表
 }
 
+// IsUserOnlineRequest 检查用户是否在线请求
 message IsUserOnlineRequest {
-    string id = 1;
+    string id = 1;  // 用户ID
 }
 
+// IsUserOnlineResponse 检查用户是否在线响应
 message IsUserOnlineResponse {
-    bool online = 1;
+    bool online = 1;         // 是否在线
+    int64 last_seen_at = 2;  // 最后在线时间（Unix 时间戳，离线时返回）
+}
+
+// GetUserPresenceRequest 获取用户详细在线状态请求
+message GetUserPresenceRequest {
+    string id = 1;  // 用户ID
+}
+
+// GetUserPresenceResponse 获取用户详细在线状态响应
+message GetUserPresenceResponse {
+    UserPresenceInfo presence = 1;  // 用户在线状态信息
+}
+
+// UserPresenceInfo 用户在线状态信息
+message UserPresenceInfo {
+    string id = 1;      // 用户ID
+    bool online = 2;         // 是否在线
+    string status = 3;      // 状态: online, offline, busy, idle, invisible
+    int64 last_seen_at = 4; // 最后在线时间（Unix 时间戳）
+    int64 online_at = 5;    // 上线时间（Unix 时间戳，仅在线时有效）
 }

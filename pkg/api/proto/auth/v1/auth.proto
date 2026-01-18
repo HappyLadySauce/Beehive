@@ -1,0 +1,80 @@
+// pkg/api/proto/auth/v1/auth.proto
+syntax = "proto3";
+
+package auth.v1;
+
+option go_package = "github.com/HappyLadySauce/Beehive/pkg/api/proto/auth/v1";
+
+// AuthService 提供认证和授权相关的服务
+service AuthService {
+    // Login 用户登录，使用 id 和 password
+    rpc Login(LoginRequest) returns (LoginResponse);
+    
+    // ValidateToken 验证 JWT Token，返回用户信息
+    rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+    
+    // RefreshToken 刷新访问令牌
+    rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+    
+    // RevokeToken 撤销令牌（加入黑名单）
+    rpc RevokeToken(RevokeTokenRequest) returns (RevokeTokenResponse);
+}
+
+// LoginRequest 登录请求
+message LoginRequest {
+    string id = 1;    // 用户ID
+    string password = 2;   // 密码
+}
+
+// LoginResponse 登录响应
+message LoginResponse {
+    string token = 1;              // 访问令牌
+    string refresh_token = 2;      // 刷新令牌
+    int64 expires_at = 3;          // 令牌过期时间（Unix 时间戳）
+    UserInfo user = 4;             // 用户信息
+}
+
+// ValidateTokenRequest Token 验证请求
+message ValidateTokenRequest {
+    string token = 1;  // 要验证的令牌
+}
+
+// ValidateTokenResponse Token 验证响应
+message ValidateTokenResponse {
+    bool valid = 1;        // 令牌是否有效
+    string id = 2;    // 用户ID
+    UserInfo user = 3;     // 用户信息（仅在 valid=true 时返回）
+}
+
+// RefreshTokenRequest 刷新令牌请求
+message RefreshTokenRequest {
+    string refresh_token = 1;  // 刷新令牌
+}
+
+// RefreshTokenResponse 刷新令牌响应
+message RefreshTokenResponse {
+    string token = 1;          // 新的访问令牌
+    string refresh_token = 2;   // 新的刷新令牌
+    int64 expires_at = 3;       // 令牌过期时间（Unix 时间戳）
+}
+
+// RevokeTokenRequest 撤销令牌请求
+message RevokeTokenRequest {
+    string token = 1;  // 要撤销的令牌
+}
+
+// RevokeTokenResponse 撤销令牌响应
+message RevokeTokenResponse {
+    bool success = 1;  // 是否成功
+}
+
+// UserInfo 用户基本信息（供 Auth Service 返回）
+message UserInfo {
+    string id = 1;          // 用户ID
+    string nickname = 2;    // 昵称
+    string avatar = 3;      // 头像URL
+    string email = 4;       // 邮箱
+    string description = 5; // 描述
+    int32 level = 6;        // 等级 0-15，0表示普通用户
+    string status = 7;      // 状态: online, offline, busy, idle, invisible
+}

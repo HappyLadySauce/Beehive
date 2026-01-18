@@ -1,111 +1,164 @@
-// internal/api/proto/v1/message.proto
+// pkg/api/proto/message/v1/message.proto
 syntax = "proto3";
 
-package v1;
+package message.v1;
 
-option go_package = "github.com/HappyLadySauce/Beehive/internal/api/proto/v1";
+option go_package = "github.com/HappyLadySauce/Beehive/pkg/api/proto/message/v1";
 
+// MessageService 提供消息相关的服务
 service MessageService {
+    // SendMessage 发送单聊消息
     rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+    
+    // SendGroupMessage 发送群聊消息
     rpc SendGroupMessage(SendGroupMessageRequest) returns (SendGroupMessageResponse);
+    
+    // GetMessageHistory 获取消息历史（单聊或群聊）
     rpc GetMessageHistory(GetMessageHistoryRequest) returns (GetMessageHistoryResponse);
+    
+    // GetGroupMessageHistory 获取群聊消息历史
     rpc GetGroupMessageHistory(GetGroupMessageHistoryRequest) returns (GetGroupMessageHistoryResponse);
+    
+    // GetUnreadMessages 获取未读消息
     rpc GetUnreadMessages(GetUnreadMessagesRequest) returns (GetUnreadMessagesResponse);
+    
+    // MarkAsRead 标记消息为已读
     rpc MarkAsRead(MarkAsReadRequest) returns (MarkAsReadResponse);
+    
+    // GetConversations 获取用户会话列表
+    rpc GetConversations(GetConversationsRequest) returns (GetConversationsResponse);
+    
+    // GetConversation 获取单个会话详情
+    rpc GetConversation(GetConversationRequest) returns (GetConversationResponse);
 }
 
+// SendMessageRequest 发送单聊消息请求
 message SendMessageRequest {
-    string id = 1;
-    string type = 2; // single, group
-    string from_user_id = 3;
-    string to_user_id = 4;
-    string group_id = 5;
-    string content = 6;
-    string message_type = 7; // text, image, file
-    string status = 8;
+    string from_id = 1;  // 发送者用户ID
+    string to_id = 2;    // 接收者用户ID
+    string content = 3;       // 消息内容
+    string message_type = 4;  // 消息类型: text, image, file
 }
 
+// SendMessageResponse 发送消息响应
 message SendMessageResponse {
-    string message_id = 1;
-    int64 created_at = 2;
+    string message_id = 1;  // 消息ID
+    int64 created_at = 2;   // 创建时间（Unix 时间戳）
 }
 
+// SendGroupMessageRequest 发送群聊消息请求
 message SendGroupMessageRequest {
-    string id = 1;
-    string type = 2; // group
-    string from_user_id = 3;
-    string group_id = 4;
-    string content = 5;
-    string message_type = 6;
-    string status = 7;
+    string from_id = 1;  // 发送者用户ID
+    string group_id = 2;      // 群组ID
+    string content = 3;       // 消息内容
+    string message_type = 4;  // 消息类型: text, image, file
 }
 
+// SendGroupMessageResponse 发送群聊消息响应
 message SendGroupMessageResponse {
-    string message_id = 1;
-    int64 created_at = 2;
+    string message_id = 1;  // 消息ID
+    int64 created_at = 2;   // 创建时间（Unix 时间戳）
 }
 
+// GetMessageHistoryRequest 获取消息历史请求
 message GetMessageHistoryRequest {
-    string id = 1;
-    string type = 2; // single, group
-    string from_user_id = 3;
-    string to_user_id = 4;
-    string group_id = 5;
-    int32 limit = 6;
-    int32 offset = 7;
+    string id = 1;        // 当前用户ID
+    string target_user_id = 2; // 目标用户ID（单聊时使用）
+    string group_id = 3;       // 群组ID（群聊时使用）
+    int32 limit = 4;           // 每页数量，默认 50
+    int32 offset = 5;          // 偏移量，默认 0
 }
 
+// GetMessageHistoryResponse 获取消息历史响应
 message GetMessageHistoryResponse {
-    repeated Message messages = 1;
-    int32 total = 2;
+    repeated Message messages = 1;  // 消息列表
+    int32 total = 2;                 // 总数量
 }
 
+// GetGroupMessageHistoryRequest 获取群聊消息历史请求
 message GetGroupMessageHistoryRequest {
-    string id = 1;
-    string type = 2; // group
-    string group_id = 3;
-    int32 limit = 4;
-    int32 offset = 5;
+    string group_id = 1;  // 群组ID
+    int32 limit = 2;      // 每页数量，默认 50
+    int32 offset = 3;     // 偏移量，默认 0
 }
 
+// GetGroupMessageHistoryResponse 获取群聊消息历史响应
 message GetGroupMessageHistoryResponse {
-    repeated Message messages = 1;
-    int32 total = 2;
+    repeated Message messages = 1;  // 消息列表
+    int32 total = 2;                 // 总数量
 }
 
+// GetUnreadMessagesRequest 获取未读消息请求
 message GetUnreadMessagesRequest {
-    string id = 1;
-    string type = 2; // single, group
-    string from_user_id = 3;
-    string to_user_id = 4;
-    string group_id = 5;
+    string id = 1;        // 用户ID
+    string target_user_id = 2;  // 目标用户ID（单聊时使用，可选）
+    string group_id = 3;       // 群组ID（群聊时使用，可选）
 }
 
+// GetUnreadMessagesResponse 获取未读消息响应
 message GetUnreadMessagesResponse {
-    repeated Message messages = 1;
+    repeated Message messages = 1;  // 未读消息列表
 }
 
+// MarkAsReadRequest 标记消息为已读请求
 message MarkAsReadRequest {
-    string id = 1;
-    string type = 2; // single, group
-    string from_user_id = 3;
-    string to_user_id = 4;
-    string group_id = 5;
-    repeated string ids = 6;
+    string id = 1;           // 用户ID
+    repeated string message_ids = 2;  // 消息ID列表
+    string conversation_id = 3;   // 会话ID（可选，用于批量标记会话所有消息为已读）
 }
 
+// MarkAsReadResponse 标记消息为已读响应
 message MarkAsReadResponse {
-    bool success = 1;
+    bool success = 1;  // 是否成功
 }
 
+// GetConversationsRequest 获取会话列表请求
+message GetConversationsRequest {
+    string id = 1;  // 用户ID
+    int32 limit = 2;     // 每页数量，默认 50
+    int32 offset = 3;    // 偏移量，默认 0
+}
+
+// GetConversationsResponse 获取会话列表响应
+message GetConversationsResponse {
+    repeated Conversation conversations = 1;  // 会话列表
+    int32 total = 2;                          // 总数量
+}
+
+// GetConversationRequest 获取会话详情请求
+message GetConversationRequest {
+    string conversation_id = 1;  // 会话ID
+}
+
+// GetConversationResponse 获取会话详情响应
+message GetConversationResponse {
+    Conversation conversation = 1;  // 会话信息
+}
+
+// Message 消息
 message Message {
-    string id = 1;
-    string type = 2; // single, group
-    string from_user_id = 3;
-    string to_user_id = 4;
-    string group_id = 5;
-    string content = 6;
-    string message_type = 7;
-    string status = 8;
-    int64 created_at = 9;
+    string id = 1;              // 消息ID
+    string type = 2;            // 消息类型: single, group
+    string from_id = 3;    // 发送者用户ID
+    string to_id = 4;      // 接收者用户ID（单聊时使用）
+    string group_id = 5;        // 群组ID（群聊时使用）
+    string content = 6;        // 消息内容
+    string message_type = 7;   // 消息类型: text, image, file
+    string status = 8;         // 状态: sent, delivered, read, unread
+    int64 created_at = 9;      // 创建时间（Unix 时间戳）
+    int64 updated_at = 10;     // 更新时间（Unix 时间戳）
+}
+
+// Conversation 会话
+message Conversation {
+    string id = 1;                  // 会话ID
+    string type = 2;                // 会话类型: single, group
+    string id1 = 3;           // 用户1ID（单聊时使用）
+    string id2 = 4;           // 用户2ID（单聊时使用）
+    string group_id = 5;           // 群组ID（群聊时使用）
+    string last_message_id = 6;    // 最后消息ID
+    int64 last_message_at = 7;     // 最后消息时间（Unix 时间戳）
+    int32 unread_count = 8;        // 未读消息数
+    int64 created_at = 9;          // 创建时间（Unix 时间戳）
+    int64 updated_at = 10;         // 更新时间（Unix 时间戳）
 }

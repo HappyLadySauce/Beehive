@@ -1,0 +1,62 @@
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1,
+    "analysis": {
+      "analyzer": {
+        "ik_max_word_analyzer": {
+          "type": "custom",
+          "tokenizer": "ik_max_word"
+        },
+        "ik_smart_analyzer": {
+          "type": "custom",
+          "tokenizer": "ik_smart"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "message_id": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "from_id": {
+        "type": "keyword"
+      },
+      "to_id": {
+        "type": "keyword"
+      },
+      "group_id": {
+        "type": "keyword"
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "ik_max_word_analyzer",
+        "search_analyzer": "ik_smart_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "message_type": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date",
+        "format": "epoch_second"
+      },
+      "updated_at": {
+        "type": "date",
+        "format": "epoch_second"
+      }
+    }
+  }
+}

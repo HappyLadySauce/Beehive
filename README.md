@@ -514,4 +514,4 @@ MIT License
 
 ## 联系方式
 
-项目地址: https://gitee.com/wang-guangke/chat_code.git
+项目地址: https://github.com/HappyLadySauce/Beehive

@@ -7,6 +7,8 @@ import (
 	"github.com/HappyLadySauce/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"k8s.io/klog/v2"
 
 	"github.com/HappyLadySauce/Beehive/internal/pkg/code"
@@ -180,4 +182,36 @@ func WriteResponse(c *gin.Context, err error, data interface{}) {
 func WriteResponseBindErr(c *gin.Context, err error, data interface{}) {
 	details := FormatValidationError(err)
 	WriteResponseWithDetails(c, errors.WithCode(code.ErrBind, "Validation failed"), data, details)
+}
+
+// HandleGRPCError 处理 gRPC 错误并转换为标准 HTTP 响应
+// 将 gRPC 错误码映射到业务错误码
+func HandleGRPCError(c *gin.Context, err error) {
+	// 解析 gRPC 错误
+	st, ok := status.FromError(err)
+	if !ok {
+		// 不是 gRPC 错误，直接返回
+		WriteResponse(c, err, nil)
+		return
+	}
+
+	// 映射 gRPC 错误码到业务错误码
+	var bizErr error
+	switch st.Code() {
+	case codes.Unauthenticated:
+		bizErr = errors.WithCode(code.ErrUnauthorized, st.Message())
+	case codes.PermissionDenied:
+		bizErr = errors.WithCode(code.ErrUnauthorized, st.Message())
+	case codes.NotFound:
+		bizErr = errors.WithCode(code.ErrUserNotFound, st.Message())
+	case codes.AlreadyExists:
+		bizErr = errors.WithCode(code.ErrUserAlreadyExists, st.Message())
+	case codes.InvalidArgument:
+		bizErr = errors.WithCode(code.ErrBind, st.Message())
+	default:
+		// 其他错误直接使用原始错误
+		bizErr = err
+	}
+
+	WriteResponse(c, bizErr, nil)
 }

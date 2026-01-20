@@ -28,7 +28,7 @@ func NewClient(cfg *config.Config) (*Client, error) {
 	var err error
 	var serviceRegistry *registry.Registry
 
-	addr := cfg.UserSvc.Addr
+	addr := cfg.Services.UserServiceAddr
 
 	// 检查是否使用 etcd 服务发现
 	useEtcdDiscovery := strings.HasPrefix(addr, "etcd://")

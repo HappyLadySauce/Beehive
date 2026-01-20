@@ -17,33 +17,34 @@ type Options struct {
 	JWT     *options.JWTOptions   `json:"jwt" mapstructure:"jwt"`
 	Redis   *options.RedisOptions `json:"redis" mapstructure:"redis"`
 	Etcd    *options.EtcdOptions  `json:"etcd" mapstructure:"etcd"`
-	UserSvc *UserServiceOptions   `json:"user-service" mapstructure:"user-service"`
+	Services  *MicroServicesOptions `json:"services" mapstructure:"services"`
 }
 
-// UserServiceOptions User Service gRPC 客户端配置
-type UserServiceOptions struct {
-	Addr string `json:"addr" mapstructure:"addr"`
+
+// MicroServicesOptions 微服务地址配置
+type MicroServicesOptions struct {
+	UserServiceAddr     string `json:"user-service-addr" mapstructure:"user-service-addr"`
 }
 
-// NewUserServiceOptions 创建 User Service 配置选项
-func NewUserServiceOptions() *UserServiceOptions {
-	return &UserServiceOptions{
-		Addr: "localhost:50051",
+// NewMicroServicesOptions 创建微服务配置选项
+func NewMicroServicesOptions() *MicroServicesOptions {
+	return &MicroServicesOptions{
+		UserServiceAddr:     "etcd://beehive-user",
 	}
 }
 
-// Validate 验证 User Service 配置
-func (o *UserServiceOptions) Validate() []error {
+// Validate 验证微服务配置
+func (o *MicroServicesOptions) Validate() []error {
 	var errs []error
-	if o.Addr == "" {
-		errs = append(errs, fmt.Errorf("user-service.addr cannot be empty"))
+	if o.UserServiceAddr == "" {
+		errs = append(errs, fmt.Errorf("services.user_service_addr cannot be empty"))
 	}
 	return errs
 }
 
 // AddFlags 添加命令行标志
-func (o *UserServiceOptions) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVar(&o.Addr, "user-service.addr", o.Addr, "User Service gRPC address")
+func (o *MicroServicesOptions) AddFlags(fs *pflag.FlagSet) {
+	fs.StringVar(&o.UserServiceAddr, "services.user-service-addr", o.UserServiceAddr, "User Service gRPC address (supports etcd:// prefix)")
 }
 
 func NewOptions(basename string) *Options {
@@ -54,7 +55,7 @@ func NewOptions(basename string) *Options {
 		JWT:     options.NewJWTOptions(),
 		Redis:   options.NewRedisOptions(),
 		Etcd:    options.NewEtcdOptions(),
-		UserSvc: NewUserServiceOptions(),
+		Services: NewMicroServicesOptions(),
 	}
 }
 
@@ -86,9 +87,9 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) *flag.NamedFlagSets {
 	etcdFlagSet := nfs.FlagSet("Etcd")
 	o.Etcd.AddFlags(etcdFlagSet)
 
-	// add user service flags to the NamedFlagSets
-	userSvcFlagSet := nfs.FlagSet("User Service")
-	o.UserSvc.AddFlags(userSvcFlagSet)
+	// add services flags to the NamedFlagSets
+	servicesFlagSet := nfs.FlagSet("Services")
+	o.Services.AddFlags(servicesFlagSet)
 
 	return nfs
 }

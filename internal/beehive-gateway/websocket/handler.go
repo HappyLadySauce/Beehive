@@ -90,7 +90,12 @@ func (h *Handler) HandleConnection(c *gin.Context) {
 	}
 
 	// 查询并推送离线消息
-	go h.pushOfflineMessages(ctx, userID)
+	go func(userID string) {
+		// 使用独立的上下文，避免受 HTTP 请求生命周期影响
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		h.pushOfflineMessages(ctx, userID)
+	}(userID)
 
 	// 启动连接处理
 	go h.handleClient(connection, userID)

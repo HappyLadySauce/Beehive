@@ -13,3 +13,5 @@ configs/beehive-gateway.yaml
 configs/beehive-message.yaml
 configs/beehive-presence.yaml
 configs/beehive-search.yaml
+
+docs/dev/

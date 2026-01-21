@@ -7,7 +7,16 @@ import (
 	"github.com/HappyLadySauce/Beehive/pkg/core"
 )
 
-// HandleHealth 处理健康检查请求
+
+// HandleHealthz 处理健康检查请求
+// @Summary 健康检查
+// @Description 检查服务是否健康
+// @Tags health
+// @Accept json
+// @Produce json
+// @Success 200 {object} v1.HealthResponse
+// @Failure 500 {object} core.ErrResponse
+// @Router /healthz [get]
 func HandleHealthz(c *gin.Context) {
 	response := v1.HealthResponse{
 		Status: "ok",
@@ -15,11 +24,19 @@ func HandleHealthz(c *gin.Context) {
 	core.WriteResponse(c, nil, response)
 }
 
-// HandleReady 处理就绪检查请求
+// HandleReadyz 处理就绪检查请求
+// @Summary 就绪检查
+// @Description 检查服务是否就绪
+// @Tags health
+// @Accept json
+// @Produce json
+// @Success 200 {object} v1.HealthResponse
+// @Failure 500 {object} core.ErrResponse
+// @Router /readyz [get]
 func HandleReadyz(c *gin.Context) {
-	// 可以在这里检查依赖服务的连接状态
 	response := v1.HealthResponse{
 		Status: "ready",
 	}
+
 	core.WriteResponse(c, nil, response)
 }

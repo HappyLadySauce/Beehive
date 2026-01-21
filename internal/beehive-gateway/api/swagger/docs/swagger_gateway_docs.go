@@ -198,6 +198,64 @@ const docTemplateswagger_gateway = `{
                     }
                 }
             }
+        },
+        "/healthz": {
+            "get": {
+                "description": "检查服务是否健康",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "健康检查",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.HealthResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/readyz": {
+            "get": {
+                "description": "检查服务是否就绪",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "就绪检查",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.HealthResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -230,6 +288,14 @@ const docTemplateswagger_gateway = `{
                 },
                 "status": {
                     "description": "状态: online, offline, busy, idle, invisible",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
                     "type": "string"
                 }
             }

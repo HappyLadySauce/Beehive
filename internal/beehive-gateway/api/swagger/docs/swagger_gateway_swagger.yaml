@@ -23,6 +23,11 @@ definitions:
         description: '状态: online, offline, busy, idle, invisible'
         type: string
     type: object
+  github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.HealthResponse:
+    properties:
+      status:
+        type: string
+    type: object
   github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.LoginRequest:
     properties:
       id:
@@ -240,4 +245,42 @@ paths:
       summary: 用户注册
       tags:
       - user
+  /healthz:
+    get:
+      consumes:
+      - application/json
+      description: 检查服务是否健康
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.HealthResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse'
+      summary: 健康检查
+      tags:
+      - health
+  /readyz:
+    get:
+      consumes:
+      - application/json
+      description: 检查服务是否就绪
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.HealthResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse'
+      summary: 就绪检查
+      tags:
+      - health
 swagger: "2.0"

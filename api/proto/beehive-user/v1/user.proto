@@ -1,16 +1,134 @@
 syntax = "proto3";
 
 package user;
-option go_package="./user";
+option go_package = "./user";
 
-message Request {
-  string ping = 1;
+// 用户服务
+service UserService {
+    // 用户注册
+    rpc Register(RegisterRequest) returns (RegisterResponse);
+    
+    // 用户登录
+    rpc Login(LoginRequest) returns (LoginResponse);
+    
+    // 获取用户信息
+    rpc GetUserInfo(GetUserInfoRequest) returns (UserInfoResponse);
+    
+    // 批量获取用户信息
+    rpc GetUsersByIds(GetUsersByIdsRequest) returns (UsersResponse);
+    
+    // 更新用户信息
+    rpc UpdateUserInfo(UpdateUserInfoRequest) returns (CommonResponse);
+    
+    // 发送邮箱验证码
+    rpc SendVerificationCode(SendCodeRequest) returns (CommonResponse);
+    
+    // 验证邮箱验证码
+    rpc VerifyCode(VerifyCodeRequest) returns (CommonResponse);
+    
+    // 更新在线状态
+    rpc UpdateOnlineStatus(UpdateOnlineStatusRequest) returns (CommonResponse);
+    
+    // 校验密码
+    rpc VerifyPassword(VerifyPasswordRequest) returns (VerifyPasswordResponse);
 }
 
-message Response {
-  string pong = 1;
+// 注册请求
+message RegisterRequest {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+    string code = 4;  // 邮箱验证码
 }
 
-service User {
-  rpc Ping(Request) returns(Response);
+// 注册响应
+message RegisterResponse {
+    int64 user_id = 1;
+    string token = 2;
+}
+
+// 登录请求
+message LoginRequest {
+    string account = 1;   // 用户名或邮箱
+    string password = 2;
+}
+
+// 登录响应
+message LoginResponse {
+    int64 user_id = 1;
+    string username = 2;
+    string nickname = 3;
+    string avatar = 4;
+    string token = 5;
+}
+
+// 获取用户信息请求
+message GetUserInfoRequest {
+    int64 user_id = 1;
+}
+
+// 用户信息响应
+message UserInfoResponse {
+    int64 user_id = 1;
+    string username = 2;
+    string email = 3;
+    string nickname = 4;
+    string avatar = 5;
+    int32 status = 6;
+    bool online = 7;
+    int64 last_login_at = 8;
+    int64 created_at = 9;
+}
+
+// 批量获取用户信息请求
+message GetUsersByIdsRequest {
+    repeated int64 user_ids = 1;
+}
+
+// 批量用户信息响应
+message UsersResponse {
+    repeated UserInfoResponse users = 1;
+}
+
+// 更新用户信息请求
+message UpdateUserInfoRequest {
+    int64 user_id = 1;
+    string nickname = 2;
+    string avatar_url = 3;
+}
+
+// 发送验证码请求
+message SendCodeRequest {
+    string email = 1;
+    string purpose = 2;  // register, reset_password, bind_email
+}
+
+// 验证验证码请求
+message VerifyCodeRequest {
+    string email = 1;
+    string code = 2;
+    string purpose = 3;
+}
+
+// 更新在线状态请求
+message UpdateOnlineStatusRequest {
+    int64 user_id = 1;
+    bool online = 2;
+}
+
+// 校验密码请求
+message VerifyPasswordRequest {
+    int64 user_id = 1;
+    string password = 2;
+}
+
+// 校验密码响应
+message VerifyPasswordResponse {
+    bool valid = 1;
+}
+
+// 通用响应
+message CommonResponse {
+    bool success = 1;
+    string message = 2;
 }

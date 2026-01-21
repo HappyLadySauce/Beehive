@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package chat;
+option go_package = "./chat";
+
+// 会话服务
+service ChatService {
+    // 创建会话
+    rpc CreateConversation(CreateConversationRequest) returns (CreateConversationResponse);
+    
+    // 获取会话列表
+    rpc GetConversations(GetConversationsRequest) returns (ConversationsResponse);
+    
+    // 获取会话详情
+    rpc GetConversationDetail(GetConversationDetailRequest) returns (ConversationDetailResponse);
+    
+    // 添加会话成员
+    rpc AddMembers(AddMembersRequest) returns (CommonResponse);
+    
+    // 移除会话成员
+    rpc RemoveMembers(RemoveMembersRequest) returns (CommonResponse);
+    
+    // 更新未读数
+    rpc UpdateUnreadCount(UpdateUnreadCountRequest) returns (CommonResponse);
+    
+    // 标记已读
+    rpc MarkRead(MarkReadRequest) returns (CommonResponse);
+    
+    // 更新会话信息
+    rpc UpdateConversationInfo(UpdateConversationInfoRequest) returns (CommonResponse);
+    
+    // 检查用户是否在会话中
+    rpc CheckMember(CheckMemberRequest) returns (CheckMemberResponse);
+}
+
+// 创建会话请求
+message CreateConversationRequest {
+    int32 type = 1;
+    string name = 2;
+    int64 owner_id = 3;
+    repeated int64 member_ids = 4;
+}
+
+// 创建会话响应
+message CreateConversationResponse {
+    int64 conversation_id = 1;
+}
+
+// 获取会话列表请求
+message GetConversationsRequest {
+    int64 user_id = 1;
+}
+
+// 会话列表响应
+message ConversationsResponse {
+    repeated ConversationInfo conversations = 1;
+}
+
+// 会话信息
+message ConversationInfo {
+    int64 conversation_id = 1;
+    int32 type = 2;
+    string name = 3;
+    string avatar = 4;
+    int32 unread_count = 5;
+    int64 last_message_at = 6;
+}
+
+// 获取会话详情请求
+message GetConversationDetailRequest {
+    int64 conversation_id = 1;
+    int64 user_id = 2;
+}
+
+// 会话详情响应
+message ConversationDetailResponse {
+    int64 conversation_id = 1;
+    int32 type = 2;
+    string name = 3;
+    string avatar = 4;
+    int64 owner_id = 5;
+    repeated MemberInfo members = 6;
+}
+
+// 会话成员信息
+message MemberInfo {
+    int64 user_id = 1;
+    int32 role = 2;
+    int64 joined_at = 3;
+}
+
+// 添加成员请求
+message AddMembersRequest {
+    int64 conversation_id = 1;
+    repeated int64 user_ids = 2;
+}
+
+// 移除成员请求
+message RemoveMembersRequest {
+    int64 conversation_id = 1;
+    repeated int64 user_ids = 2;
+}
+
+// 更新未读数请求
+message UpdateUnreadCountRequest {
+    int64 conversation_id = 1;
+    int64 user_id = 2;
+    int32 increment = 3;
+}
+
+// 标记已读请求
+message MarkReadRequest {
+    int64 conversation_id = 1;
+    int64 user_id = 2;
+}
+
+// 更新会话信息请求
+message UpdateConversationInfoRequest {
+    int64 conversation_id = 1;
+    string name = 2;
+    string avatar = 3;
+}
+
+// 检查成员请求
+message CheckMemberRequest {
+    int64 conversation_id = 1;
+    int64 user_id = 2;
+}
+
+// 检查成员响应
+message CheckMemberResponse {
+    bool is_member = 1;
+    int32 role = 2;
+}
+
+// 通用响应
+message CommonResponse {
+    bool success = 1;
+    string message = 2;
+}

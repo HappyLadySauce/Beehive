@@ -1,4 +1,4 @@
-package common
+package handler
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,7 +8,7 @@ import (
 )
 
 // HandleHealth 处理健康检查请求
-func (h *Handler) HandleHealth(c *gin.Context) {
+func HandleHealthz(c *gin.Context) {
 	response := v1.HealthResponse{
 		Status: "ok",
 	}
@@ -16,7 +16,7 @@ func (h *Handler) HandleHealth(c *gin.Context) {
 }
 
 // HandleReady 处理就绪检查请求
-func (h *Handler) HandleReady(c *gin.Context) {
+func HandleReadyz(c *gin.Context) {
 	// 可以在这里检查依赖服务的连接状态
 	response := v1.HealthResponse{
 		Status: "ready",

@@ -24,7 +24,7 @@ tools.verify.go.%:
 # Install rules for various tools
 .PHONY: install.swagger
 install.swagger:
-	@$(GO) install github.com/swaggo/swag/cmd/swag@latest
+	@$(GO) install github.com/swaggo/swag/cmd/swag@v1.16.6
 
 .PHONY: install.protoc-gen-go
 install.protoc-gen-go:

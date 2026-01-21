@@ -1,7 +1,7 @@
 package user
 
 import (
-	userpb "github.com/HappyLadySauce/Beehive/pkg/api/proto/user/v1"
+	userpb "github.com/HappyLadySauce/Beehive/api/proto/user/v1"
 )
 
 // Handler 用户处理器

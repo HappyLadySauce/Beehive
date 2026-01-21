@@ -10,12 +10,12 @@ import (
 	"google.golang.org/grpc/resolver"
 	"k8s.io/klog/v2"
 
+	authpb "github.com/HappyLadySauce/Beehive/api/proto/auth/v1"
+	messagepb "github.com/HappyLadySauce/Beehive/api/proto/message/v1"
+	presencepb "github.com/HappyLadySauce/Beehive/api/proto/presence/v1"
+	userpb "github.com/HappyLadySauce/Beehive/api/proto/user/v1"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-gateway/config"
 	"github.com/HappyLadySauce/Beehive/internal/pkg/registry"
-	authpb "github.com/HappyLadySauce/Beehive/pkg/api/proto/auth/v1"
-	messagepb "github.com/HappyLadySauce/Beehive/pkg/api/proto/message/v1"
-	presencepb "github.com/HappyLadySauce/Beehive/pkg/api/proto/presence/v1"
-	userpb "github.com/HappyLadySauce/Beehive/pkg/api/proto/user/v1"
 )
 
 // Client gRPC 客户端管理器

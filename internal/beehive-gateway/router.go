@@ -8,9 +8,9 @@ import (
 	"github.com/HappyLadySauce/Beehive/internal/beehive-gateway/config"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-gateway/connection"
 	authCtrl "github.com/HappyLadySauce/Beehive/internal/beehive-gateway/controller/auth"
-	commonCtrl "github.com/HappyLadySauce/Beehive/internal/beehive-gateway/controller/common"
 	userCtrl "github.com/HappyLadySauce/Beehive/internal/beehive-gateway/controller/user"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-gateway/websocket"
+	"github.com/HappyLadySauce/Beehive/internal/pkg/handler"
 	"github.com/HappyLadySauce/Beehive/internal/pkg/middleware"
 )
 
@@ -24,14 +24,13 @@ func installControllers(
 	klog.Info("Initializing controllers...")
 	authHandler := authCtrl.NewHandler(grpcClient.AuthService())
 	userHandler := userCtrl.NewHandler(grpcClient.UserService())
-	commonHandler := commonCtrl.NewHandler()
 
 	// 创建 WebSocket Handler
 	klog.Info("Setting up WebSocket handler...")
 	wsHandler := websocket.NewHandler(cfg, grpcClient, connMgr)
 
 	// 设置路由
-	return setupRoutes(cfg, authHandler, userHandler, commonHandler, wsHandler.HandleConnection)
+	return setupRoutes(cfg, authHandler, userHandler, wsHandler.HandleConnection)
 }
 
 // setupRoutes 设置所有路由
@@ -39,7 +38,6 @@ func setupRoutes(
 	cfg *config.Config,
 	authHandler *authCtrl.Handler,
 	userHandler *userCtrl.Handler,
-	commonHandler *commonCtrl.Handler,
 	wsHandler func(c *gin.Context),
 ) *gin.Engine {
 	// 根据日志级别设置 Gin 模式
@@ -54,7 +52,6 @@ func setupRoutes(
 	// 应用中间件（优化顺序：Recovery -> RequestID -> CORS -> Logger）
 	router.Use(gin.Recovery())
 	router.Use(middleware.RequestID())
-	router.Use(middleware.Swagger())
 	router.Use(middleware.Cors())
 	router.Use(gin.Logger())
 
@@ -82,8 +79,8 @@ func setupRoutes(
 	}
 
 	// 健康检查路由
-	router.GET("/health", commonHandler.HandleHealth)
-	router.GET("/ready", commonHandler.HandleReady)
+	router.GET("/healthz", handler.HandleHealthz)
+	router.GET("/readyz", handler.HandleReadyz)
 
 	return router
 }

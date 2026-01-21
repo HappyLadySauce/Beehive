@@ -2,11 +2,15 @@ package beehiveAuth
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"k8s.io/klog/v2"
 
 	"github.com/HappyLadySauce/Beehive/internal/beehive-auth/config"
-	commonCtrl "github.com/HappyLadySauce/Beehive/internal/beehive-gateway/controller/common"
+	"github.com/HappyLadySauce/Beehive/internal/pkg/handler"
 	"github.com/HappyLadySauce/Beehive/internal/pkg/middleware"
+
+	_ "github.com/HappyLadySauce/Beehive/internal/beehive-auth/api/swagger/docs"
 )
 
 // installRoutes 构建 Auth 微服务的 HTTP 路由（健康检查 / Swagger）。
@@ -20,17 +24,18 @@ func installRoutes(cfg *config.Config) *gin.Engine {
 
 	router := gin.New()
 
-	// 中间件顺序：Recovery -> RequestID -> CORS -> Swagger -> Logger
+	// 中间件顺序：Recovery -> RequestID -> CORS -> Logger
 	router.Use(gin.Recovery())
 	router.Use(middleware.RequestID())
 	router.Use(middleware.Cors())
-	router.Use(middleware.Swagger())
 	router.Use(gin.Logger())
 
 	// 健康检查路由（/healthz, /readyz）
-	commonHandler := commonCtrl.NewHandler()
-	router.GET("/healthz", commonHandler.HandleHealth)
-	router.GET("/readyz", commonHandler.HandleReady)
+	router.GET("/healthz", handler.HandleHealthz)
+	router.GET("/readyz", handler.HandleReadyz)
+
+	// Swagger 文档路由
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	klog.Info("Auth HTTP routes installed: /healthz, /readyz, /swagger")
 

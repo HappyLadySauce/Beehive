@@ -5,8 +5,8 @@ import (
 
 	"k8s.io/klog/v2"
 
+	messagepb "github.com/HappyLadySauce/Beehive/api/proto/message/v1"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-gateway/client"
-	messagepb "github.com/HappyLadySauce/Beehive/pkg/api/proto/message/v1"
 )
 
 // MessageHandler 消息处理器

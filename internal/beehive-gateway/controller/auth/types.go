@@ -1,7 +1,7 @@
 package auth
 
 import (
-	authpb "github.com/HappyLadySauce/Beehive/pkg/api/proto/auth/v1"
+	authpb "github.com/HappyLadySauce/Beehive/api/proto/auth/v1"
 )
 
 // Handler 认证处理器

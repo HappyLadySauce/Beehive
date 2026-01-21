@@ -9,11 +9,11 @@ import (
 	"google.golang.org/grpc/status"
 	"k8s.io/klog/v2"
 
+	pb "github.com/HappyLadySauce/Beehive/api/proto/auth/v1"
+	userpb "github.com/HappyLadySauce/Beehive/api/proto/user/v1"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-auth/client"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-auth/config"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-auth/store"
-	pb "github.com/HappyLadySauce/Beehive/pkg/api/proto/auth/v1"
-	userpb "github.com/HappyLadySauce/Beehive/pkg/api/proto/user/v1"
 	"github.com/HappyLadySauce/Beehive/pkg/utils/jwt"
 	"github.com/HappyLadySauce/Beehive/pkg/utils/passwd"
 )
@@ -21,9 +21,9 @@ import (
 // Service Auth Service 实现
 type Service struct {
 	pb.UnimplementedAuthServiceServer
-	config      *config.Config
-	redisStore  *store.Store
-	userClient  *client.Client
+	config     *config.Config
+	redisStore *store.Store
+	userClient *client.Client
 }
 
 // NewService 创建新的 Auth Service

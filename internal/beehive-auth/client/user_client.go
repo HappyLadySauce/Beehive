@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc/resolver"
 	"k8s.io/klog/v2"
 
+	pb "github.com/HappyLadySauce/Beehive/api/proto/user/v1"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-auth/config"
 	"github.com/HappyLadySauce/Beehive/internal/pkg/registry"
-	pb "github.com/HappyLadySauce/Beehive/pkg/api/proto/user/v1"
 )
 
 // Client User Service gRPC 客户端

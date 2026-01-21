@@ -11,11 +11,11 @@ import (
 	"github.com/gorilla/websocket"
 	"k8s.io/klog/v2"
 
+	messagepb "github.com/HappyLadySauce/Beehive/api/proto/message/v1"
+	presencepb "github.com/HappyLadySauce/Beehive/api/proto/presence/v1"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-gateway/client"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-gateway/config"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-gateway/connection"
-	messagepb "github.com/HappyLadySauce/Beehive/pkg/api/proto/message/v1"
-	presencepb "github.com/HappyLadySauce/Beehive/pkg/api/proto/presence/v1"
 )
 
 var upgrader = websocket.Upgrader{

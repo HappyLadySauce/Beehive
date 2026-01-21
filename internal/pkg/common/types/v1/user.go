@@ -1,6 +1,6 @@
 package v1
 
-import authpb "github.com/HappyLadySauce/Beehive/pkg/api/proto/auth/v1"
+import authpb "github.com/HappyLadySauce/Beehive/api/proto/auth/v1"
 
 // LoginRequest 登录请求
 type LoginRequest struct {

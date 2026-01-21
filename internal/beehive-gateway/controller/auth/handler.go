@@ -3,8 +3,8 @@ package auth
 import (
 	"github.com/gin-gonic/gin"
 
+	authpb "github.com/HappyLadySauce/Beehive/api/proto/auth/v1"
 	v1 "github.com/HappyLadySauce/Beehive/internal/pkg/common/types/v1"
-	authpb "github.com/HappyLadySauce/Beehive/pkg/api/proto/auth/v1"
 	"github.com/HappyLadySauce/Beehive/pkg/core"
 )
 

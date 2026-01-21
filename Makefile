@@ -21,6 +21,7 @@ include scripts/make-rules/common.mk
 include scripts/make-rules/golang.mk
 include scripts/make-rules/service.mk
 include scripts/make-rules/grpc.mk
+include scripts/make-rules/swagger.mk
 
 # ==============================================================================
 # Usage
@@ -34,6 +35,9 @@ USAGE_OPTIONS += "grpc.gen: Generate gRPC code for all services"
 USAGE_OPTIONS += "grpc.gen.SERVICE: Generate gRPC code for a specific service (e.g., grpc.gen.user)"
 USAGE_OPTIONS += "grpc.clean: Clean generated gRPC code for all services"
 USAGE_OPTIONS += "grpc.status: Show gRPC generation status"
+USAGE_OPTIONS += "swagger: Generate swagger docs for all services"
+USAGE_OPTIONS += "swagger.SERVICE: Generate swagger docs for a specific service (e.g., swagger.auth)"
+USAGE_OPTIONS += "swagger.clean: Clean all swagger docs"
 USAGE_OPTIONS += "service.list: List all available services"
 USAGE_OPTIONS += "help: Show this help info"
 

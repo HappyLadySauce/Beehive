@@ -8,10 +8,10 @@ import (
 	"google.golang.org/grpc/status"
 	"k8s.io/klog/v2"
 
+	v1 "github.com/HappyLadySauce/Beehive/api/proto/user/v1"
+	userv1 "github.com/HappyLadySauce/Beehive/api/user/v1"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-user/store"
 	"github.com/HappyLadySauce/Beehive/internal/pkg/utils/id"
-	v1 "github.com/HappyLadySauce/Beehive/pkg/api/proto/user/v1"
-	userv1 "github.com/HappyLadySauce/Beehive/pkg/api/user/v1"
 	"github.com/HappyLadySauce/Beehive/pkg/utils/passwd"
 )
 

@@ -1,8 +1,8 @@
 package service
 
 import (
-	v1 "github.com/HappyLadySauce/Beehive/pkg/api/proto/user/v1"
-	userv1 "github.com/HappyLadySauce/Beehive/pkg/api/user/v1"
+	v1 "github.com/HappyLadySauce/Beehive/api/proto/user/v1"
+	userv1 "github.com/HappyLadySauce/Beehive/api/user/v1"
 )
 
 // toProtoUserInfo 将 User 模型转换为 proto UserInfo

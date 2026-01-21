@@ -123,12 +123,3 @@ performance:
   enable-cache: false
   # 缓存过期时间（分钟）
   cache-ttl: 5
-
-# 健康检查配置
-health:
-  # 健康检查端口
-  port: 8080
-  # 健康检查路径
-  path: "/health"
-  # 就绪检查路径
-  ready-path: "/ready"

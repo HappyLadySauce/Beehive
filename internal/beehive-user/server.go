@@ -17,7 +17,7 @@ import (
 	"github.com/HappyLadySauce/Beehive/internal/beehive-user/service"
 	"github.com/HappyLadySauce/Beehive/internal/beehive-user/store"
 	"github.com/HappyLadySauce/Beehive/internal/pkg/registry"
-	pb "github.com/HappyLadySauce/Beehive/pkg/api/proto/user/v1"
+	pb "github.com/HappyLadySauce/Beehive/api/proto/user/v1"
 	"github.com/google/uuid"
 )
 

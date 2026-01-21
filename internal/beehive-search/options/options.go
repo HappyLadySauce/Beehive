@@ -9,18 +9,20 @@ import (
 )
 
 type Options struct {
-	Name string
-	Log  *options.LogOptions  `json:"log" mapstructure:"log"`
-	Grpc *options.GrpcOptions `json:"grpc" mapstructure:"grpc"`
-	Etcd *options.EtcdOptions `json:"etcd" mapstructure:"etcd"`
+	Name            string
+	Log             *options.LogOptions             `json:"log" mapstructure:"log"`
+	Grpc            *options.GrpcOptions            `json:"grpc" mapstructure:"grpc"`
+	Etcd            *options.EtcdOptions            `json:"etcd" mapstructure:"etcd"`
+	InsecureServing *options.InsecureServingOptions `json:"insecure-serving" mapstructure:"insecure-serving"`
 }
 
 func NewOptions(basename string) *Options {
 	return &Options{
-		Name: basename,
-		Log:  options.NewLogOptions(),
-		Grpc: options.NewGrpcOptions(),
-		Etcd: options.NewEtcdOptions(),
+		Name:            basename,
+		Log:             options.NewLogOptions(),
+		Grpc:            options.NewGrpcOptions(),
+		Etcd:            options.NewEtcdOptions(),
+		InsecureServing: options.NewInsecureServingOptions(),
 	}
 }
 
@@ -43,6 +45,10 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) *flag.NamedFlagSets {
 	// add etcd flags to the NamedFlagSets
 	etcdFlagSet := nfs.FlagSet("Etcd")
 	o.Etcd.AddFlags(etcdFlagSet)
+
+	// add insecure serving flags to the NamedFlagSets
+	insecureServingFlagSet := nfs.FlagSet("Insecure Serving")
+	o.InsecureServing.AddFlags(insecureServingFlagSet)
 
 	return nfs
 }

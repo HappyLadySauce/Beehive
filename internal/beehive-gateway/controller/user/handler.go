@@ -3,8 +3,8 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 
+	userpb "github.com/HappyLadySauce/Beehive/api/proto/user/v1"
 	v1 "github.com/HappyLadySauce/Beehive/internal/pkg/common/types/v1"
-	userpb "github.com/HappyLadySauce/Beehive/pkg/api/proto/user/v1"
 	"github.com/HappyLadySauce/Beehive/pkg/core"
 )
 

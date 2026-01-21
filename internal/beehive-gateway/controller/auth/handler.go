@@ -35,7 +35,7 @@ func (h *Handler) HandleLogin(c *gin.Context) {
 
 	authResp, err := h.authClient.Login(c.Request.Context(), authReq)
 	if err != nil {
-		core.WriteResponseBindErr(c, err, nil)
+		core.WriteResponse(c, err, nil)
 		return
 	}
 
@@ -75,7 +75,7 @@ func (h *Handler) HandleRefreshToken(c *gin.Context) {
 
 	authResp, err := h.authClient.RefreshToken(c.Request.Context(), authReq)
 	if err != nil {
-		core.WriteResponseBindErr(c, err, nil)
+		core.WriteResponse(c, err, nil)
 		return
 	}
 
@@ -114,7 +114,7 @@ func (h *Handler) HandleRevokeToken(c *gin.Context) {
 
 	authResp, err := h.authClient.RevokeToken(c.Request.Context(), authReq)
 	if err != nil {
-		core.WriteResponseBindErr(c, err, nil)
+		core.WriteResponse(c, err, nil)
 		return
 	}
 

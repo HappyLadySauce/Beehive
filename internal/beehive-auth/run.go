@@ -39,9 +39,12 @@ func Run(ctx context.Context, opts *options.Options) error {
 
 	// 5. 准备运行服务器
 	if err := server.PrepareRun(); err != nil {
+		// PrepareRun 失败时清理已创建的资源
+		server.Shutdown()
 		return fmt.Errorf("failed to prepare server: %w", err)
 	}
 
 	// 6. 运行服务器（阻塞直到收到停止信号）
+	// Run 方法会在所有返回路径上调用 Shutdown()，确保资源被清理
 	return server.Run(ctx)
 }

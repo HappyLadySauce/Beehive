@@ -38,7 +38,7 @@ func (h *Handler) HandleRegister(c *gin.Context) {
 
 	userResp, err := h.userClient.Register(c.Request.Context(), userReq)
 	if err != nil {
-		core.WriteResponseBindErr(c, err, nil)
+		core.WriteResponse(c, err, nil)
 		return
 	}
 

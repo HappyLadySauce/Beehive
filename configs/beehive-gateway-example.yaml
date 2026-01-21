@@ -1,9 +1,9 @@
 # Gateway 服务配置文件示例
 
 # HTTP 服务器配置
-server:
-  http-port: 8080
-  http-address: "0.0.0.0"
+insecure-serving:
+  bind-address: "0.0.0.0"
+  bind-port: 8080
 
 # WebSocket 配置
 websocket:

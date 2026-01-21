@@ -1,6 +1,11 @@
 # Beehive Message Service 配置文件示例
 # 复制此文件为 beehive-message.yaml 并根据实际环境修改
 
+# HTTP 服务器配置
+insecure-serving:
+  bind-address: "0.0.0.0"
+  bind-port: 8083
+
 # gRPC 服务配置
 grpc:
   # 绑定地址

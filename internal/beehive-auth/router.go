@@ -35,7 +35,10 @@ func installRoutes(cfg *config.Config) *gin.Engine {
 	router.GET("/readyz", handler.HandleReadyz)
 
 	// Swagger 文档路由
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(
+		swaggerFiles.Handler,
+		ginSwagger.InstanceName("swagger_auth"),
+	))
 
 	klog.Info("Auth HTTP routes installed: /healthz, /readyz, /swagger")
 

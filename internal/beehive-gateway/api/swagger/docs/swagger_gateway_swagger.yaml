@@ -1,0 +1,243 @@
+definitions:
+  github_com_HappyLadySauce_Beehive_api_proto_auth_v1.UserInfo:
+    properties:
+      avatar:
+        description: 头像URL
+        type: string
+      description:
+        description: 描述
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      id:
+        description: 用户ID
+        type: string
+      level:
+        description: 等级 0-15，0表示普通用户
+        type: integer
+      nickname:
+        description: 昵称
+        type: string
+      status:
+        description: '状态: online, offline, busy, idle, invisible'
+        type: string
+    type: object
+  github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.LoginRequest:
+    properties:
+      id:
+        type: string
+      password:
+        type: string
+    required:
+    - id
+    - password
+    type: object
+  github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.LoginResponse:
+    properties:
+      expires_at:
+        type: integer
+      refresh_token:
+        type: string
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_HappyLadySauce_Beehive_api_proto_auth_v1.UserInfo'
+    type: object
+  github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RefreshTokenResponse:
+    properties:
+      expires_at:
+        type: integer
+      refresh_token:
+        type: string
+      token:
+        type: string
+    type: object
+  github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RegisterRequest:
+    properties:
+      avatar:
+        type: string
+      description:
+        type: string
+      email:
+        type: string
+      nickname:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - nickname
+    - password
+    type: object
+  github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RegisterResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RevokeTokenRequest:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RevokeTokenResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse:
+    properties:
+      code:
+        description: Code defines the business error code.
+        type: integer
+      details:
+        additionalProperties:
+          type: string
+        description: |-
+          Details contains detailed validation error information.
+          This field is only present when validation errors occur.
+        type: object
+      message:
+        description: |-
+          Message contains the detail of this message.
+          This message is suitable to be exposed to external
+        type: string
+      reference:
+        description: Reference returns the reference document which maybe useful to
+          solve this error.
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 使用用户 ID 和密码进行登录，返回访问令牌和刷新令牌
+      parameters:
+      - description: 登录请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse'
+      summary: 用户登录
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: 使用刷新令牌获取新的访问令牌
+      parameters:
+      - description: 刷新令牌请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RefreshTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse'
+      summary: 刷新访问令牌
+      tags:
+      - auth
+  /api/v1/auth/revoke:
+    post:
+      consumes:
+      - application/json
+      description: 撤销指定访问令牌，使其立即失效
+      parameters:
+      - description: 撤销令牌请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RevokeTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RevokeTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse'
+      summary: 撤销访问令牌
+      tags:
+      - auth
+  /api/v1/user/register:
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的用户账号
+      parameters:
+      - description: 注册请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_internal_pkg_common_types_v1.RegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_HappyLadySauce_Beehive_pkg_core.ErrResponse'
+      summary: 用户注册
+      tags:
+      - user
+swagger: "2.0"

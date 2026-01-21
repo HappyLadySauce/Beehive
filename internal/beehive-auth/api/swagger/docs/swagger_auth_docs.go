@@ -3,7 +3,7 @@ package docs
 
 import "github.com/swaggo/swag"
 
-const docTemplate = `{
+const docTemplateswagger_auth = `{
     "schemes": {{ marshal .Schemes }},
     "swagger": "2.0",
     "info": {
@@ -26,20 +26,20 @@ const docTemplate = `{
     "paths": {}
 }`
 
-// SwaggerInfo holds exported Swagger Info so clients can modify it
-var SwaggerInfo = &swag.Spec{
-	Version:     "1.0",
-	Host:        "localhost:8080",
-	BasePath:    "/",
-	Schemes:     []string{  },
-	Title:       "Beehive User Service API",
-	Description: "Beehive 用户微服务 API 文档",
-	InfoInstanceName: "swagger-user",
-	SwaggerTemplate: docTemplate,
+// SwaggerInfoswagger_auth holds exported Swagger Info so clients can modify it
+var SwaggerInfoswagger_auth = &swag.Spec{
+	Version:          "1.0",
+	Host:             "localhost:8080",
+	BasePath:         "/",
+	Schemes:          []string{},
+	Title:            "Beehive Auth Service API",
+	Description:      "Beehive 认证微服务 API 文档",
+	InfoInstanceName: "swagger_auth",
+	SwaggerTemplate:  docTemplateswagger_auth,
 	LeftDelim:        "{{",
 	RightDelim:       "}}",
 }
 
 func init() {
-	swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
+	swag.Register(SwaggerInfoswagger_auth.InstanceName(), SwaggerInfoswagger_auth)
 }

@@ -2,6 +2,8 @@ package beehiveGateway
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"k8s.io/klog/v2"
 
 	"github.com/HappyLadySauce/Beehive/internal/beehive-gateway/client"
@@ -12,6 +14,8 @@ import (
 	"github.com/HappyLadySauce/Beehive/internal/beehive-gateway/websocket"
 	"github.com/HappyLadySauce/Beehive/internal/pkg/handler"
 	"github.com/HappyLadySauce/Beehive/internal/pkg/middleware"
+
+	_ "github.com/HappyLadySauce/Beehive/internal/beehive-gateway/api/swagger/docs"
 )
 
 // installControllers 初始化并注册所有控制器
@@ -54,6 +58,12 @@ func setupRoutes(
 	router.Use(middleware.RequestID())
 	router.Use(middleware.Cors())
 	router.Use(gin.Logger())
+
+	// Swagger 文档路由
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(
+		swaggerFiles.Handler,
+		ginSwagger.InstanceName("swagger_gateway"),
+	))
 
 	// WebSocket 路由
 	if wsHandler != nil {

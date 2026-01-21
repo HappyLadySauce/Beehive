@@ -30,9 +30,7 @@ func (h *Handler) HandleRegister(c *gin.Context) {
 	// 调用 User Service
 	userReq := &userpb.RegisterRequest{
 		Nickname:    req.Nickname,
-		Avatar:      req.Avatar,
 		Email:       req.Email,
-		Description: req.Description,
 		Password:    req.Password,
 	}
 

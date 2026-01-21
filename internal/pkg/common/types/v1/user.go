@@ -19,9 +19,7 @@ type LoginResponse struct {
 // RegisterRequest 注册请求
 type RegisterRequest struct {
 	Nickname    string `json:"nickname" binding:"required"`
-	Avatar      string `json:"avatar"`
 	Email       string `json:"email" binding:"required,email"`
-	Description string `json:"description"`
 	Password    string `json:"password" binding:"required,min=6"`
 }
 

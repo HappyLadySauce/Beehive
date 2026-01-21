@@ -23,10 +23,8 @@ service UserService {
 // RegisterRequest 注册请求
 message RegisterRequest {
     string nickname = 1;     // 昵称
-    string avatar = 2;       // 头像URL
-    string email = 3;        // 邮箱（唯一）
-    string description = 4;  // 描述
-    string password = 5;     // 密码
+    string email = 2;        // 邮箱（唯一）
+    string password = 3;     // 密码
 }
 
 // RegisterResponse 注册响应
@@ -51,9 +49,7 @@ message GetUserByIDRequest {
 
 // GetUserByIDResponse 根据ID获取用户响应
 message GetUserByIDResponse {
-    UserInfo user = 1;  // 用户信息（包含密码哈希和盐值，供认证使用）
-    string salt = 2;    // 盐值（供 Auth Service 验证密码）
-    string password_hash = 3;  // 密码哈希（供 Auth Service 验证密码）
+    UserInfo user = 1;  // 用户信息
 }
 
 // UpdateUserRequest 更新用户请求

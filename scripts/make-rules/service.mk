@@ -6,7 +6,8 @@
 SERVICES ?= auth user message presence
 
 # Base directory for proto files
-PROTO_BASE_DIR := $(ROOT_DIR)/pkg/api/proto
+# NOTE: 项目目前的 proto 实际位于 api/proto 下，而不是 pkg/api/proto
+PROTO_BASE_DIR := $(ROOT_DIR)/api/proto
 
 # Proto file directory for each service: pkg/api/proto/{service}/v1
 define get-proto-dir

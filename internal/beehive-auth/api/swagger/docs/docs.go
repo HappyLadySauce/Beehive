@@ -28,14 +28,14 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/",
-	Schemes:          []string{},
-	Title:            "Beehive Auth Service API",
-	Description:      "Beehive 认证微服务 API 文档",
-	InfoInstanceName: "swagger",
-	SwaggerTemplate:  docTemplate,
+	Version:     "1.0",
+	Host:        "localhost:8080",
+	BasePath:    "/",
+	Schemes:     []string{  },
+	Title:       "Beehive Auth Service API",
+	Description: "Beehive 认证微服务 API 文档",
+	InfoInstanceName: "swagger-auth",
+	SwaggerTemplate: docTemplate,
 	LeftDelim:        "{{",
 	RightDelim:       "}}",
 }

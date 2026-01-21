@@ -33,7 +33,15 @@ swagger.verify:
 swagger.auth swagger.user: swagger.verify
 	@echo "===========> Generating swagger API docs for $(@:swagger.%=%)"
 	@mkdir -p $(call get-swagger-output-dir,$(@:swagger.%=%))
-	@$(SWAG) init -g $(call get-swagger-main,$(@:swagger.%=%)) -o $(call get-swagger-output-dir,$(@:swagger.%=%)) --exclude internal/beehive-gateway
+	@svc_name=$(@:swagger.%=%); \
+	instance_name="swagger-$$svc_name"; \
+	output_dir=$(call get-swagger-output-dir,$$svc_name); \
+	$(SWAG) init -g $(call get-swagger-main,$$svc_name) -o $$output_dir --exclude internal/beehive-gateway --instanceName $$instance_name; \
+	docs_file="$$output_dir/$${instance_name}_docs.go"; \
+	if [ -f "$$docs_file" ]; then \
+		mv "$$docs_file" "$$output_dir/docs.go"; \
+		sed -i "s/docTemplate$$instance_name/docTemplate/g; s/SwaggerInfo$$instance_name/SwaggerInfo/g" "$$output_dir/docs.go"; \
+	fi
 
 # 生成所有服务的 swagger 文档
 .PHONY: swagger

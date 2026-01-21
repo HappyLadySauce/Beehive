@@ -11,7 +11,7 @@ grpc:
   # 绑定地址
   bind-address: "0.0.0.0"
   # 绑定端口
-  bind-port: 50052
+  bind-port: 50053
   # 最大接收消息大小（字节）
   max-recv-msg-size: 4194304  # 4MB
   # 最大发送消息大小（字节）

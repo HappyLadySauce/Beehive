@@ -35,12 +35,18 @@ swagger.auth swagger.user: swagger.verify
 	@mkdir -p $(call get-swagger-output-dir,$(@:swagger.%=%))
 	@svc_name=$(@:swagger.%=%); \
 	instance_name="swagger-$$svc_name"; \
+	instance_safe=$${instance_name//-/_}; \
 	output_dir=$(call get-swagger-output-dir,$$svc_name); \
 	$(SWAG) init -g $(call get-swagger-main,$$svc_name) -o $$output_dir --exclude internal/beehive-gateway --instanceName $$instance_name; \
 	docs_file="$$output_dir/$${instance_name}_docs.go"; \
 	if [ -f "$$docs_file" ]; then \
 		mv "$$docs_file" "$$output_dir/docs.go"; \
-		sed -i "s/docTemplate$$instance_name/docTemplate/g; s/SwaggerInfo$$instance_name/SwaggerInfo/g" "$$output_dir/docs.go"; \
+		sed -i \
+			-e "s/docTemplate$${instance_name}/docTemplate/g" \
+			-e "s/SwaggerInfo$${instance_name}/SwaggerInfo/g" \
+			-e "s/docTemplate_$${instance_safe}/docTemplate/g" \
+			-e "s/SwaggerInfo_$${instance_safe}/SwaggerInfo/g" \
+			"$$output_dir/docs.go"; \
 	fi
 
 # 生成所有服务的 swagger 文档

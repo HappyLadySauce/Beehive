@@ -6,7 +6,7 @@ import (
 )
 
 // requestIDMiddleware 请求ID中间件
-func RequestIDMiddleware() gin.HandlerFunc {
+func RequestID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		requestID := c.Request.Header.Get("X-Request-ID")
 		if requestID == "" {

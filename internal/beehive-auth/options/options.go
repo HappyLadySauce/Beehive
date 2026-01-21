@@ -11,25 +11,25 @@ import (
 )
 
 type Options struct {
-	Name    string
-	Log     *options.LogOptions   `json:"log" mapstructure:"log"`
-	Grpc    *options.GrpcOptions  `json:"grpc" mapstructure:"grpc"`
-	JWT     *options.JWTOptions   `json:"jwt" mapstructure:"jwt"`
-	Redis   *options.RedisOptions `json:"redis" mapstructure:"redis"`
-	Etcd    *options.EtcdOptions  `json:"etcd" mapstructure:"etcd"`
-	Services  *MicroServicesOptions `json:"services" mapstructure:"services"`
+	Name            string
+	Log             *options.LogOptions             `json:"log" mapstructure:"log"`
+	Grpc            *options.GrpcOptions            `json:"grpc" mapstructure:"grpc"`
+	JWT             *options.JWTOptions             `json:"jwt" mapstructure:"jwt"`
+	Redis           *options.RedisOptions           `json:"redis" mapstructure:"redis"`
+	Etcd            *options.EtcdOptions            `json:"etcd" mapstructure:"etcd"`
+	InsecureServing *options.InsecureServingOptions `json:"insecure-serving" mapstructure:"insecure-serving"`
+	Services        *MicroServicesOptions           `json:"services" mapstructure:"services"`
 }
-
 
 // MicroServicesOptions 微服务地址配置
 type MicroServicesOptions struct {
-	UserServiceAddr     string `json:"user-service-addr" mapstructure:"user-service-addr"`
+	UserServiceAddr string `json:"user-service-addr" mapstructure:"user-service-addr"`
 }
 
 // NewMicroServicesOptions 创建微服务配置选项
 func NewMicroServicesOptions() *MicroServicesOptions {
 	return &MicroServicesOptions{
-		UserServiceAddr:     "etcd://beehive-user",
+		UserServiceAddr: "etcd://beehive-user",
 	}
 }
 
@@ -49,13 +49,14 @@ func (o *MicroServicesOptions) AddFlags(fs *pflag.FlagSet) {
 
 func NewOptions(basename string) *Options {
 	return &Options{
-		Name:    basename,
-		Log:     options.NewLogOptions(),
-		Grpc:    options.NewGrpcOptions(),
-		JWT:     options.NewJWTOptions(),
-		Redis:   options.NewRedisOptions(),
-		Etcd:    options.NewEtcdOptions(),
-		Services: NewMicroServicesOptions(),
+		Name:            basename,
+		Log:             options.NewLogOptions(),
+		Grpc:            options.NewGrpcOptions(),
+		JWT:             options.NewJWTOptions(),
+		Redis:           options.NewRedisOptions(),
+		Etcd:            options.NewEtcdOptions(),
+		InsecureServing: options.NewInsecureServingOptions(),
+		Services:        NewMicroServicesOptions(),
 	}
 }
 
@@ -86,6 +87,10 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) *flag.NamedFlagSets {
 	// add etcd flags to the NamedFlagSets
 	etcdFlagSet := nfs.FlagSet("Etcd")
 	o.Etcd.AddFlags(etcdFlagSet)
+
+	// add insecure serving flags to the NamedFlagSets
+	insecureServingFlagSet := nfs.FlagSet("Insecure Serving")
+	o.InsecureServing.AddFlags(insecureServingFlagSet)
 
 	// add services flags to the NamedFlagSets
 	servicesFlagSet := nfs.FlagSet("Services")

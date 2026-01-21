@@ -9,6 +9,17 @@ import (
 )
 
 // HandleLogin 处理登录请求
+// @Summary 用户登录
+// @Description 使用用户 ID 和密码进行登录，返回访问令牌和刷新令牌
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body v1.LoginRequest true "登录请求参数"
+// @Success 200 {object} v1.LoginResponse
+// @Failure 400 {object} core.ErrResponse
+// @Failure 500 {object} core.ErrResponse
+// @Router /api/v1/auth/login [post]
+// HandleLogin 处理登录请求
 func (h *Handler) HandleLogin(c *gin.Context) {
 	var req v1.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -24,7 +35,7 @@ func (h *Handler) HandleLogin(c *gin.Context) {
 
 	authResp, err := h.authClient.Login(c.Request.Context(), authReq)
 	if err != nil {
-		core.HandleGRPCError(c, err)
+		core.WriteResponseBindErr(c, err, nil)
 		return
 	}
 
@@ -38,6 +49,17 @@ func (h *Handler) HandleLogin(c *gin.Context) {
 	core.WriteResponse(c, nil, response)
 }
 
+// HandleRefreshToken 处理 Token 刷新请求
+// @Summary 刷新访问令牌
+// @Description 使用刷新令牌获取新的访问令牌
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body v1.RefreshTokenRequest true "刷新令牌请求参数"
+// @Success 200 {object} v1.RefreshTokenResponse
+// @Failure 400 {object} core.ErrResponse
+// @Failure 500 {object} core.ErrResponse
+// @Router /api/v1/auth/refresh [post]
 // HandleRefreshToken 处理 Token 刷新请求
 func (h *Handler) HandleRefreshToken(c *gin.Context) {
 	var req v1.RefreshTokenRequest
@@ -53,7 +75,7 @@ func (h *Handler) HandleRefreshToken(c *gin.Context) {
 
 	authResp, err := h.authClient.RefreshToken(c.Request.Context(), authReq)
 	if err != nil {
-		core.HandleGRPCError(c, err)
+		core.WriteResponseBindErr(c, err, nil)
 		return
 	}
 
@@ -66,6 +88,17 @@ func (h *Handler) HandleRefreshToken(c *gin.Context) {
 	core.WriteResponse(c, nil, response)
 }
 
+// HandleRevokeToken 处理 Token 撤销请求
+// @Summary 撤销访问令牌
+// @Description 撤销指定访问令牌，使其立即失效
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body v1.RevokeTokenRequest true "撤销令牌请求参数"
+// @Success 200 {object} v1.RevokeTokenResponse
+// @Failure 400 {object} core.ErrResponse
+// @Failure 500 {object} core.ErrResponse
+// @Router /api/v1/auth/revoke [post]
 // HandleRevokeToken 处理 Token 撤销请求
 func (h *Handler) HandleRevokeToken(c *gin.Context) {
 	var req v1.RevokeTokenRequest
@@ -81,7 +114,7 @@ func (h *Handler) HandleRevokeToken(c *gin.Context) {
 
 	authResp, err := h.authClient.RevokeToken(c.Request.Context(), authReq)
 	if err != nil {
-		core.HandleGRPCError(c, err)
+		core.WriteResponseBindErr(c, err, nil)
 		return
 	}
 

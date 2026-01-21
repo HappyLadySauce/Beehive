@@ -60,9 +60,20 @@ func (coder ErrCode) HTTPStatus() int {
 
 // nolint: unparam
 func register(code int, httpStatus int, message string, refs ...string) {
-	found, _ := gubrak.Includes([]int{200, 400, 401, 403, 404, 500}, httpStatus)
+	// 允许的 HTTP 状态码集合，需要与各业务错误码保持一致
+	allowedStatusCodes := []int{
+		http.StatusOK,                  // 200
+		http.StatusBadRequest,          // 400
+		http.StatusUnauthorized,        // 401
+		http.StatusForbidden,           // 403
+		http.StatusNotFound,            // 404
+		http.StatusConflict,            // 409
+		http.StatusInternalServerError, // 500
+	}
+
+	found, _ := gubrak.Includes(allowedStatusCodes, httpStatus)
 	if !found {
-		panic("http code not in `200, 400, 401, 403, 404, 500`")
+		panic("http code not in `200, 400, 401, 403, 404, 409, 500`")
 	}
 
 	var reference string

@@ -53,7 +53,8 @@ func setupRoutes(
 
 	// 应用中间件（优化顺序：Recovery -> RequestID -> CORS -> Logger）
 	router.Use(gin.Recovery())
-	router.Use(middleware.RequestIDMiddleware())
+	router.Use(middleware.RequestID())
+	router.Use(middleware.Swagger())
 	router.Use(middleware.Cors())
 	router.Use(gin.Logger())
 
@@ -86,4 +87,3 @@ func setupRoutes(
 
 	return router
 }
-

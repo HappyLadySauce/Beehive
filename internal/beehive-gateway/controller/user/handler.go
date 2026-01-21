@@ -9,6 +9,17 @@ import (
 )
 
 // HandleRegister 处理注册请求
+// @Summary 用户注册
+// @Description 创建一个新的用户账号
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param request body v1.RegisterRequest true "注册请求参数"
+// @Success 200 {object} v1.RegisterResponse
+// @Failure 400 {object} core.ErrResponse
+// @Failure 500 {object} core.ErrResponse
+// @Router /api/v1/user/register [post]
+// HandleRegister 处理注册请求
 func (h *Handler) HandleRegister(c *gin.Context) {
 	var req v1.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -27,7 +38,7 @@ func (h *Handler) HandleRegister(c *gin.Context) {
 
 	userResp, err := h.userClient.Register(c.Request.Context(), userReq)
 	if err != nil {
-		core.HandleGRPCError(c, err)
+		core.WriteResponseBindErr(c, err, nil)
 		return
 	}
 

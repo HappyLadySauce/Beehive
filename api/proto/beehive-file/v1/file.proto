@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package file;
+option go_package = "./file";
+
+// 文件服务
+service FileService {
+    // 上传文件
+    rpc UploadFile(UploadFileRequest) returns (UploadFileResponse);
+    
+    // 获取文件信息
+    rpc GetFileInfo(GetFileInfoRequest) returns (FileInfoResponse);
+    
+    // 删除文件
+    rpc DeleteFile(DeleteFileRequest) returns (CommonResponse);
+    
+    // 检查文件是否存在（去重）
+    rpc CheckFileExists(CheckFileExistsRequest) returns (CheckFileExistsResponse);
+    
+    // 初始化分片上传
+    rpc InitMultipartUpload(InitMultipartUploadRequest) returns (InitMultipartUploadResponse);
+    
+    // 上传文件分片
+    rpc UploadPart(UploadPartRequest) returns (UploadPartResponse);
+    
+    // 完成分片上传
+    rpc CompleteMultipartUpload(CompleteMultipartUploadRequest) returns (UploadFileResponse);
+}
+
+// 上传文件请求
+message UploadFileRequest {
+    int64 user_id = 1;
+    string file_name = 2;
+    int64 file_size = 3;
+    string file_type = 4;
+    string file_hash = 5;
+    bytes file_data = 6;
+}
+
+// 上传文件响应
+message UploadFileResponse {
+    int64 file_id = 1;
+    string file_url = 2;
+    string file_hash = 3;
+    bool is_duplicate = 4;
+}
+
+// 获取文件信息请求
+message GetFileInfoRequest {
+    int64 file_id = 1;
+}
+
+// 文件信息响应
+message FileInfoResponse {
+    int64 file_id = 1;
+    string file_name = 2;
+    int64 file_size = 3;
+    string file_type = 4;
+    string file_url = 5;
+    string file_hash = 6;
+}
+
+// 删除文件请求
+message DeleteFileRequest {
+    int64 file_id = 1;
+}
+
+// 检查文件是否存在请求
+message CheckFileExistsRequest {
+    string file_hash = 1;
+}
+
+// 检查文件是否存在响应
+message CheckFileExistsResponse {
+    bool exists = 1;
+    int64 file_id = 2;
+    string file_url = 3;
+}
+
+// 初始化分片上传请求
+message InitMultipartUploadRequest {
+    int64 user_id = 1;
+    string file_name = 2;
+    int64 file_size = 3;
+    string file_type = 4;
+    string file_hash = 5;
+    int32 total_parts = 6;
+}
+
+// 初始化分片上传响应
+message InitMultipartUploadResponse {
+    string upload_id = 1;
+}
+
+// 上传分片请求
+message UploadPartRequest {
+    string upload_id = 1;
+    int32 part_number = 2;
+    bytes part_data = 3;
+}
+
+// 上传分片响应
+message UploadPartResponse {
+    bool success = 1;
+    string etag = 2;
+}
+
+// 完成分片上传请求
+message CompleteMultipartUploadRequest {
+    string upload_id = 1;
+    repeated PartInfo parts = 2;
+}
+
+// 分片信息
+message PartInfo {
+    int32 part_number = 1;
+    string etag = 2;
+}
+
+// 通用响应
+message CommonResponse {
+    bool success = 1;
+    string message = 2;
+}

@@ -1,276 +1,486 @@
 # Beehive IM 开发文档
 
-本目录包含 Beehive IM 系统的详细开发文档。
+## 文档概览
 
-## 文档目录
+本目录包含 Beehive IM 系统的完整开发文档，涵盖架构设计、数据库设计、API 接口、RPC 服务、消息队列、搜索引擎和部署方案。
 
-### 架构设计
+## 文档列表
 
-#### [00-微服务架构设计.md](./00-微服务架构设计.md)
-- 系统整体架构设计
-- 微服务划分和职责
-- 服务间通信方式
-- 服务注册与发现
-- 配置管理
+### 1. [架构设计](architecture.md)
 
-**关键内容**：
-- Gateway 服务（WebSocket、HTTP API）
-- Auth Service（认证授权）
-- User Service（用户管理）
-- Message Service（消息服务）
-- Presence Service（在线状态）
-- Search Service（消息搜索）
+**内容**:
+- 系统概述和技术栈
+- 微服务架构图和服务职责划分
+- 数据流转和核心业务流程
+- 高可用设计和安全设计
+- 性能优化策略
+- 监控和可观测性
+- 项目目录结构
 
-#### [01-用户登录与操作逻辑.md](./01-用户登录与操作逻辑.md)
-- 用户注册流程
-- 用户登录流程
-- Token 认证机制
-- 消息发送和接收流程
+**适合人群**: 架构师、技术负责人、新加入的开发人员
 
-#### [02-Auth认证架构设计.md](./02-Auth认证架构设计.md)
-- JWT Token 认证机制
-- Token 生成和验证
-- Token 刷新策略
-- Token 撤销机制
-- Redis 缓存设计
+**关键亮点**:
+- 清晰的微服务拆分（6个RPC服务 + API Gateway）
+- 完整的数据流转图（用户注册、消息发送、好友申请）
+- 基于 go-zero 框架的微服务治理能力
 
-#### [03-消息队列设计.md](./03-消息队列设计.md)
+---
+
+### 2. [数据库设计](database.md)
+
+**内容**:
+- PostgreSQL 数据库选型理由
+- 完整的表结构设计（9张表）
+- 索引策略和性能优化
+- 缓存策略（Redis）
+- 数据备份和恢复方案
+- ER 图和表关系
+
+**适合人群**: 后端开发人员、DBA
+
+**核心表**:
+- `users`: 用户表
+- `friends`: 好友关系表
+- `friend_requests`: 好友申请表
+- `conversations`: 会话表
+- `conversation_members`: 会话成员表
+- `messages`: 消息表（分区表）
+- `files`: 文件表（支持去重）
+- `email_verification_codes`: 邮箱验证码表
+
+**特色设计**:
+- 消息表按月分区
+- 文件去重（SHA256哈希）
+- 好友关系双向存储
+- 完善的索引设计
+
+---
+
+### 3. [API 接口设计](api.md)
+
+**内容**:
+- RESTful API 规范
+- 完整的接口定义（用户、好友、会话、消息、文件）
+- WebSocket 接口定义
+- 请求响应示例
+- 错误码说明
+- 接口测试指南
+
+**适合人群**: 前端开发人员、接口测试人员
+
+**接口分类**:
+- **用户相关**: 注册、登录、获取/更新用户信息
+- **好友相关**: 发送申请、处理申请、好友列表、删除好友
+- **会话相关**: 创建会话、会话列表、会话详情、标记已读
+- **消息相关**: 获取历史消息、搜索消息
+- **文件相关**: 上传、下载、批量上传
+- **WebSocket**: 实时消息推送、心跳检测
+
+**特色功能**:
+- JWT 认证
+- WebSocket 长连接
+- 全文检索
+- 文件去重
+
+---
+
+### 4. [RPC 服务设计](rpc.md)
+
+**内容**:
+- gRPC 和 Protocol Buffers 介绍
+- 6个 RPC 服务的 Proto 定义
+- 服务实现要点
+- RPC 调用示例
+- 性能优化和监控
+
+**适合人群**: 后端开发人员
+
+**RPC 服务列表**:
+1. **User RPC** (8001): 用户管理、认证、在线状态
+2. **Friend RPC** (8002): 好友关系、好友申请
+3. **Chat RPC** (8004): 会话管理、会话成员
+4. **Message RPC** (8003): 消息发送、历史消息
+5. **File RPC** (8005): 文件上传、下载、去重
+6. **Search RPC** (8006): 消息全文检索
+
+**技术特点**:
+- 基于 gRPC 的高性能通信
+- etcd 服务发现
+- go-zero 内置负载均衡
+- 自适应熔断和限流
+
+---
+
+### 5. [消息队列设计](message-queue.md)
+
+**内容**:
 - RabbitMQ 架构设计
 - Exchange 和 Queue 配置
-- 消息路由策略
-- 单聊消息路由
-- 群聊消息路由
+- 消息格式定义
+- 生产者和消费者实现
 - 消息可靠性保证
+- 监控和告警
 
-#### [04-完整开发指南.md](./04-完整开发指南.md)
-- 从零开始构建系统
-- 开发阶段划分
-- 每日开发检查清单
-- 常见问题排查
-- Docker 环境配置
+**适合人群**: 后端开发人员、运维人员
 
-**开发阶段**：
-1. 基础搭建（第1-4天）
-2. Protocol Buffers 定义（第5-6天）
-3. gRPC 服务实现（第7-11天）
-4. WebSocket Gateway（第12-16天）
-5. RabbitMQ 集成（第17-21天）
-6. Elasticsearch 集成（第22-27天）
-7. 测试和优化（第28-36天）
+**队列设计**:
+- **message.persist**: 消息持久化队列
+- **message.push**: 消息推送队列（Gateway 消费）
+- **message.index**: 消息索引队列（Search RPC 消费）
 
-#### [05-Elasticsearch搜索架构设计.md](./05-Elasticsearch搜索架构设计.md)
-- Elasticsearch 集成方案
-- 索引设计和映射
-- 中文分词配置
-- 搜索查询实现
-- 数据同步策略
-- 性能优化方案
-- Search Service 实现
+**可靠性保证**:
+- 生产者确认
+- 消费者手动 ACK
+- 消息持久化
+- 死信队列
 
-**核心功能**：
-- 消息全文搜索
-- 单聊消息搜索
-- 群聊消息搜索
+---
+
+### 6. [Elasticsearch 设计](elasticsearch.md)
+
+**内容**:
+- Elasticsearch 索引设计
+- IK 中文分词器配置
+- 索引和搜索操作
+- Go 客户端实现
+- 性能优化
+- 备份和恢复
+
+**适合人群**: 后端开发人员、搜索工程师
+
+**核心功能**:
+- 历史消息全文检索
 - 搜索结果高亮
-- 时间范围筛选
-- 批量数据同步
+- 按会话过滤
+- 分页查询
 
-## 快速导航
+**技术实现**:
+- IK 分词器（ik_smart + ik_max_word）
+- 按月创建索引
+- 别名机制
+- 批量索引（Bulk API）
 
-### 新手入门
-1. 阅读 [微服务架构设计](./00-微服务架构设计.md) 了解系统整体架构
-2. 阅读 [完整开发指南](./04-完整开发指南.md) 开始开发
-3. 参考 [用户登录与操作逻辑](./01-用户登录与操作逻辑.md) 理解业务流程
+---
 
-### 实现特定功能
-- **认证功能**: [Auth认证架构设计](./02-Auth认证架构设计.md)
-- **消息功能**: [消息队列设计](./03-消息队列设计.md)
-- **搜索功能**: [Elasticsearch搜索架构设计](./05-Elasticsearch搜索架构设计.md)
+### 7. [部署文档](deployment.md)
 
-### 部署和运维
-- Docker 环境：参考 `/docker/README.md`
-- 服务配置：参考 `/configs/` 目录下的示例文件
+**内容**:
+- 开发环境部署（Docker Compose）
+- 生产环境部署（Kubernetes）
+- Docker 镜像构建
+- 监控和日志
+- 备份和恢复
+- 运维操作
 
-## 架构图
+**适合人群**: 运维人员、DevOps 工程师
 
-### 系统整体架构
+**部署方案**:
+- **开发环境**: Docker Compose（单机）
+- **生产环境**: Kubernetes（集群）
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        客户端层                              │
-│        Web 客户端    |    移动端    |    API 客户端         │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      Gateway 服务层                          │
-│                WebSocket Gateway (8080)                      │
-│                    HTTP API (8080)                           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-            ┌─────────────────┼─────────────────┐
-            ▼                 ▼                 ▼
-┌───────────────────┐ ┌───────────────┐ ┌──────────────────┐
-│   Auth Service    │ │ User Service  │ │ Message Service  │
-│     (50050)       │ │   (50051)     │ │    (50052)       │
-└───────────────────┘ └───────────────┘ └──────────────────┘
-            │                 │                 │
-            ▼                 ▼                 ▼
-┌───────────────────┐ ┌───────────────┐ ┌──────────────────┐
-│ Presence Service  │ │Search Service │ │                  │
-│     (50053)       │ │   (50054)     │ │                  │
-└───────────────────┘ └───────────────┘ └──────────────────┘
-                              │
-            ┌─────────────────┼─────────────────┐
-            ▼                 ▼                 ▼
-┌───────────────────┐ ┌───────────────┐ ┌──────────────────┐
-│   PostgreSQL      │ │     Redis     │ │   RabbitMQ       │
-│     (5432)        │ │    (6379)     │ │   (5672)         │
-└───────────────────┘ └───────────────┘ └──────────────────┘
-            │                                   │
-            ▼                                   ▼
-┌───────────────────┐                 ┌──────────────────┐
-│  Elasticsearch    │                 │      etcd        │
-│  (9200, 9300)     │                 │     (2379)       │
-└───────────────────┘                 └──────────────────┘
-            │
-            ▼
-┌───────────────────┐
-│      Kibana       │
-│      (5601)       │
-└───────────────────┘
+**基础设施**:
+- PostgreSQL（主数据库）
+- Redis（缓存）
+- RabbitMQ（消息队列）
+- Elasticsearch（搜索引擎）
+- etcd（服务发现）
+
+---
+
+## 快速开始
+
+### 1. 环境准备
+
+```bash
+# 安装 Go
+brew install go  # macOS
+apt install golang  # Ubuntu
+
+# 安装 Docker
+brew install docker docker-compose  # macOS
+apt install docker.io docker-compose  # Ubuntu
+
+# 安装 goctl
+go install github.com/zeromicro/go-zero/tools/goctl@latest
+
+# 验证安装
+goctl --version
 ```
 
-## 技术栈说明
+### 2. 启动基础设施
 
-### 后端技术
-- **Go 1.21+**: 主要开发语言
-- **gRPC**: 微服务间通信
-- **WebSocket**: 客户端实时通信
-- **Protocol Buffers**: 接口定义和序列化
+```bash
+cd /opt/Beehive/docker
+docker-compose up -d
 
-### 数据存储
-- **PostgreSQL 15**: 主数据库，存储用户、消息、会话等数据
-- **Redis 7**: 缓存 Token、在线状态等
-- **Elasticsearch 8.11**: 消息全文搜索引擎
+# 等待服务启动
+docker-compose ps
+```
 
-### 消息队列
-- **RabbitMQ 3**: 异步消息处理和推送
+### 3. 初始化数据库
 
-### 服务发现
-- **etcd 3.5**: 服务注册与发现、配置管理
+```bash
+# 创建数据库
+docker exec -it beehive-postgres psql -U postgres -c "CREATE DATABASE beehive;"
 
-### 可视化工具
-- **Kibana 8.11**: Elasticsearch 数据可视化和管理
+# 执行初始化脚本
+docker exec -i beehive-postgres psql -U postgres -d beehive < scripts/init_db.sql
+```
+
+### 4. 初始化 Elasticsearch
+
+```bash
+./scripts/init_es.sh
+```
+
+### 5. 初始化 RabbitMQ
+
+```bash
+./scripts/init_rabbitmq.sh
+```
+
+### 6. 生成代码
+
+```bash
+./scripts/gen_code.sh
+```
+
+### 7. 启动服务
+
+```bash
+# 终端1: User RPC
+cd rpc/user && go run user.go -f etc/user.yaml
+
+# 终端2: Friend RPC
+cd rpc/friend && go run friend.go -f etc/friend.yaml
+
+# 终端3: Chat RPC
+cd rpc/chat && go run chat.go -f etc/chat.yaml
+
+# 终端4: Message RPC
+cd rpc/message && go run message.go -f etc/message.yaml
+
+# 终端5: File RPC
+cd rpc/file && go run file.go -f etc/file.yaml
+
+# 终端6: Search RPC
+cd rpc/search && go run search.go -f etc/search.yaml
+
+# 终端7: Gateway
+cd api/gateway && go run gateway.go -f etc/gateway.yaml
+```
+
+### 8. 测试
+
+```bash
+# 健康检查
+curl http://localhost:8888/ping
+
+# 发送验证码
+curl -X POST http://localhost:8888/api/v1/auth/send-code \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","purpose":"register"}'
+```
+
+---
+
+## 技术栈总结
+
+### 后端
+
+- **语言**: Go 1.21+
+- **框架**: go-zero
+- **通信协议**: HTTP REST、gRPC、WebSocket
+- **数据库**: PostgreSQL 15
+- **缓存**: Redis 7
+- **消息队列**: RabbitMQ 3.12
+- **搜索引擎**: Elasticsearch 8.11
+- **服务发现**: etcd 3.5
+- **认证**: JWT
+
+### 前端（待开发）
+
+- **Web**: React + TypeScript
+- **Desktop**: Electron
+- **Mobile**: React Native / Flutter
+
+### 基础设施
+
+- **容器化**: Docker
+- **编排**: Kubernetes
+- **监控**: Prometheus + Grafana
+- **日志**: ELK (Elasticsearch + Logstash + Kibana)
+- **链路追踪**: OpenTelemetry + Jaeger
+
+---
+
+## 架构特点
+
+### 1. 微服务架构
+
+- 服务拆分合理，职责清晰
+- 通过 etcd 实现服务发现
+- go-zero 内置负载均衡
+
+### 2. 高可用设计
+
+- RPC 服务多实例部署
+- 数据库主从复制
+- Redis Cluster
+- RabbitMQ 集群
+- Elasticsearch 集群
+
+### 3. 高性能设计
+
+- Redis 缓存热点数据
+- 消息队列异步处理
+- 数据库索引优化
+- 消息表分区
+
+### 4. 可扩展性
+
+- 水平扩展：增加服务实例
+- 垂直扩展：增加机器资源
+- 数据库分库分表
+
+### 5. 安全性
+
+- JWT 认证
+- 密码 bcrypt 加密
+- SQL 注入防护
+- XSS 防护
+
+---
 
 ## 开发规范
 
-### 代码规范
-- 遵循 Go 官方代码规范
-- 使用 `gofmt` 格式化代码
-- 使用 `golint` 进行代码检查
+### 1. Git 提交规范
 
-### Git 提交规范
-使用 Angular 提交规范：
+遵循 Angular 提交规范：
+
 - `feat`: 新功能
 - `fix`: 修复 bug
 - `docs`: 文档更新
 - `style`: 代码格式调整
-- `refactor`: 代码重构
-- `test`: 测试相关
-- `chore`: 构建工具或辅助工具的变动
+- `refactor`: 重构
+- `test`: 测试
+- `chore`: 构建/工具链
 
 示例：
+
 ```
-feat(search): 添加 Elasticsearch 全文搜索功能
+feat(user): 添加用户注册功能
 
-- 实现 Search Service
-- 集成 IK 中文分词
-- 添加搜索结果高亮
+- 实现邮箱验证码发送
+- 实现用户注册接口
+- 添加单元测试
 ```
 
-### API 设计规范
-- RESTful API 设计
-- 使用 HTTP 状态码表示请求结果
-- 统一的错误响应格式
-- API 版本控制（v1, v2）
+### 2. 代码规范
 
-### 文档规范
-- 每个微服务提供 README
-- API 文档使用 Swagger/OpenAPI
-- gRPC 服务使用 Proto 注释
+- 遵循 Go 官方代码规范
+- 使用 `gofmt` 格式化代码
+- 使用 `golangci-lint` 检查代码
+- 注释使用中文
+
+### 3. 接口命名规范
+
+- RESTful API: 使用名词复数，如 `/api/v1/users`
+- RPC 方法: 使用动词开头，如 `GetUserInfo`、`SendMessage`
+
+---
 
 ## 常见问题
 
-### Q1: 如何添加新的微服务？
+### Q1: 如何添加新的 RPC 服务？
 
-1. 在 `cmd/` 目录创建服务入口
-2. 在 `internal/` 目录实现服务逻辑
-3. 在 `pkg/api/proto/` 定义 Proto 文件
-4. 更新 `docker-compose.yml` 添加必要的基础设施
-5. 更新文档
+A:
+1. 在 `api/proto/` 下创建新的 proto 文件
+2. 使用 `goctl rpc protoc` 生成代码
+3. 实现业务逻辑
+4. 在 Gateway 中注入新的 RPC Client
 
-### Q2: 如何修改数据库表结构？
+### Q2: 如何添加新的 API 接口？
 
-1. 使用数据库迁移工具（如 golang-migrate）
-2. 创建迁移文件
-3. 更新数据模型代码
-4. 运行迁移
+A:
+1. 在 `api/gateway/v1/gateway.api` 中定义接口
+2. 使用 `goctl api go` 重新生成代码
+3. 实现 Logic 层业务逻辑
+4. 调用 RPC 服务
 
-### Q3: 如何测试 gRPC 服务？
+### Q3: 如何调试？
 
-使用 `grpcurl` 工具：
-```bash
-grpcurl -plaintext localhost:50050 auth.v1.AuthService/Login
-```
+A:
+1. 查看日志：`logs/` 目录
+2. 使用 `pprof` 性能分析
+3. 使用 Postman 测试接口
+4. 使用 grpcurl 测试 RPC
 
-### Q4: 如何查看 Elasticsearch 索引？
+### Q4: 如何部署到生产环境？
 
-访问 Kibana：http://localhost:5601
+A: 参考 [部署文档](deployment.md)
 
-或使用 curl：
-```bash
-curl http://localhost:9200/_cat/indices?v
-```
+---
 
-## 参考资源
+## 项目进度
 
-### 官方文档
-- [Go 语言](https://golang.org/doc/)
-- [gRPC](https://grpc.io/docs/)
-- [Protocol Buffers](https://developers.google.com/protocol-buffers)
-- [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
-- [RabbitMQ](https://www.rabbitmq.com/documentation.html)
-- [etcd](https://etcd.io/docs/)
+### 已完成
 
-### 第三方库
-- [Cobra](https://github.com/spf13/cobra) - CLI 框架
-- [Viper](https://github.com/spf13/viper) - 配置管理
-- [GORM](https://gorm.io/) - ORM 框架
-- [go-elasticsearch](https://github.com/elastic/go-elasticsearch) - ES 客户端
+- [x] 架构设计
+- [x] 数据库设计
+- [x] API 接口设计
+- [x] RPC 服务设计
+- [x] 消息队列设计
+- [x] Elasticsearch 设计
+- [x] 部署方案设计
 
-### 工具
-- [grpcurl](https://github.com/fullstorydev/grpcurl) - gRPC 命令行工具
-- [Evans](https://github.com/ktr0731/evans) - gRPC 客户端
-- [Postman](https://www.postman.com/) - API 测试工具
+### 待完成
 
-## 贡献指南
+- [ ] 生成所有 RPC 服务代码
+- [ ] 实现业务逻辑
+- [ ] 实现 WebSocket 连接管理
+- [ ] 实现邮件发送服务
+- [ ] 实现 RabbitMQ 消费者
+- [ ] 实现 Elasticsearch 搜索
+- [ ] 实现文件上传服务
+- [ ] 编写单元测试
+- [ ] 编写集成测试
+- [ ] 前端开发（Web、Desktop）
 
-欢迎贡献代码和文档！
-
-### 贡献流程
-1. Fork 项目
-2. 创建特性分支
-3. 提交代码
-4. 创建 Pull Request
-
-### 文档贡献
-- 修复文档错误
-- 补充缺失的文档
-- 优化文档结构
-- 添加示例代码
+---
 
 ## 联系方式
 
-- 项目地址: https://gitee.com/wang-guangke/chat_code.git
-- 问题反馈: 提交 Issue
+- **项目地址**: https://github.com/HappyLadySauce/Beehive
+- **文档地址**: /opt/Beehive/docs/
+- **作者**: HappyLadySauce
+- **邮箱**: 13452552349@163.com
+
+---
+
+## 参考资源
+
+- [go-zero 官方文档](https://go-zero.dev/)
+- [go-zero GitHub](https://github.com/zeromicro/go-zero)
+- [go-zero 书店示例](https://github.com/zeromicro/zero-examples/tree/main/bookstore)
+- [Protocol Buffers 文档](https://protobuf.dev/)
+- [gRPC 文档](https://grpc.io/docs/)
+- [PostgreSQL 文档](https://www.postgresql.org/docs/)
+- [Redis 文档](https://redis.io/docs/)
+- [RabbitMQ 文档](https://www.rabbitmq.com/docs)
+- [Elasticsearch 文档](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
+
+---
+
+## 更新日志
+
+### 2026-01-21
+
+- 创建完整的开发文档
+- 完成架构设计
+- 完成数据库设计
+- 完成 API 接口设计
+- 完成 RPC 服务设计
+- 完成消息队列设计
+- 完成 Elasticsearch 设计
+- 完成部署方案设计

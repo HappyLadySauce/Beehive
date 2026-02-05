@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package message;
+option go_package = "./message";
+
+// 消息服务
+service MessageService {
+    // 发送消息
+    rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+    
+    // 获取历史消息
+    rpc GetMessages(GetMessagesRequest) returns (MessagesResponse);
+    
+    // 更新消息状态
+    rpc UpdateMessageStatus(UpdateMessageStatusRequest) returns (CommonResponse);
+    
+    // 获取消息详情
+    rpc GetMessageDetail(GetMessageDetailRequest) returns (MessageInfo);
+}
+
+// 发送消息请求
+message SendMessageRequest {
+    int64 conversation_id = 1;
+    int64 sender_id = 2;
+    int32 content_type = 3;
+    string content = 4;
+    string extra_data = 5;
+}
+
+// 发送消息响应
+message SendMessageResponse {
+    int64 message_id = 1;
+    int64 created_at = 2;
+}
+
+// 获取历史消息请求
+message GetMessagesRequest {
+    int64 conversation_id = 1;
+    int64 before_id = 2;
+    int32 limit = 3;
+}
+
+// 历史消息响应
+message MessagesResponse {
+    repeated MessageInfo messages = 1;
+    bool has_more = 2;
+}
+
+// 消息信息
+message MessageInfo {
+    int64 message_id = 1;
+    int64 conversation_id = 2;
+    int64 sender_id = 3;
+    int32 content_type = 4;
+    string content = 5;
+    string extra_data = 6;
+    int32 status = 7;
+    int64 created_at = 8;
+}
+
+// 更新消息状态请求
+message UpdateMessageStatusRequest {
+    int64 message_id = 1;
+    int32 status = 2;
+}
+
+// 获取消息详情请求
+message GetMessageDetailRequest {
+    int64 message_id = 1;
+}
+
+// 通用响应
+message CommonResponse {
+    bool success = 1;
+    string message = 2;
+}

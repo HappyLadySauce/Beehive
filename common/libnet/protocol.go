@@ -37,7 +37,7 @@ type Codec interface {
 	SetReadDeadline(t time.Time) error
 	SetWriteDeadline(t time.Time) error
 	Receive() (*Message, error)
-	Send(msg *Message) error
+	Send(msg Message) error
 	Close() error
 }
 
@@ -122,7 +122,7 @@ func (c *BeehiveCodec) Receive() (*Message, error) {
 }
 
 // Send 发送消息
-func (c *BeehiveCodec) Send(msg *Message) error {
+func (c *BeehiveCodec) Send(msg Message) error {
 	payloadSize := msg.PayloadSize()
 	frameSize := msg.FrameSize()
 

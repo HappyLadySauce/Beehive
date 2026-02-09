@@ -3,7 +3,9 @@ module github.com/HappyLadySauce/Beehive
 go 1.25.3
 
 require (
+	github.com/spaolacci/murmur3 v1.1.0
 	github.com/zeromicro/go-zero v1.9.4
+	golang.org/x/exp v0.0.0-20260112195511-716be5621a96
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 )
@@ -49,7 +51,6 @@ require (
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/redis/go-redis/v9 v9.17.2 // indirect
-	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.15 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.15 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.15 // indirect

@@ -1,25 +1,25 @@
-package session
+package sessionId
 
 import (
 	"strconv"
 	"strings"
 )
 
-type Session string
+type SessionId string
 
-func NewSession(name, token string, id uint64) Session {
+func NewSessionId(name, token string, id uint64) SessionId {
 	if len(name) == 0 || len(token) == 0 {
 		panic("name or token are required")
 	}
 	idstr := strconv.FormatUint(id, 10)
-	return Session(name + ":" + token + ":" + idstr)
+	return SessionId(name + ":" + token + ":" + idstr)
 }
 
-func FromString(str string) Session {
-	return Session(str)
+func FromString(str string) SessionId {
+	return SessionId(str)
 }
 
-func (s Session) Name() string {
+func (s SessionId) Name() string {
 	arr := strings.Split(string(s), ":")
 	if len(arr) != 3 {
 		panic("invalid session")
@@ -27,7 +27,7 @@ func (s Session) Name() string {
 	return arr[0]
 }
 
-func (s Session) Token() string {
+func (s SessionId) Token() string {
 	arr := strings.Split(string(s), ":")
 	if len(arr) != 3 {
 		panic("invalid session")
@@ -35,7 +35,7 @@ func (s Session) Token() string {
 	return arr[1]
 }
 
-func (s Session) Id() uint64 {
+func (s SessionId) Id() uint64 {
 	arr := strings.Split(string(s), ":")
 	if len(arr) != 3 {
 		panic("invalid session")
@@ -47,7 +47,7 @@ func (s Session) Id() uint64 {
 	return id
 }
 
-func (s Session) Info() (string, string, uint64) {
+func (s SessionId) Info() (string, string, uint64) {
 	arr := strings.Split(string(s), ":")
 	if len(arr) != 3 {
 		panic("invalid session")
@@ -59,6 +59,6 @@ func (s Session) Info() (string, string, uint64) {
 	return arr[0], arr[1], id
 }
 
-func (s Session) String() string {
+func (s SessionId) String() string {
 	return string(s)
 }

@@ -34,6 +34,8 @@ func main() {
 	})
 	defer s.Stop()
 
+	tcpServer := server.NewTcpServer(ctx)
+
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
 }

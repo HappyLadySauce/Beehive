@@ -7,8 +7,12 @@ import (
 	"github.com/HappyLadySauce/Beehive/common/utils/hash"
 )
 
+// 会话map数量
+// 用于将会话根据token散列到不同的会话map中
+// 减少锁竞争，提高性能
 const sessionMapNum = 32
 
+// Manager 管理器
 type Manager struct {
 	Name        string
 	sessionMaps [sessionMapNum]sessionMap
@@ -17,12 +21,14 @@ type Manager struct {
 	disposeWait sync.WaitGroup
 }
 
+// sessionMap 会话map
 type sessionMap struct {
 	sync.RWMutex
 	sessions      map[sessionId.SessionId]*Session
 	tokenSessions map[string][]sessionId.SessionId
 }
 
+// 创建管理器
 func NewManager(name string) *Manager {
 	manager := &Manager{
 		Name: name,
@@ -34,6 +40,7 @@ func NewManager(name string) *Manager {
 	return manager
 }
 
+// 获取会话
 func (m *Manager) GetSession(sessionId sessionId.SessionId) *Session {
 	token := sessionId.Token()
 	hashId := hash.Hash([]byte(token))
@@ -49,6 +56,7 @@ func (m *Manager) GetSession(sessionId sessionId.SessionId) *Session {
 	return session
 }
 
+// 添加会话
 func (m *Manager) AddSession(session *Session) {
 	sessionId := session.SessionId()
 	token := session.token
@@ -62,6 +70,7 @@ func (m *Manager) AddSession(session *Session) {
 	smap.tokenSessions[token] = append(smap.tokenSessions[token], sessionId)
 }
 
+// 删除会话
 func (m *Manager) removeSession(session *Session) {
 	sessionId := session.SessionId()
 	token := session.token
@@ -79,6 +88,7 @@ func (m *Manager) removeSession(session *Session) {
 	delete(smap.sessions, sessionId)
 }
 
+// 关闭管理器
 func (m *Manager) Close() {
 	m.disposeOnce.Do(func() {
 		m.disposeFlag = true

@@ -14,11 +14,17 @@ import (
 )
 
 type (
-	Request  = imrpc.Request
-	Response = imrpc.Response
+	LoginRequest   = imrpc.LoginRequest
+	LoginResponse  = imrpc.LoginResponse
+	LogoutRequest  = imrpc.LogoutRequest
+	LogoutResponse = imrpc.LogoutResponse
+	PostMsg        = imrpc.PostMsg
+	PostReponse    = imrpc.PostReponse
 
 	Imrpc interface {
-		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+		Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+		Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+		PostMessage(ctx context.Context, in *PostMsg, opts ...grpc.CallOption) (*PostReponse, error)
 	}
 
 	defaultImrpc struct {
@@ -32,7 +38,17 @@ func NewImrpc(cli zrpc.Client) Imrpc {
 	}
 }
 
-func (m *defaultImrpc) Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
+func (m *defaultImrpc) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	client := imrpc.NewImrpcClient(m.cli.Conn())
-	return client.Ping(ctx, in, opts...)
+	return client.Login(ctx, in, opts...)
+}
+
+func (m *defaultImrpc) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
+	client := imrpc.NewImrpcClient(m.cli.Conn())
+	return client.Logout(ctx, in, opts...)
+}
+
+func (m *defaultImrpc) PostMessage(ctx context.Context, in *PostMsg, opts ...grpc.CallOption) (*PostReponse, error) {
+	client := imrpc.NewImrpcClient(m.cli.Conn())
+	return client.PostMessage(ctx, in, opts...)
 }

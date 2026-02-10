@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.1
 // - protoc             v3.19.4
-// source: imrpc.proto
+// source: imrpc/imrpc.proto
 
 package imrpc
 
@@ -19,14 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Imrpc_Ping_FullMethodName = "/imrpc.Imrpc/Ping"
+	Imrpc_Login_FullMethodName       = "/imrpc.Imrpc/Login"
+	Imrpc_Logout_FullMethodName      = "/imrpc.Imrpc/Logout"
+	Imrpc_PostMessage_FullMethodName = "/imrpc.Imrpc/PostMessage"
 )
 
 // ImrpcClient is the client API for Imrpc service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ImrpcClient interface {
-	Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	PostMessage(ctx context.Context, in *PostMsg, opts ...grpc.CallOption) (*PostReponse, error)
 }
 
 type imrpcClient struct {
@@ -37,10 +41,30 @@ func NewImrpcClient(cc grpc.ClientConnInterface) ImrpcClient {
 	return &imrpcClient{cc}
 }
 
-func (c *imrpcClient) Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
+func (c *imrpcClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Response)
-	err := c.cc.Invoke(ctx, Imrpc_Ping_FullMethodName, in, out, cOpts...)
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, Imrpc_Login_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imrpcClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LogoutResponse)
+	err := c.cc.Invoke(ctx, Imrpc_Logout_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imrpcClient) PostMessage(ctx context.Context, in *PostMsg, opts ...grpc.CallOption) (*PostReponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PostReponse)
+	err := c.cc.Invoke(ctx, Imrpc_PostMessage_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +75,9 @@ func (c *imrpcClient) Ping(ctx context.Context, in *Request, opts ...grpc.CallOp
 // All implementations must embed UnimplementedImrpcServer
 // for forward compatibility.
 type ImrpcServer interface {
-	Ping(context.Context, *Request) (*Response, error)
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	PostMessage(context.Context, *PostMsg) (*PostReponse, error)
 	mustEmbedUnimplementedImrpcServer()
 }
 
@@ -62,8 +88,14 @@ type ImrpcServer interface {
 // pointer dereference when methods are called.
 type UnimplementedImrpcServer struct{}
 
-func (UnimplementedImrpcServer) Ping(context.Context, *Request) (*Response, error) {
-	return nil, status.Error(codes.Unimplemented, "method Ping not implemented")
+func (UnimplementedImrpcServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedImrpcServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
+}
+func (UnimplementedImrpcServer) PostMessage(context.Context, *PostMsg) (*PostReponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PostMessage not implemented")
 }
 func (UnimplementedImrpcServer) mustEmbedUnimplementedImrpcServer() {}
 func (UnimplementedImrpcServer) testEmbeddedByValue()               {}
@@ -86,20 +118,56 @@ func RegisterImrpcServer(s grpc.ServiceRegistrar, srv ImrpcServer) {
 	s.RegisterService(&Imrpc_ServiceDesc, srv)
 }
 
-func _Imrpc_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+func _Imrpc_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ImrpcServer).Ping(ctx, in)
+		return srv.(ImrpcServer).Login(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Imrpc_Ping_FullMethodName,
+		FullMethod: Imrpc_Login_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ImrpcServer).Ping(ctx, req.(*Request))
+		return srv.(ImrpcServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Imrpc_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LogoutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImrpcServer).Logout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Imrpc_Logout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImrpcServer).Logout(ctx, req.(*LogoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Imrpc_PostMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImrpcServer).PostMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Imrpc_PostMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImrpcServer).PostMessage(ctx, req.(*PostMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -112,10 +180,18 @@ var Imrpc_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ImrpcServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Ping",
-			Handler:    _Imrpc_Ping_Handler,
+			MethodName: "Login",
+			Handler:    _Imrpc_Login_Handler,
+		},
+		{
+			MethodName: "Logout",
+			Handler:    _Imrpc_Logout_Handler,
+		},
+		{
+			MethodName: "PostMessage",
+			Handler:    _Imrpc_PostMessage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "imrpc.proto",
+	Metadata: "imrpc/imrpc.proto",
 }

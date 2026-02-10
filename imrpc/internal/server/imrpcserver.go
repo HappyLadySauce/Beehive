@@ -23,7 +23,17 @@ func NewImrpcServer(svcCtx *svc.ServiceContext) *ImrpcServer {
 	}
 }
 
-func (s *ImrpcServer) Ping(ctx context.Context, in *imrpc.Request) (*imrpc.Response, error) {
-	l := logic.NewPingLogic(ctx, s.svcCtx)
-	return l.Ping(in)
+func (s *ImrpcServer) Login(ctx context.Context, in *imrpc.LoginRequest) (*imrpc.LoginResponse, error) {
+	l := logic.NewLoginLogic(ctx, s.svcCtx)
+	return l.Login(in)
+}
+
+func (s *ImrpcServer) Logout(ctx context.Context, in *imrpc.LogoutRequest) (*imrpc.LogoutResponse, error) {
+	l := logic.NewLogoutLogic(ctx, s.svcCtx)
+	return l.Logout(in)
+}
+
+func (s *ImrpcServer) PostMessage(ctx context.Context, in *imrpc.PostMsg) (*imrpc.PostReponse, error) {
+	l := logic.NewPostMessageLogic(ctx, s.svcCtx)
+	return l.PostMessage(in)
 }

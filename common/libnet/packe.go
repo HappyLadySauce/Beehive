@@ -64,7 +64,7 @@ type Header struct {
 
 // Message 完整消息
 type Message struct {
-	Header Header // 包头 10字节
+	Header // 包头 10字节
 	Data   []byte // 数据
 }
 

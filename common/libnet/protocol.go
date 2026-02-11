@@ -105,11 +105,11 @@ func (c *BeehiveCodec) Receive() (*Message, error) {
 
 	// 5. 解析 Header
 	var msg Message
-	msg.Header.Version = data[0]
-	msg.Header.Status = data[1]
-	msg.Header.Cmd = binary.BigEndian.Uint16(data[2:4])
-	msg.Header.ServiceId = binary.BigEndian.Uint16(data[4:6])
-	msg.Header.Seq = binary.BigEndian.Uint32(data[6:10])
+	msg.Version = data[0]
+	msg.Status = data[1]
+	msg.Cmd = binary.BigEndian.Uint16(data[2:4])
+	msg.ServiceId = binary.BigEndian.Uint16(data[4:6])
+	msg.Seq = binary.BigEndian.Uint32(data[6:10])
 
 	// 6. 复制 Body（需要复制因为 buffer 会被归还池）
 	bodySize := len(data) - HeaderSize
@@ -141,11 +141,11 @@ func (c *BeehiveCodec) Send(msg Message) error {
 	binary.BigEndian.PutUint32(buf[OffsetLen:], uint32(payloadSize))
 
 	// 4. 写入 Header
-	buf[OffsetVersion] = msg.Header.Version
-	buf[OffsetStatus] = msg.Header.Status
-	binary.BigEndian.PutUint16(buf[OffsetCmd:], msg.Header.Cmd)
-	binary.BigEndian.PutUint16(buf[OffsetServiceId:], msg.Header.ServiceId)
-	binary.BigEndian.PutUint32(buf[OffsetSeq:], msg.Header.Seq)
+	buf[OffsetVersion] = msg.Version
+	buf[OffsetStatus] = msg.Status
+	binary.BigEndian.PutUint16(buf[OffsetCmd:], msg.Cmd)
+	binary.BigEndian.PutUint16(buf[OffsetServiceId:], msg.ServiceId)
+	binary.BigEndian.PutUint32(buf[OffsetSeq:], msg.Seq)
 
 	// 5. 写入 Body
 	copy(buf[OffsetBody:], msg.Data)

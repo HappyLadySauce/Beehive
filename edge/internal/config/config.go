@@ -9,6 +9,10 @@ import (
 )
 
 type Config struct {
-	rest.RestConf
+	Name string
 	IMRPC zrpc.RpcClientConf
+	rest.RestConf
+	TCPListenOn string
+	SendChanSize int
+	WSListenOn string
 }

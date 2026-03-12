@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package beehive.auth;
+
+option go_package = "services/auth/pb;authpb";
+
+service AuthService {
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc TokenLogin(TokenLoginRequest) returns (LoginResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+  string device_id = 3;
+}
+
+message LoginResponse {
+  string user_id = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  int64 expires_in = 4;
+}
+
+message TokenLoginRequest {
+  string access_token = 1;
+  string device_id = 2;
+}
+
+message ValidateTokenRequest {
+  string access_token = 1;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
+  string user_id = 2;
+}
+
+message LogoutRequest {
+  string access_token = 1;
+}
+
+message LogoutResponse {}
+

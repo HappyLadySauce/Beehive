@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package beehive.conversation;
+
+option go_package = "services/conversation/pb;conversationpb";
+
+service ConversationService {
+  rpc CreateConversation(CreateConversationRequest) returns (CreateConversationResponse);
+  rpc AddMember(AddMemberRequest) returns (AddMemberResponse);
+  rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse);
+  rpc ListUserConversations(ListUserConversationsRequest) returns (ListUserConversationsResponse);
+  rpc GetConversation(GetConversationRequest) returns (GetConversationResponse);
+  rpc ListMembers(ListMembersRequest) returns (ListMembersResponse);
+}
+
+message CreateConversationRequest {
+  string type = 1;         // single / group / channel
+  string name = 2;
+  repeated string member_ids = 3;
+}
+
+message CreateConversationResponse {
+  string conversation_id = 1;
+}
+
+message AddMemberRequest {
+  string conversation_id = 1;
+  string user_id = 2;
+  string role = 3;         // owner / admin / member
+}
+
+message AddMemberResponse {}
+
+message RemoveMemberRequest {
+  string conversation_id = 1;
+  string user_id = 2;
+}
+
+message RemoveMemberResponse {}
+
+message ConversationInfo {
+  string id = 1;
+  string type = 2;
+  string name = 3;
+  int32 member_count = 4;
+  int64 created_at = 5;
+  int64 last_active_at = 6;
+}
+
+message ListUserConversationsRequest {
+  string user_id = 1;
+  string cursor = 2;
+  int32 limit = 3;
+}
+
+message ListUserConversationsResponse {
+  repeated ConversationInfo items = 1;
+  string next_cursor = 2;
+}
+
+message GetConversationRequest {
+  string id = 1;
+}
+
+message GetConversationResponse {
+  ConversationInfo conversation = 1;
+}
+
+message ListMembersRequest {
+  string conversation_id = 1;
+}
+
+message MemberInfo {
+  string user_id = 1;
+  string role = 2;
+  int64 joined_at = 3;
+  string status = 4;   // active / left / banned
+}
+
+message ListMembersResponse {
+  repeated MemberInfo items = 1;
+}
+

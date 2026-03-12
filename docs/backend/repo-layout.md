@@ -97,8 +97,10 @@ Beehive/
 ### 2. Go module 策略
 
 - 继续使用单一 Go module：`github.com/HappyLadySauce/Beehive`。
-- 各服务通过内部包路径（如 `github.com/HappyLadySauce/Beehive/services/auth/internal/...`）相互引用公共定义。
-- 所有 `.proto` 文件统一放在 `proto/` 目录，使用 goctl 为每个服务生成对应的 `internal` 代码。
+- 各服务通过内部包路径（如 `services/auth/internal/...`）相互引用公共定义。
+- 所有 `.proto` 文件统一放在 `proto/` 目录；
+  - 使用 `goctl rpc protoc` 为每个服务在 `services/<service>/` 下生成 zrpc 服务端骨架代码（`beehive.<service>.go` + `internal/*`）；
+  - 使用 `protoc` 按 `go_package = "services/<service>/pb;xxxpb"` 生成该服务对应的 gRPC client / server stub，物理路径位于 `services/<service>/pb/proto/*.pb.go`，供 Gateway 和其他服务引用。
 
 ---
 

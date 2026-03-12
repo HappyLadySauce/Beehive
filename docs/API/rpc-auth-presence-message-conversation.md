@@ -1,6 +1,6 @@
 ## 内部 gRPC 接口设计（Auth / Presence / Message / Conversation）
 
-本文件根据 `docs/backend/services-design.md` 描述的服务职责，对核心内部服务的 gRPC 接口进行设计，后续可直接映射为 `proto/*.proto` 并通过 goctl 生成 zrpc 服务代码。
+本文件根据 `docs/backend/services-design.md` 描述的服务职责，对核心内部服务的 gRPC 接口进行设计，后续可直接映射为 `proto/*.proto`，使用 goctl 生成 zrpc 服务端骨架，并使用 protoc 生成各服务目录下的 RPC client 代码。
 
 > 说明：以下接口以「伪 proto 风格」描述，实际 `.proto` 文件可在实现时按需要拆分/调整字段类型。
 
@@ -292,4 +292,3 @@ message ListMembersResponse {
   - 例如：
     - `goctl rpc protoc proto/auth.proto --go_out=. --go-grpc_out=. --zrpc_out=services/auth`
 - 上述消息体仅为初始设计，可在实现阶段根据具体字段需求微调，但应保持与 `docs/API/websocket-client-api.md` 中的字段语义一致。
-

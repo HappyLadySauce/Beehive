@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package beehive.message;
+
+option go_package = "services/message/pb;messagepb";
+  
+service MessageService {
+  rpc PostMessage(PostMessageRequest) returns (PostMessageResponse);
+  rpc GetHistory(GetHistoryRequest) returns (GetHistoryResponse);
+  rpc GetLastMessages(GetLastMessagesRequest) returns (GetLastMessagesResponse);
+}
+
+message MessageBody {
+  string type = 1;   // text / image / system / ...
+  string text = 2;   // when type = text
+  // future fields for image, etc.
+}
+
+message PostMessageRequest {
+  string client_msg_id = 1;
+  string conversation_id = 2;
+  string from_user_id = 3;
+  string to_user_id = 4;      // for single chat, optional for group
+  MessageBody body = 5;
+}
+
+message PostMessageResponse {
+  string server_msg_id = 1;
+  string conversation_id = 2;
+  int64 server_time = 3;
+}
+
+message GetHistoryRequest {
+  string conversation_id = 1;
+  int64 before_time = 2;     // optional: messages before this time
+  int32 limit = 3;
+}
+
+message MessageRecord {
+  string server_msg_id = 1;
+  string conversation_id = 2;
+  string from_user_id = 3;
+  string to_user_id = 4;
+  MessageBody body = 5;
+  int64 server_time = 6;
+}
+
+message GetHistoryResponse {
+  repeated MessageRecord items = 1;
+  bool has_more = 2;
+}
+
+message GetLastMessagesRequest {
+  repeated string conversation_ids = 1;
+}
+
+message GetLastMessagesResponse {
+  map<string, MessageRecord> last_messages = 1;
+}
+

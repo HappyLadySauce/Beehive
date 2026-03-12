@@ -22,6 +22,7 @@
 - **`type`**：字符串枚举，标识消息类别与方向。约定命名规则：
   - 请求：`<domain>.<action>`，例如：`auth.login`, `message.send`, `conversation.list`
   - 成功响应：`<domain>.<action>.ok`，例如：`auth.login.ok`, `message.send.ok`
+  - 失败响应：`<domain>.<action>.error`，例如：`auth.login.error`, `message.send.error`
   - 推送/事件：`<domain>.<event>`，例如：`message.push`, `conversation.updated`
 - **`tid`**（Trace/Transaction ID，可选但推荐）：
   - 由客户端生成，在请求与对应响应中保持一致，用于前端匹配请求与响应、排查问题。
@@ -86,7 +87,7 @@
 
 ```json
 {
-  "type": "auth.tokenLogin",
+  "type": "auth.tokenLogin.error",
   "tid": "login-1",
   "payload": null,
   "error": {
@@ -358,7 +359,7 @@
   "tid": "history-1",
   "payload": {
     "conversationId": "conv_abc",
-    "before": 1710000000,   // 可选：某个 serverTime 或 serverMsgId 之前
+    "before": 1710000000,   // 可选：某个 serverTime（int64 时间戳）之前
     "limit": 50
   }
 }
@@ -415,7 +416,7 @@
 
 ```json
 {
-  "type": "message.send",
+  "type": "message.send.error",
   "tid": "msg-1",
   "payload": null,
   "error": {

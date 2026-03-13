@@ -43,4 +43,3 @@
 - 实现前请对照：
   - Gateway：`docs/backend/gateway-design.md`、`docs/API/websocket-client-api.md`。
   - 各 RPC 服务：`docs/backend/services-design.md`、`docs/backend/repo-layout.md`、`docs/API/rpc-auth-presence-message-conversation.md`。
-

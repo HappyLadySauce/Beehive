@@ -1,0 +1,47 @@
+version: 1
+updated_at: 2026-03-12
+areas:
+  - id: backend-core
+    name: 后端核心服务
+    items:
+      - id: auth-service
+        title: 实现 AuthService 基础功能
+        status: pending
+        service: auth
+        proto: proto/auth.proto
+        owner: ""
+        tags: [auth, rpc]
+        notes: "登录/登出/Token 校验的最小可用实现（设计参考 docs/backend/services-design.md, docs/API/rpc-auth-presence-message-conversation.md）"
+      - id: presence-service
+        title: 实现 PresenceService 在线状态管理
+        status: pending
+        service: presence
+        proto: proto/presence.proto
+        owner: ""
+        tags: [presence, redis, rpc]
+        notes: "基于 Redis 管理在线 Session（设计参考 docs/backend/services-design.md, docs/API/rpc-auth-presence-message-conversation.md）"
+      - id: message-service
+        title: 实现 MessageService 消息写入与历史查询
+        status: pending
+        service: message
+        proto: proto/message.proto
+        owner: ""
+        tags: [message, db, mq, rpc]
+        notes: "PostgreSQL 持久化 + RabbitMQ 发布 message.created 事件（设计参考 docs/backend/services-design.md, docs/API/rpc-auth-presence-message-conversation.md）"
+      - id: conversation-service
+        title: 实现 ConversationService 会话与成员管理
+        status: pending
+        service: conversation
+        proto: proto/conversation.proto
+        owner: ""
+        tags: [conversation, db, rpc]
+        notes: "会话元数据与成员关系管理，提供会话列表等能力（设计参考 docs/backend/services-design.md, docs/API/rpc-auth-presence-message-conversation.md）"
+      - id: user-service
+        title: 实现 UserService 用户 Profile 读写
+        status: pending
+        service: user
+        proto: proto/user.proto
+        owner: ""
+        tags: [user, db, rpc]
+        notes: "基础用户信息（昵称、头像、签名等）的读写能力（设计参考 docs/backend/services-design.md）"
+

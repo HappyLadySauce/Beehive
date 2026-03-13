@@ -55,8 +55,15 @@ func (l *WsEntryLogic) ServeConn(c *ws.Connection) error {
 	}
 }
 
-// dispatch 按 type 分发到对应处理逻辑；当前仅实现 presence.ping，其余返回未实现。
 func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
+	// 除 auth.* 之外的消息都要求连接已登录，包括 presence.ping 在内。
+	if env.Type != "auth.login" && env.Type != "auth.tokenLogin" && env.Type != "auth.logout" {
+		if c.UserID == "" {
+			l.sendError(c, env.Tid, "unauthorized", "user not logged in")
+			return
+		}
+	}
+
 	switch env.Type {
 	case "presence.ping":
 		l.handlePresencePing(c, env)
@@ -65,11 +72,6 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 	case "auth.logout":
 		l.handleAuthLogout(c, env)
 	default:
-		// 所有非 auth.* 消息都要求连接已登录。
-		if c.UserID == "" {
-			l.sendError(c, env.Tid, "unauthorized", "user not logged in")
-			return
-		}
 		l.sendError(c, env.Tid, "bad_request", "unknown type: "+env.Type)
 	}
 }
@@ -171,15 +173,21 @@ func (l *WsEntryLogic) afterAuthSuccess(c *ws.Connection, env *ws.Envelope, resp
 		l.sendError(c, env.Tid, "internal_error", "empty auth response")
 		return
 	}
-	c.BindUser(resp.UserId)
-	_, _ = l.svcCtx.PresenceSvc.RegisterSession(l.ctx, &presenceservice.RegisterSessionRequest{
+	// 先向 Presence 注册会话，确保在线状态成功记录；失败则不认为登录成功。
+	if _, err := l.svcCtx.PresenceSvc.RegisterSession(l.ctx, &presenceservice.RegisterSessionRequest{
 		UserId:     resp.UserId,
 		GatewayId:  l.svcCtx.Config.GatewayID,
 		ConnId:     c.ConnID,
 		DeviceId:   deviceID,
 		DeviceType: "", // 可根据实际需求从 Query 或 payload 补充
 		Ip:         "",
-	})
+	}); err != nil {
+		l.Errorf("register session failed for user %s conn %s: %v", resp.UserId, c.ConnID, err)
+		l.sendError(c, env.Tid, "internal_error", "failed to register session")
+		return
+	}
+	// Presence 注册成功后再在本地绑定用户，并返回登录成功响应。
+	c.BindUser(resp.UserId)
 	// 返回 auth.login.ok 或 auth.tokenLogin.ok
 	okType := env.Type + ".ok"
 	_ = c.WriteJSON(&ws.Envelope{

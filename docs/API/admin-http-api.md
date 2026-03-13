@@ -9,7 +9,9 @@
 ### 1. 通用约定
 
 - **协议**：HTTPS + JSON。
-- **认证**：推荐使用基于 JWT 的 Bearer Token 或管理端专用的会话机制。
+- **认证**：通过 `AuthService` 提供的 `ValidateToken` 做统一认证，前端使用基于 Bearer Token 的方式传递访问令牌：
+  - 请求头：`Authorization: Bearer <accessToken>`
+  - 后端在中间件中调用 `AuthService.ValidateToken`，获取当前 `userId`，并将其注入 `context`，供后续 handler 使用。
 - **返回结构**（示例）：
 
 ```json
@@ -34,6 +36,14 @@
 - `3001`：资源不存在
 - `5000`：内部错误
 
+> 认证/鉴权中间件建议：
+>
+> - 在 AdminAPIService 的 HTTP Server 中配置统一中间件：
+>   - 从 `Authorization` 头获取 `accessToken`；
+>   - 调用 `AuthService.ValidateToken`，失败则返回 `code=1001`（未认证）；
+>   - 成功则将 `userId` 放入 `context`；
+> - 对敏感路由在进入 handler 前再调用 `AuthService.CheckPermission(userId, permissionCode)`，失败返回 `code=1003`（权限不足）。
+
 ---
 
 ### 2. 用户管理接口
@@ -42,6 +52,9 @@
 
 - **方法与路径**
   - `GET /admin/users`
+
+- **所需权限**
+  - `admin.user.read`
 
 - **请求参数（Query）**
 
@@ -160,6 +173,9 @@
   - 封禁：`POST /admin/users/{id}/ban`
   - 解封：`POST /admin/users/{id}/unban`
 
+- **所需权限**
+  - `admin.user.ban`
+
 - **请求体**
 
 ```json
@@ -187,6 +203,9 @@
 
 - **方法与路径**
   - `GET /admin/conversations`
+
+- **所需权限**
+  - `admin.conversation.read`
 
 - **请求参数（Query）**
 
@@ -251,6 +270,9 @@
 - **方法与路径**
   - `GET /admin/conversations/{id}/messages`
 
+- **所需权限**
+  - `admin.message.read`
+
 - **请求参数（Query）**
 
 | 名称        | 类型   | 必填 | 说明                       |
@@ -299,6 +321,9 @@
 - **方法与路径**
   - `GET /admin/config`
 
+- **所需权限**
+  - `admin.config.read`
+
 - **请求参数（Query）**
 
 | 名称        | 类型   | 必填 | 说明         |
@@ -329,6 +354,9 @@
 
 - **方法与路径**
   - `PUT /admin/config/{key}`
+
+- **所需权限**
+  - `admin.config.write`
 
 - **请求体**
 
@@ -361,4 +389,6 @@
   - `POST /admin/ops/replay`
 - 服务健康状态汇总：
   - `GET /admin/ops/health`
+
+> 运维类接口通常仅对拥有 `admin.ops.use` 或更高权限（如 `super_admin`）的用户开放，具体编码可在实现前进一步细化。
 

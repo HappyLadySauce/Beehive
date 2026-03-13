@@ -20,14 +20,14 @@ areas:
         notes: "WsEntry 已完成 HTTP→WebSocket 升级，Hub 维护 ConnID/UserID/DeviceID/GatewayID，读循环解析 Envelope 按 type 分发，presence.ping 已响应，auth 占位待集成"
       - id: gateway-auth-integration
         title: Gateway 与 AuthService 集成
-        status: pending
+        status: done
         service: gateway
         owner: ""
         tags: [gateway, auth, rpc]
         notes: "解析 auth.login/auth.tokenLogin 消息并调用 AuthService RPC，登录成功后绑定 userId"
       - id: gateway-presence-integration
         title: Gateway 与 PresenceService 集成
-        status: pending
+        status: in_progress
         service: gateway
         owner: ""
         tags: [gateway, presence, rpc]
@@ -37,7 +37,7 @@ areas:
     items:
       - id: auth-service
         title: 实现 AuthService 基础功能
-        status: pending
+        status: done
         service: auth
         proto: proto/auth.proto
         owner: ""
@@ -45,7 +45,7 @@ areas:
         notes: "登录/登出/Token 校验的最小可用实现（设计参考 docs/backend/services-design.md, docs/API/rpc-auth-presence-message-conversation.md）"
       - id: presence-service
         title: 实现 PresenceService 在线状态管理
-        status: pending
+        status: in_progress
         service: presence
         proto: proto/presence.proto
         owner: ""
@@ -75,4 +75,15 @@ areas:
         owner: ""
         tags: [user, db, rpc]
         notes: "基于 PostgreSQL（GORM）+ Redis（go-redis）实现 user_profiles 读写与缓存，提供 GetUser/BatchGetUsers/UpdateUser 能力（设计参考 docs/backend/services-design.md, docs/backend/storage-and-mq.md）"
+
+  - id: admin
+    name: 管理后台服务
+    items:
+      - id: admin-service
+        title: 设计与实现 AdminService（经 Gateway 暴露 HTTP 接口）
+        status: pending
+        service: admin
+        owner: ""
+        tags: [admin, gateway, http, auth, rbac]
+        notes: "AdminService 作为独立微服务，通过 Gateway 的 /admin/* HTTP 路由对外提供管理接口，内部依赖 User/Conversation/Message/Auth 等服务，并统一使用 AuthService 的 ValidateToken/CheckPermission 做认证与 RBAC（设计参考 docs/API/admin-http-api.md, docs/frontend/admin-app.md）"
 

@@ -8,8 +8,10 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/HappyLadySauce/Beehive/services/auth/authservice"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/svc"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/ws"
+	"github.com/HappyLadySauce/Beehive/services/presence/presenceservice"
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -59,10 +61,15 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 	case "presence.ping":
 		l.handlePresencePing(c, env)
 	case "auth.login", "auth.tokenLogin":
-		l.sendError(c, env.Tid, "internal_error", "auth not implemented yet")
+		l.handleAuth(c, env)
 	case "auth.logout":
-		l.sendError(c, env.Tid, "internal_error", "auth not implemented yet")
+		l.handleAuthLogout(c, env)
 	default:
+		// 所有非 auth.* 消息都要求连接已登录。
+		if c.UserID == "" {
+			l.sendError(c, env.Tid, "unauthorized", "user not logged in")
+			return
+		}
 		l.sendError(c, env.Tid, "bad_request", "unknown type: "+env.Type)
 	}
 }
@@ -84,4 +91,124 @@ func (l *WsEntryLogic) sendError(c *ws.Connection, tid, code, message string) {
 		Payload: nil,
 		Error:   &ws.ErrBody{Code: code, Message: message},
 	})
+}
+
+// handleAuth 处理 auth.login / auth.tokenLogin。
+func (l *WsEntryLogic) handleAuth(c *ws.Connection, env *ws.Envelope) {
+	switch env.Type {
+	case "auth.login":
+		var payload struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+			DeviceID string `json:"deviceId"`
+		}
+		if !l.bindJSONPayload(c, env, &payload) {
+			return
+		}
+		resp, err := l.svcCtx.AuthSvc.Login(l.ctx, &authservice.LoginRequest{
+			Username: payload.Username,
+			Password: payload.Password,
+			DeviceId: payload.DeviceID,
+		})
+		if err != nil {
+			l.sendError(c, env.Tid, "unauthorized", err.Error())
+			return
+		}
+		l.afterAuthSuccess(c, env, resp, payload.DeviceID)
+	case "auth.tokenLogin":
+		var payload struct {
+			AccessToken string `json:"accessToken"`
+			DeviceID    string `json:"deviceId"`
+		}
+		if !l.bindJSONPayload(c, env, &payload) {
+			return
+		}
+		resp, err := l.svcCtx.AuthSvc.TokenLogin(l.ctx, &authservice.TokenLoginRequest{
+			AccessToken: payload.AccessToken,
+			DeviceId:    payload.DeviceID,
+		})
+		if err != nil {
+			l.sendError(c, env.Tid, "unauthorized", err.Error())
+			return
+		}
+		l.afterAuthSuccess(c, env, resp, payload.DeviceID)
+	default:
+		l.sendError(c, env.Tid, "bad_request", "unsupported auth type")
+	}
+}
+
+// handleAuthLogout 处理 auth.logout。
+func (l *WsEntryLogic) handleAuthLogout(c *ws.Connection, env *ws.Envelope) {
+	var payload struct {
+		AccessToken string `json:"accessToken"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.AccessToken != "" {
+		_, _ = l.svcCtx.AuthSvc.Logout(l.ctx, &authservice.LogoutRequest{
+			AccessToken: payload.AccessToken,
+		})
+	}
+	if c.UserID != "" {
+		_, _ = l.svcCtx.PresenceSvc.UnregisterSession(l.ctx, &presenceservice.UnregisterSessionRequest{
+			UserId: c.UserID,
+			ConnId: c.ConnID,
+		})
+		c.BindUser("")
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "auth.logout.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{"ok": true},
+		Error:   nil,
+	})
+}
+
+// afterAuthSuccess 在登录或 tokenLogin 成功后绑定 UserID 并注册 Presence。
+func (l *WsEntryLogic) afterAuthSuccess(c *ws.Connection, env *ws.Envelope, resp *authservice.LoginResponse, deviceID string) {
+	if resp == nil || resp.UserId == "" {
+		l.sendError(c, env.Tid, "internal_error", "empty auth response")
+		return
+	}
+	c.BindUser(resp.UserId)
+	_, _ = l.svcCtx.PresenceSvc.RegisterSession(l.ctx, &presenceservice.RegisterSessionRequest{
+		UserId:     resp.UserId,
+		GatewayId:  l.svcCtx.Config.GatewayID,
+		ConnId:     c.ConnID,
+		DeviceId:   deviceID,
+		DeviceType: "", // 可根据实际需求从 Query 或 payload 补充
+		Ip:         "",
+	})
+	// 返回 auth.login.ok 或 auth.tokenLogin.ok
+	okType := env.Type + ".ok"
+	_ = c.WriteJSON(&ws.Envelope{
+		Type: okType,
+		Tid:  env.Tid,
+		Payload: map[string]any{
+			"userId":       resp.UserId,
+			"accessToken":  resp.AccessToken,
+			"refreshToken": resp.RefreshToken,
+			"expiresIn":    resp.ExpiresIn,
+		},
+		Error: nil,
+	})
+}
+
+// bindJSONPayload 将 Envelope.Payload 反序列化为给定结构体。
+func (l *WsEntryLogic) bindJSONPayload(c *ws.Connection, env *ws.Envelope, v interface{}) bool {
+	if env.Payload == nil {
+		l.sendError(c, env.Tid, "bad_request", "missing payload")
+		return false
+	}
+	raw, err := json.Marshal(env.Payload)
+	if err != nil {
+		l.sendError(c, env.Tid, "bad_request", "invalid payload format")
+		return false
+	}
+	if err := json.Unmarshal(raw, v); err != nil {
+		l.sendError(c, env.Tid, "bad_request", "invalid payload json")
+		return false
+	}
+	return true
 }

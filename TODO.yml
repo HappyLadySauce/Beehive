@@ -69,10 +69,10 @@ areas:
         notes: "会话元数据与成员关系管理，提供会话列表等能力（设计参考 docs/backend/services-design.md, docs/API/rpc-auth-presence-message-conversation.md）"
       - id: user-service
         title: 实现 UserService 用户 Profile 读写
-        status: pending
+        status: done
         service: user
         proto: proto/user.proto
         owner: ""
         tags: [user, db, rpc]
-        notes: "基础用户信息（昵称、头像、签名等）的读写能力（设计参考 docs/backend/services-design.md）"
+        notes: "基于 PostgreSQL（GORM）+ Redis（go-redis）实现 user_profiles 读写与缓存，提供 GetUser/BatchGetUsers/UpdateUser 能力（设计参考 docs/backend/services-design.md, docs/backend/storage-and-mq.md）"
 

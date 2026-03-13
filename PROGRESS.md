@@ -13,7 +13,7 @@
   - PresenceService：zrpc 骨架已生成，在线 Session 与 Redis 接入待实现（见 `TODO.yml` 中任务 `presence-service`）。
   - MessageService：zrpc 骨架已生成，消息持久化与 MQ 发布待实现（见 `TODO.yml` 中任务 `message-service`）。
   - ConversationService：zrpc 骨架已生成，会话/成员管理待实现（见 `TODO.yml` 中任务 `conversation-service`）。
-  - UserService：zrpc 骨架已生成，用户 Profile 读写待实现（见 `TODO.yml` 中任务 `user-service`）。
+  - UserService：zrpc 骨架已生成，用户 Profile 读写已实现（GetUser/BatchGetUsers/UpdateUser，见 `TODO.yml` 中任务 `user-service`）。
 
 ## 二、已完成工作
 
@@ -27,6 +27,10 @@
 - **Proto 与 zrpc 骨架**
   - `proto/auth.proto`, `proto/presence.proto`, `proto/message.proto`, `proto/conversation.proto`, `proto/user.proto` 已与 `docs/API/rpc-auth-presence-message-conversation.md` 对齐。
   - 使用 goctl 为以上服务生成了 zrpc 代码骨架：`services/auth`、`services/presence`、`services/message`、`services/conversation`、`services/user`。
+ - **UserService 用户 Profile 读写**（`user-service`）
+  - 数据层：在 `db/migrations/001_create_users_and_user_profiles.sql` 中创建 `users` / `user_profiles` 表；在 `internal/model` 中通过 GORM 定义 `User` / `UserProfile` 与 `UserProfileModel`（FindByID/FindByIDs/UpdateProfile）。
+  - 配置与依赖：`etc/user.yaml` / `etc/beehive.user.yaml` 配置 `PostgresDSN`、`RedisAddr`、`UserProfileTTLSeconds`；`ServiceContext` 初始化 GORM 与 go-redis 客户端，并注入 `UserProfileMod`。
+  - 逻辑层：`GetUser` 先读 Redis 缓存，miss 时查 PostgreSQL 并回写缓存；`BatchGetUsers` 使用 Redis MGet + PostgreSQL 批查 + Pipeline 回填缓存；`UpdateUser` 更新 `user_profiles` 并刷新对应缓存。
 
 ## 三、正在进行 / 阻塞项
 

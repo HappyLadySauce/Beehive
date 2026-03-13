@@ -13,11 +13,11 @@ areas:
         notes: "api/gateway.api 已定义 /ws、/healthz，goctl 已在 services/gateway 下生成骨架（设计参考 docs/backend/gateway-design.md, docs/API/websocket-client-api.md）"
       - id: gateway-ws-upgrade
         title: Gateway WebSocket 升级与连接管理
-        status: pending
+        status: done
         service: gateway
         owner: ""
         tags: [gateway, websocket]
-        notes: "在 WsEntry handler 中完成 HTTP→WebSocket 升级，维护连接与 ConnID，为按 type 路由 Envelope 做准备"
+        notes: "WsEntry 已完成 HTTP→WebSocket 升级，Hub 维护 ConnID/UserID/DeviceID/GatewayID，读循环解析 Envelope 按 type 分发，presence.ping 已响应，auth 占位待集成"
       - id: gateway-auth-integration
         title: Gateway 与 AuthService 集成
         status: pending

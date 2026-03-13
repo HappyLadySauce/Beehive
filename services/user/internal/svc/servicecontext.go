@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/HappyLadySauce/Beehive/services/user/internal/config"
+	"github.com/HappyLadySauce/Beehive/services/user/internal/model"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,8 +14,9 @@ import (
 type ServiceContext struct {
 	Config config.Config
 
-	DB    *gorm.DB
-	Redis *redis.Client
+	DB             *gorm.DB
+	Redis          *redis.Client
+	UserProfileMod *model.UserProfileModel
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -39,8 +41,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 
 	return &ServiceContext{
-		Config: c,
-		DB:     db,
-		Redis:  rdb,
+		Config:        c,
+		DB:            db,
+		Redis:         rdb,
+		UserProfileMod: model.NewUserProfileModel(db),
 	}
 }

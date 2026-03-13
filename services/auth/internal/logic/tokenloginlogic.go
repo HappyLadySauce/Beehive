@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 
 	"github.com/HappyLadySauce/Beehive/services/auth/internal/svc"
 	"github.com/HappyLadySauce/Beehive/services/auth/pb"
@@ -24,7 +25,22 @@ func NewTokenLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *TokenL
 }
 
 func (l *TokenLoginLogic) TokenLogin(in *pb.TokenLoginRequest) (*pb.LoginResponse, error) {
-	// todo: add your logic here and delete this line
+	if in.GetAccessToken() == "" {
+		return nil, errors.New("access_token is empty")
+	}
 
-	return &pb.LoginResponse{}, nil
+	userID, _, ttl, err := loadAndTouchToken(l.ctx, l.svcCtx.Redis, in.GetAccessToken())
+	if err != nil {
+		return nil, err
+	}
+	if userID == "" {
+		return nil, errors.New("token invalid")
+	}
+
+	return &pb.LoginResponse{
+		UserId:       userID,
+		AccessToken:  in.GetAccessToken(),
+		RefreshToken: "",
+		ExpiresIn:    int64(ttl.Seconds()),
+	}, nil
 }

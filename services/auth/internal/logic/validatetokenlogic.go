@@ -24,7 +24,26 @@ func NewValidateTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Val
 }
 
 func (l *ValidateTokenLogic) ValidateToken(in *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
-	// todo: add your logic here and delete this line
+	if in.GetAccessToken() == "" {
+		return &pb.ValidateTokenResponse{
+			Valid: false,
+			UserId: "",
+		}, nil
+	}
 
-	return &pb.ValidateTokenResponse{}, nil
+	userID, _, _, err := loadAndTouchToken(l.ctx, l.svcCtx.Redis, in.GetAccessToken())
+	if err != nil {
+		return nil, err
+	}
+	if userID == "" {
+		return &pb.ValidateTokenResponse{
+			Valid:  false,
+			UserId: "",
+		}, nil
+	}
+
+	return &pb.ValidateTokenResponse{
+		Valid:  true,
+		UserId: userID,
+	}, nil
 }

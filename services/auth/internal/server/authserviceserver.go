@@ -42,3 +42,21 @@ func (s *AuthServiceServer) Logout(ctx context.Context, in *pb.LogoutRequest) (*
 	l := logic.NewLogoutLogic(ctx, s.svcCtx)
 	return l.Logout(in)
 }
+
+// RBAC：查询用户系统级角色
+func (s *AuthServiceServer) GetUserRoles(ctx context.Context, in *pb.GetUserRolesRequest) (*pb.GetUserRolesResponse, error) {
+	l := logic.NewGetUserRolesLogic(ctx, s.svcCtx)
+	return l.GetUserRoles(in)
+}
+
+// RBAC：检查用户是否具备某个权限
+func (s *AuthServiceServer) CheckPermission(ctx context.Context, in *pb.CheckPermissionRequest) (*pb.CheckPermissionResponse, error) {
+	l := logic.NewCheckPermissionLogic(ctx, s.svcCtx)
+	return l.CheckPermission(in)
+}
+
+// RBAC（可选，对内/管理用途）：为用户设置角色
+func (s *AuthServiceServer) AssignRoles(ctx context.Context, in *pb.AssignRolesRequest) (*pb.AssignRolesResponse, error) {
+	l := logic.NewAssignRolesLogic(ctx, s.svcCtx)
+	return l.AssignRoles(in)
+}

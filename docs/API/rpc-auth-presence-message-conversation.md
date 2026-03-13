@@ -18,6 +18,12 @@ service AuthService {
   rpc TokenLogin(TokenLoginRequest) returns (LoginResponse);
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
   rpc Logout(LogoutRequest) returns (LogoutResponse);
+  // RBAC：查询用户系统级角色
+  rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse);
+  // RBAC：检查用户是否具备某个权限
+  rpc CheckPermission(CheckPermissionRequest) returns (CheckPermissionResponse);
+  // RBAC（可选，对内/管理用途）：为用户设置角色
+  rpc AssignRoles(AssignRolesRequest) returns (AssignRolesResponse);
 }
 ```
 
@@ -50,6 +56,48 @@ message ValidateTokenResponse {
   bool   valid = 1;
   string user_id = 2;
 }
+
+// RBAC：用户角色与权限
+
+// 约定若干系统级角色：
+// - user：普通用户，默认角色
+// - admin：管理员，可访问 Admin 后台的大部分只读接口
+// - super_admin：超级管理员，可进行封禁、配置变更等高危操作
+//
+// 权限使用字符串编码，按照「域.资源.动作」风格命名，例如：
+// - admin.user.read
+// - admin.user.ban
+// - admin.config.write
+
+message GetUserRolesRequest {
+  string user_id = 1;
+}
+
+message GetUserRolesResponse {
+  repeated string roles = 1;
+}
+
+message CheckPermissionRequest {
+  string user_id = 1;
+  string permission = 2;
+}
+
+message CheckPermissionResponse {
+  bool allowed = 1;
+}
+
+message AssignRolesRequest {
+  string user_id = 1;
+  // 完整覆盖式赋值：实现时建议先清空再写入
+  repeated string roles = 2;
+}
+
+message AssignRolesResponse {}
+
+> 集成建议：
+>
+> - Gateway 在处理需要管理权限的 WebSocket 操作前，可调用 `CheckPermission` 校验当前用户是否具备如 `admin.user.ban` 等权限；
+> - AdminHTTP 中间件在路由前统一调用 `ValidateToken` + `CheckPermission`，对不同路由绑定不同的权限编码。
 ```
 
 ---

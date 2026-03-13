@@ -120,7 +120,7 @@
 ### 5. 各服务与基础设施的关系汇总
 
 - **AuthService**
-  - PostgreSQL：`users` 等认证数据。
+  - PostgreSQL：`users` 等认证数据，以及系统级 RBAC 相关表（如 `roles` / `permissions` / `role_permissions` / `user_roles`）。
   - Redis：可缓存用户登录信息、黑名单等（可选）。
   - etcd：参与服务注册发现，获取其他依赖组件的地址（如配置中心自身也可使用 etcd 存储）。
 - **UserService**

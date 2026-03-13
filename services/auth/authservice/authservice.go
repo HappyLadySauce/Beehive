@@ -14,19 +14,31 @@ import (
 )
 
 type (
-	LoginRequest          = pb.LoginRequest
-	LoginResponse         = pb.LoginResponse
-	LogoutRequest         = pb.LogoutRequest
-	LogoutResponse        = pb.LogoutResponse
-	TokenLoginRequest     = pb.TokenLoginRequest
-	ValidateTokenRequest  = pb.ValidateTokenRequest
-	ValidateTokenResponse = pb.ValidateTokenResponse
+	AssignRolesRequest      = pb.AssignRolesRequest
+	AssignRolesResponse     = pb.AssignRolesResponse
+	CheckPermissionRequest  = pb.CheckPermissionRequest
+	CheckPermissionResponse = pb.CheckPermissionResponse
+	GetUserRolesRequest     = pb.GetUserRolesRequest
+	GetUserRolesResponse    = pb.GetUserRolesResponse
+	LoginRequest            = pb.LoginRequest
+	LoginResponse           = pb.LoginResponse
+	LogoutRequest           = pb.LogoutRequest
+	LogoutResponse          = pb.LogoutResponse
+	TokenLoginRequest       = pb.TokenLoginRequest
+	ValidateTokenRequest    = pb.ValidateTokenRequest
+	ValidateTokenResponse   = pb.ValidateTokenResponse
 
 	AuthService interface {
 		Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 		TokenLogin(ctx context.Context, in *TokenLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 		ValidateToken(ctx context.Context, in *ValidateTokenRequest, opts ...grpc.CallOption) (*ValidateTokenResponse, error)
 		Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+		// RBAC：查询用户系统级角色
+		GetUserRoles(ctx context.Context, in *GetUserRolesRequest, opts ...grpc.CallOption) (*GetUserRolesResponse, error)
+		// RBAC：检查用户是否具备某个权限
+		CheckPermission(ctx context.Context, in *CheckPermissionRequest, opts ...grpc.CallOption) (*CheckPermissionResponse, error)
+		// RBAC（可选，对内/管理用途）：为用户设置角色
+		AssignRoles(ctx context.Context, in *AssignRolesRequest, opts ...grpc.CallOption) (*AssignRolesResponse, error)
 	}
 
 	defaultAuthService struct {
@@ -58,4 +70,22 @@ func (m *defaultAuthService) ValidateToken(ctx context.Context, in *ValidateToke
 func (m *defaultAuthService) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
 	client := pb.NewAuthServiceClient(m.cli.Conn())
 	return client.Logout(ctx, in, opts...)
+}
+
+// RBAC：查询用户系统级角色
+func (m *defaultAuthService) GetUserRoles(ctx context.Context, in *GetUserRolesRequest, opts ...grpc.CallOption) (*GetUserRolesResponse, error) {
+	client := pb.NewAuthServiceClient(m.cli.Conn())
+	return client.GetUserRoles(ctx, in, opts...)
+}
+
+// RBAC：检查用户是否具备某个权限
+func (m *defaultAuthService) CheckPermission(ctx context.Context, in *CheckPermissionRequest, opts ...grpc.CallOption) (*CheckPermissionResponse, error) {
+	client := pb.NewAuthServiceClient(m.cli.Conn())
+	return client.CheckPermission(ctx, in, opts...)
+}
+
+// RBAC（可选，对内/管理用途）：为用户设置角色
+func (m *defaultAuthService) AssignRoles(ctx context.Context, in *AssignRolesRequest, opts ...grpc.CallOption) (*AssignRolesResponse, error) {
+	client := pb.NewAuthServiceClient(m.cli.Conn())
+	return client.AssignRoles(ctx, in, opts...)
 }

@@ -377,6 +377,279 @@ func (*LogoutResponse) Descriptor() ([]byte, []int) {
 	return file_proto_auth_proto_rawDescGZIP(), []int{6}
 }
 
+type GetUserRolesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserRolesRequest) Reset() {
+	*x = GetUserRolesRequest{}
+	mi := &file_proto_auth_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserRolesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserRolesRequest) ProtoMessage() {}
+
+func (x *GetUserRolesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_auth_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserRolesRequest.ProtoReflect.Descriptor instead.
+func (*GetUserRolesRequest) Descriptor() ([]byte, []int) {
+	return file_proto_auth_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetUserRolesRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type GetUserRolesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Roles         []string               `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserRolesResponse) Reset() {
+	*x = GetUserRolesResponse{}
+	mi := &file_proto_auth_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserRolesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserRolesResponse) ProtoMessage() {}
+
+func (x *GetUserRolesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_auth_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserRolesResponse.ProtoReflect.Descriptor instead.
+func (*GetUserRolesResponse) Descriptor() ([]byte, []int) {
+	return file_proto_auth_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetUserRolesResponse) GetRoles() []string {
+	if x != nil {
+		return x.Roles
+	}
+	return nil
+}
+
+type CheckPermissionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Permission    string                 `protobuf:"bytes,2,opt,name=permission,proto3" json:"permission,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckPermissionRequest) Reset() {
+	*x = CheckPermissionRequest{}
+	mi := &file_proto_auth_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckPermissionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckPermissionRequest) ProtoMessage() {}
+
+func (x *CheckPermissionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_auth_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckPermissionRequest.ProtoReflect.Descriptor instead.
+func (*CheckPermissionRequest) Descriptor() ([]byte, []int) {
+	return file_proto_auth_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *CheckPermissionRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *CheckPermissionRequest) GetPermission() string {
+	if x != nil {
+		return x.Permission
+	}
+	return ""
+}
+
+type CheckPermissionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Allowed       bool                   `protobuf:"varint,1,opt,name=allowed,proto3" json:"allowed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckPermissionResponse) Reset() {
+	*x = CheckPermissionResponse{}
+	mi := &file_proto_auth_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckPermissionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckPermissionResponse) ProtoMessage() {}
+
+func (x *CheckPermissionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_auth_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckPermissionResponse.ProtoReflect.Descriptor instead.
+func (*CheckPermissionResponse) Descriptor() ([]byte, []int) {
+	return file_proto_auth_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *CheckPermissionResponse) GetAllowed() bool {
+	if x != nil {
+		return x.Allowed
+	}
+	return false
+}
+
+type AssignRolesRequest struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	UserId string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// 完整覆盖式赋值：实现时建议先清空再写入
+	Roles         []string `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AssignRolesRequest) Reset() {
+	*x = AssignRolesRequest{}
+	mi := &file_proto_auth_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AssignRolesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AssignRolesRequest) ProtoMessage() {}
+
+func (x *AssignRolesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_auth_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AssignRolesRequest.ProtoReflect.Descriptor instead.
+func (*AssignRolesRequest) Descriptor() ([]byte, []int) {
+	return file_proto_auth_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *AssignRolesRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *AssignRolesRequest) GetRoles() []string {
+	if x != nil {
+		return x.Roles
+	}
+	return nil
+}
+
+type AssignRolesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AssignRolesResponse) Reset() {
+	*x = AssignRolesResponse{}
+	mi := &file_proto_auth_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AssignRolesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AssignRolesResponse) ProtoMessage() {}
+
+func (x *AssignRolesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_auth_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AssignRolesResponse.ProtoReflect.Descriptor instead.
+func (*AssignRolesResponse) Descriptor() ([]byte, []int) {
+	return file_proto_auth_proto_rawDescGZIP(), []int{12}
+}
+
 var File_proto_auth_proto protoreflect.FileDescriptor
 
 const file_proto_auth_proto_rawDesc = "" +
@@ -402,13 +675,31 @@ const file_proto_auth_proto_rawDesc = "" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"2\n" +
 	"\rLogoutRequest\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"\x10\n" +
-	"\x0eLogoutResponse2\xba\x02\n" +
+	"\x0eLogoutResponse\".\n" +
+	"\x13GetUserRolesRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\",\n" +
+	"\x14GetUserRolesResponse\x12\x14\n" +
+	"\x05roles\x18\x01 \x03(\tR\x05roles\"Q\n" +
+	"\x16CheckPermissionRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1e\n" +
+	"\n" +
+	"permission\x18\x02 \x01(\tR\n" +
+	"permission\"3\n" +
+	"\x17CheckPermissionResponse\x12\x18\n" +
+	"\aallowed\x18\x01 \x01(\bR\aallowed\"C\n" +
+	"\x12AssignRolesRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
+	"\x05roles\x18\x02 \x03(\tR\x05roles\"\x15\n" +
+	"\x13AssignRolesResponse2\xc5\x04\n" +
 	"\vAuthService\x12@\n" +
 	"\x05Login\x12\x1a.beehive.auth.LoginRequest\x1a\x1b.beehive.auth.LoginResponse\x12J\n" +
 	"\n" +
 	"TokenLogin\x12\x1f.beehive.auth.TokenLoginRequest\x1a\x1b.beehive.auth.LoginResponse\x12X\n" +
 	"\rValidateToken\x12\".beehive.auth.ValidateTokenRequest\x1a#.beehive.auth.ValidateTokenResponse\x12C\n" +
-	"\x06Logout\x12\x1b.beehive.auth.LogoutRequest\x1a\x1c.beehive.auth.LogoutResponseB\x14Z\x12./services/auth/pbb\x06proto3"
+	"\x06Logout\x12\x1b.beehive.auth.LogoutRequest\x1a\x1c.beehive.auth.LogoutResponse\x12U\n" +
+	"\fGetUserRoles\x12!.beehive.auth.GetUserRolesRequest\x1a\".beehive.auth.GetUserRolesResponse\x12^\n" +
+	"\x0fCheckPermission\x12$.beehive.auth.CheckPermissionRequest\x1a%.beehive.auth.CheckPermissionResponse\x12R\n" +
+	"\vAssignRoles\x12 .beehive.auth.AssignRolesRequest\x1a!.beehive.auth.AssignRolesResponseB\x14Z\x12./services/auth/pbb\x06proto3"
 
 var (
 	file_proto_auth_proto_rawDescOnce sync.Once
@@ -422,30 +713,42 @@ func file_proto_auth_proto_rawDescGZIP() []byte {
 	return file_proto_auth_proto_rawDescData
 }
 
-var file_proto_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_proto_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_proto_auth_proto_goTypes = []any{
-	(*LoginRequest)(nil),          // 0: beehive.auth.LoginRequest
-	(*LoginResponse)(nil),         // 1: beehive.auth.LoginResponse
-	(*TokenLoginRequest)(nil),     // 2: beehive.auth.TokenLoginRequest
-	(*ValidateTokenRequest)(nil),  // 3: beehive.auth.ValidateTokenRequest
-	(*ValidateTokenResponse)(nil), // 4: beehive.auth.ValidateTokenResponse
-	(*LogoutRequest)(nil),         // 5: beehive.auth.LogoutRequest
-	(*LogoutResponse)(nil),        // 6: beehive.auth.LogoutResponse
+	(*LoginRequest)(nil),            // 0: beehive.auth.LoginRequest
+	(*LoginResponse)(nil),           // 1: beehive.auth.LoginResponse
+	(*TokenLoginRequest)(nil),       // 2: beehive.auth.TokenLoginRequest
+	(*ValidateTokenRequest)(nil),    // 3: beehive.auth.ValidateTokenRequest
+	(*ValidateTokenResponse)(nil),   // 4: beehive.auth.ValidateTokenResponse
+	(*LogoutRequest)(nil),           // 5: beehive.auth.LogoutRequest
+	(*LogoutResponse)(nil),          // 6: beehive.auth.LogoutResponse
+	(*GetUserRolesRequest)(nil),     // 7: beehive.auth.GetUserRolesRequest
+	(*GetUserRolesResponse)(nil),    // 8: beehive.auth.GetUserRolesResponse
+	(*CheckPermissionRequest)(nil),  // 9: beehive.auth.CheckPermissionRequest
+	(*CheckPermissionResponse)(nil), // 10: beehive.auth.CheckPermissionResponse
+	(*AssignRolesRequest)(nil),      // 11: beehive.auth.AssignRolesRequest
+	(*AssignRolesResponse)(nil),     // 12: beehive.auth.AssignRolesResponse
 }
 var file_proto_auth_proto_depIdxs = []int32{
-	0, // 0: beehive.auth.AuthService.Login:input_type -> beehive.auth.LoginRequest
-	2, // 1: beehive.auth.AuthService.TokenLogin:input_type -> beehive.auth.TokenLoginRequest
-	3, // 2: beehive.auth.AuthService.ValidateToken:input_type -> beehive.auth.ValidateTokenRequest
-	5, // 3: beehive.auth.AuthService.Logout:input_type -> beehive.auth.LogoutRequest
-	1, // 4: beehive.auth.AuthService.Login:output_type -> beehive.auth.LoginResponse
-	1, // 5: beehive.auth.AuthService.TokenLogin:output_type -> beehive.auth.LoginResponse
-	4, // 6: beehive.auth.AuthService.ValidateToken:output_type -> beehive.auth.ValidateTokenResponse
-	6, // 7: beehive.auth.AuthService.Logout:output_type -> beehive.auth.LogoutResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: beehive.auth.AuthService.Login:input_type -> beehive.auth.LoginRequest
+	2,  // 1: beehive.auth.AuthService.TokenLogin:input_type -> beehive.auth.TokenLoginRequest
+	3,  // 2: beehive.auth.AuthService.ValidateToken:input_type -> beehive.auth.ValidateTokenRequest
+	5,  // 3: beehive.auth.AuthService.Logout:input_type -> beehive.auth.LogoutRequest
+	7,  // 4: beehive.auth.AuthService.GetUserRoles:input_type -> beehive.auth.GetUserRolesRequest
+	9,  // 5: beehive.auth.AuthService.CheckPermission:input_type -> beehive.auth.CheckPermissionRequest
+	11, // 6: beehive.auth.AuthService.AssignRoles:input_type -> beehive.auth.AssignRolesRequest
+	1,  // 7: beehive.auth.AuthService.Login:output_type -> beehive.auth.LoginResponse
+	1,  // 8: beehive.auth.AuthService.TokenLogin:output_type -> beehive.auth.LoginResponse
+	4,  // 9: beehive.auth.AuthService.ValidateToken:output_type -> beehive.auth.ValidateTokenResponse
+	6,  // 10: beehive.auth.AuthService.Logout:output_type -> beehive.auth.LogoutResponse
+	8,  // 11: beehive.auth.AuthService.GetUserRoles:output_type -> beehive.auth.GetUserRolesResponse
+	10, // 12: beehive.auth.AuthService.CheckPermission:output_type -> beehive.auth.CheckPermissionResponse
+	12, // 13: beehive.auth.AuthService.AssignRoles:output_type -> beehive.auth.AssignRolesResponse
+	7,  // [7:14] is the sub-list for method output_type
+	0,  // [0:7] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_proto_auth_proto_init() }
@@ -459,7 +762,7 @@ func file_proto_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_auth_proto_rawDesc), len(file_proto_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

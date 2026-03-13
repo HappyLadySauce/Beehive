@@ -11,6 +11,7 @@
 - 用户登录/登出、注册（可选）。
 - 访问令牌（accessToken）与刷新令牌（refreshToken）的签发与校验。
 - 提供用户认证相关的统一入口给 Gateway 和其他内部服务。
+- 维护系统级用户角色（如 user/admin/super_admin）与权限映射，并对外提供权限校验能力（RBAC）。
 
 **核心接口（示意）**
 
@@ -23,6 +24,7 @@
 
 - PostgreSQL：`users` 表（账号、密码哈希、状态等）。
 - 可使用 Redis 做登录状态或黑名单缓存。
+- PostgreSQL：RBAC 相关表（如 `roles` / `permissions` / `role_permissions` / `user_roles`），仅用于系统级角色与权限，不与会话内角色混用。
 
 ---
 

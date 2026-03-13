@@ -9,6 +9,12 @@ service AuthService {
   rpc TokenLogin(TokenLoginRequest) returns (LoginResponse);
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
   rpc Logout(LogoutRequest) returns (LogoutResponse);
+  // RBAC：查询用户系统级角色
+  rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse);
+  // RBAC：检查用户是否具备某个权限
+  rpc CheckPermission(CheckPermissionRequest) returns (CheckPermissionResponse);
+  // RBAC（可选，对内/管理用途）：为用户设置角色
+  rpc AssignRoles(AssignRolesRequest) returns (AssignRolesResponse);
 }
 
 message LoginRequest {
@@ -43,4 +49,31 @@ message LogoutRequest {
 }
 
 message LogoutResponse {}
+
+// RBAC：用户角色与权限
+
+message GetUserRolesRequest {
+  string user_id = 1;
+}
+
+message GetUserRolesResponse {
+  repeated string roles = 1;
+}
+
+message CheckPermissionRequest {
+  string user_id = 1;
+  string permission = 2;
+}
+
+message CheckPermissionResponse {
+  bool allowed = 1;
+}
+
+message AssignRolesRequest {
+  string user_id = 1;
+  // 完整覆盖式赋值：实现时建议先清空再写入
+  repeated string roles = 2;
+}
+
+message AssignRolesResponse {}
 

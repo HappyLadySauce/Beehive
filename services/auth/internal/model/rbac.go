@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -109,6 +110,22 @@ func (m *RBACModel) ReplaceUserRoles(ctx context.Context, userID string, roleNam
 	if err := tx.Where("name IN ?", roleNames).Find(&roles).Error; err != nil {
 		tx.Rollback()
 		return err
+	}
+
+	// 确保所有传入的角色名称都存在，否则回滚并返回错误，避免静默丢失角色。
+	found := make(map[string]struct{}, len(roles))
+	for _, r := range roles {
+		found[r.Name] = struct{}{}
+	}
+	var missing []string
+	for _, name := range roleNames {
+		if _, ok := found[name]; !ok {
+			missing = append(missing, name)
+		}
+	}
+	if len(missing) > 0 {
+		tx.Rollback()
+		return fmt.Errorf("roles not found: %v", missing)
 	}
 
 	now := time.Now()

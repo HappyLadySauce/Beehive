@@ -1,0 +1,32 @@
+syntax = "v1"
+
+info (
+	title: "Beehive Gateway API"
+	desc:  "WebSocket 网关入口与健康检查，WebSocket 消息协议详见 docs/API/websocket-client-api.md。"
+)
+
+type (
+	HealthResp {
+		Code    int64  `json:"code"`
+		Message string `json:"message"`
+	}
+)
+
+@server (
+	name:  gateway
+	group: gateway
+)
+service gateway-api {
+	// WebSocket 入口，仅用于 HTTP -> WebSocket 升级。
+	// 连接建立后，客户端需按照 docs/API/websocket-client-api.md 中的 Envelope 协议
+	// 发送 auth.tokenLogin / auth.login 等消息完成认证。
+	@doc "WebSocket entrypoint. See docs/API/websocket-client-api.md for JSON message envelope {type, tid, payload, error}."
+	@handler WsEntry
+	get /ws
+
+	// 健康检查接口，用于 K8s/运维探活。
+	@doc "Health check endpoint for gateway service."
+	@handler Health
+	get /healthz returns (HealthResp)
+}
+

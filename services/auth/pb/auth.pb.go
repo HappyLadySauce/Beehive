@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: proto/auth.proto
 
-package authpb
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -408,7 +408,7 @@ const file_proto_auth_proto_rawDesc = "" +
 	"\n" +
 	"TokenLogin\x12\x1f.beehive.auth.TokenLoginRequest\x1a\x1b.beehive.auth.LoginResponse\x12X\n" +
 	"\rValidateToken\x12\".beehive.auth.ValidateTokenRequest\x1a#.beehive.auth.ValidateTokenResponse\x12C\n" +
-	"\x06Logout\x12\x1b.beehive.auth.LogoutRequest\x1a\x1c.beehive.auth.LogoutResponseB\x19Z\x17services/auth/pb;authpbb\x06proto3"
+	"\x06Logout\x12\x1b.beehive.auth.LogoutRequest\x1a\x1c.beehive.auth.LogoutResponseB\x14Z\x12./services/auth/pbb\x06proto3"
 
 var (
 	file_proto_auth_proto_rawDescOnce sync.Once

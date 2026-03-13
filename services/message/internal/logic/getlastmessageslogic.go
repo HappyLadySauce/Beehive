@@ -23,8 +23,8 @@ func NewGetLastMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 	}
 }
 
-func (l *GetLastMessagesLogic) GetLastMessages(in *pb_messagepb.GetLastMessagesRequest) (*pb_messagepb.GetLastMessagesResponse, error) {
+func (l *GetLastMessagesLogic) GetLastMessages(in *pb.GetLastMessagesRequest) (*pb.GetLastMessagesResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_messagepb.GetLastMessagesResponse{}, nil
+	return &pb.GetLastMessagesResponse{}, nil
 }

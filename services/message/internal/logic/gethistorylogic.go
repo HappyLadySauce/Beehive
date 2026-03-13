@@ -23,8 +23,8 @@ func NewGetHistoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetHis
 	}
 }
 
-func (l *GetHistoryLogic) GetHistory(in *pb_messagepb.GetHistoryRequest) (*pb_messagepb.GetHistoryResponse, error) {
+func (l *GetHistoryLogic) GetHistory(in *pb.GetHistoryRequest) (*pb.GetHistoryResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_messagepb.GetHistoryResponse{}, nil
+	return &pb.GetHistoryResponse{}, nil
 }

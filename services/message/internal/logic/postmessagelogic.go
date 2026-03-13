@@ -23,8 +23,8 @@ func NewPostMessageLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PostM
 	}
 }
 
-func (l *PostMessageLogic) PostMessage(in *pb_messagepb.PostMessageRequest) (*pb_messagepb.PostMessageResponse, error) {
+func (l *PostMessageLogic) PostMessage(in *pb.PostMessageRequest) (*pb.PostMessageResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_messagepb.PostMessageResponse{}, nil
+	return &pb.PostMessageResponse{}, nil
 }

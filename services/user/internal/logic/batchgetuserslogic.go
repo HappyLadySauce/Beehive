@@ -23,8 +23,8 @@ func NewBatchGetUsersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Bat
 	}
 }
 
-func (l *BatchGetUsersLogic) BatchGetUsers(in *pb_userpb.BatchGetUsersRequest) (*pb_userpb.BatchGetUsersResponse, error) {
+func (l *BatchGetUsersLogic) BatchGetUsers(in *pb.BatchGetUsersRequest) (*pb.BatchGetUsersResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_userpb.BatchGetUsersResponse{}, nil
+	return &pb.BatchGetUsersResponse{}, nil
 }

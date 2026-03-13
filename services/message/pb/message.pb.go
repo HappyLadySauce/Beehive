@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: proto/message.proto
 
-package messagepb
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -543,7 +543,7 @@ const file_proto_message_proto_rawDesc = "" +
 	"\vPostMessage\x12#.beehive.message.PostMessageRequest\x1a$.beehive.message.PostMessageResponse\x12U\n" +
 	"\n" +
 	"GetHistory\x12\".beehive.message.GetHistoryRequest\x1a#.beehive.message.GetHistoryResponse\x12d\n" +
-	"\x0fGetLastMessages\x12'.beehive.message.GetLastMessagesRequest\x1a(.beehive.message.GetLastMessagesResponseB\x1fZ\x1dservices/message/pb;messagepbb\x06proto3"
+	"\x0fGetLastMessages\x12'.beehive.message.GetLastMessagesRequest\x1a(.beehive.message.GetLastMessagesResponseB\x17Z\x15./services/message/pbb\x06proto3"
 
 var (
 	file_proto_message_proto_rawDescOnce sync.Once

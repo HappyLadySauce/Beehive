@@ -23,8 +23,8 @@ func NewGetOnlineSessionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *GetOnlineSessionsLogic) GetOnlineSessions(in *pb_presencepb.GetOnlineSessionsRequest) (*pb_presencepb.GetOnlineSessionsResponse, error) {
+func (l *GetOnlineSessionsLogic) GetOnlineSessions(in *pb.GetOnlineSessionsRequest) (*pb.GetOnlineSessionsResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_presencepb.GetOnlineSessionsResponse{}, nil
+	return &pb.GetOnlineSessionsResponse{}, nil
 }

@@ -14,17 +14,17 @@ import (
 )
 
 type (
-	GetOnlineSessionsRequest  = pb_presencepb.GetOnlineSessionsRequest
-	GetOnlineSessionsResponse = pb_presencepb.GetOnlineSessionsResponse
-	GetUserPresenceRequest    = pb_presencepb.GetUserPresenceRequest
-	GetUserPresenceResponse   = pb_presencepb.GetUserPresenceResponse
-	RefreshSessionRequest     = pb_presencepb.RefreshSessionRequest
-	RefreshSessionResponse    = pb_presencepb.RefreshSessionResponse
-	RegisterSessionRequest    = pb_presencepb.RegisterSessionRequest
-	RegisterSessionResponse   = pb_presencepb.RegisterSessionResponse
-	SessionInfo               = pb_presencepb.SessionInfo
-	UnregisterSessionRequest  = pb_presencepb.UnregisterSessionRequest
-	UnregisterSessionResponse = pb_presencepb.UnregisterSessionResponse
+	GetOnlineSessionsRequest  = pb.GetOnlineSessionsRequest
+	GetOnlineSessionsResponse = pb.GetOnlineSessionsResponse
+	GetUserPresenceRequest    = pb.GetUserPresenceRequest
+	GetUserPresenceResponse   = pb.GetUserPresenceResponse
+	RefreshSessionRequest     = pb.RefreshSessionRequest
+	RefreshSessionResponse    = pb.RefreshSessionResponse
+	RegisterSessionRequest    = pb.RegisterSessionRequest
+	RegisterSessionResponse   = pb.RegisterSessionResponse
+	SessionInfo               = pb.SessionInfo
+	UnregisterSessionRequest  = pb.UnregisterSessionRequest
+	UnregisterSessionResponse = pb.UnregisterSessionResponse
 
 	PresenceService interface {
 		RegisterSession(ctx context.Context, in *RegisterSessionRequest, opts ...grpc.CallOption) (*RegisterSessionResponse, error)
@@ -46,26 +46,26 @@ func NewPresenceService(cli zrpc.Client) PresenceService {
 }
 
 func (m *defaultPresenceService) RegisterSession(ctx context.Context, in *RegisterSessionRequest, opts ...grpc.CallOption) (*RegisterSessionResponse, error) {
-	client := pb_presencepb.NewPresenceServiceClient(m.cli.Conn())
+	client := pb.NewPresenceServiceClient(m.cli.Conn())
 	return client.RegisterSession(ctx, in, opts...)
 }
 
 func (m *defaultPresenceService) UnregisterSession(ctx context.Context, in *UnregisterSessionRequest, opts ...grpc.CallOption) (*UnregisterSessionResponse, error) {
-	client := pb_presencepb.NewPresenceServiceClient(m.cli.Conn())
+	client := pb.NewPresenceServiceClient(m.cli.Conn())
 	return client.UnregisterSession(ctx, in, opts...)
 }
 
 func (m *defaultPresenceService) RefreshSession(ctx context.Context, in *RefreshSessionRequest, opts ...grpc.CallOption) (*RefreshSessionResponse, error) {
-	client := pb_presencepb.NewPresenceServiceClient(m.cli.Conn())
+	client := pb.NewPresenceServiceClient(m.cli.Conn())
 	return client.RefreshSession(ctx, in, opts...)
 }
 
 func (m *defaultPresenceService) GetOnlineSessions(ctx context.Context, in *GetOnlineSessionsRequest, opts ...grpc.CallOption) (*GetOnlineSessionsResponse, error) {
-	client := pb_presencepb.NewPresenceServiceClient(m.cli.Conn())
+	client := pb.NewPresenceServiceClient(m.cli.Conn())
 	return client.GetOnlineSessions(ctx, in, opts...)
 }
 
 func (m *defaultPresenceService) GetUserPresence(ctx context.Context, in *GetUserPresenceRequest, opts ...grpc.CallOption) (*GetUserPresenceResponse, error) {
-	client := pb_presencepb.NewPresenceServiceClient(m.cli.Conn())
+	client := pb.NewPresenceServiceClient(m.cli.Conn())
 	return client.GetUserPresence(ctx, in, opts...)
 }

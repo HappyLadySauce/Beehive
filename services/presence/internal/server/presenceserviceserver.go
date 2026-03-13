@@ -14,7 +14,7 @@ import (
 
 type PresenceServiceServer struct {
 	svcCtx *svc.ServiceContext
-	pb_presencepb.UnimplementedPresenceServiceServer
+	pb.UnimplementedPresenceServiceServer
 }
 
 func NewPresenceServiceServer(svcCtx *svc.ServiceContext) *PresenceServiceServer {
@@ -23,27 +23,27 @@ func NewPresenceServiceServer(svcCtx *svc.ServiceContext) *PresenceServiceServer
 	}
 }
 
-func (s *PresenceServiceServer) RegisterSession(ctx context.Context, in *pb_presencepb.RegisterSessionRequest) (*pb_presencepb.RegisterSessionResponse, error) {
+func (s *PresenceServiceServer) RegisterSession(ctx context.Context, in *pb.RegisterSessionRequest) (*pb.RegisterSessionResponse, error) {
 	l := logic.NewRegisterSessionLogic(ctx, s.svcCtx)
 	return l.RegisterSession(in)
 }
 
-func (s *PresenceServiceServer) UnregisterSession(ctx context.Context, in *pb_presencepb.UnregisterSessionRequest) (*pb_presencepb.UnregisterSessionResponse, error) {
+func (s *PresenceServiceServer) UnregisterSession(ctx context.Context, in *pb.UnregisterSessionRequest) (*pb.UnregisterSessionResponse, error) {
 	l := logic.NewUnregisterSessionLogic(ctx, s.svcCtx)
 	return l.UnregisterSession(in)
 }
 
-func (s *PresenceServiceServer) RefreshSession(ctx context.Context, in *pb_presencepb.RefreshSessionRequest) (*pb_presencepb.RefreshSessionResponse, error) {
+func (s *PresenceServiceServer) RefreshSession(ctx context.Context, in *pb.RefreshSessionRequest) (*pb.RefreshSessionResponse, error) {
 	l := logic.NewRefreshSessionLogic(ctx, s.svcCtx)
 	return l.RefreshSession(in)
 }
 
-func (s *PresenceServiceServer) GetOnlineSessions(ctx context.Context, in *pb_presencepb.GetOnlineSessionsRequest) (*pb_presencepb.GetOnlineSessionsResponse, error) {
+func (s *PresenceServiceServer) GetOnlineSessions(ctx context.Context, in *pb.GetOnlineSessionsRequest) (*pb.GetOnlineSessionsResponse, error) {
 	l := logic.NewGetOnlineSessionsLogic(ctx, s.svcCtx)
 	return l.GetOnlineSessions(in)
 }
 
-func (s *PresenceServiceServer) GetUserPresence(ctx context.Context, in *pb_presencepb.GetUserPresenceRequest) (*pb_presencepb.GetUserPresenceResponse, error) {
+func (s *PresenceServiceServer) GetUserPresence(ctx context.Context, in *pb.GetUserPresenceRequest) (*pb.GetUserPresenceResponse, error) {
 	l := logic.NewGetUserPresenceLogic(ctx, s.svcCtx)
 	return l.GetUserPresence(in)
 }

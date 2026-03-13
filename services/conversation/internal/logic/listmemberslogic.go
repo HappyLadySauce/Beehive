@@ -23,8 +23,8 @@ func NewListMembersLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListM
 	}
 }
 
-func (l *ListMembersLogic) ListMembers(in *pb_conversationpb.ListMembersRequest) (*pb_conversationpb.ListMembersResponse, error) {
+func (l *ListMembersLogic) ListMembers(in *pb.ListMembersRequest) (*pb.ListMembersResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_conversationpb.ListMembersResponse{}, nil
+	return &pb.ListMembersResponse{}, nil
 }

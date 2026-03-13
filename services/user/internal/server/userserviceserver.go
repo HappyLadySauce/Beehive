@@ -14,7 +14,7 @@ import (
 
 type UserServiceServer struct {
 	svcCtx *svc.ServiceContext
-	pb_userpb.UnimplementedUserServiceServer
+	pb.UnimplementedUserServiceServer
 }
 
 func NewUserServiceServer(svcCtx *svc.ServiceContext) *UserServiceServer {
@@ -23,17 +23,17 @@ func NewUserServiceServer(svcCtx *svc.ServiceContext) *UserServiceServer {
 	}
 }
 
-func (s *UserServiceServer) GetUser(ctx context.Context, in *pb_userpb.GetUserRequest) (*pb_userpb.GetUserResponse, error) {
+func (s *UserServiceServer) GetUser(ctx context.Context, in *pb.GetUserRequest) (*pb.GetUserResponse, error) {
 	l := logic.NewGetUserLogic(ctx, s.svcCtx)
 	return l.GetUser(in)
 }
 
-func (s *UserServiceServer) BatchGetUsers(ctx context.Context, in *pb_userpb.BatchGetUsersRequest) (*pb_userpb.BatchGetUsersResponse, error) {
+func (s *UserServiceServer) BatchGetUsers(ctx context.Context, in *pb.BatchGetUsersRequest) (*pb.BatchGetUsersResponse, error) {
 	l := logic.NewBatchGetUsersLogic(ctx, s.svcCtx)
 	return l.BatchGetUsers(in)
 }
 
-func (s *UserServiceServer) UpdateUser(ctx context.Context, in *pb_userpb.UpdateUserRequest) (*pb_userpb.UpdateUserResponse, error) {
+func (s *UserServiceServer) UpdateUser(ctx context.Context, in *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
 	l := logic.NewUpdateUserLogic(ctx, s.svcCtx)
 	return l.UpdateUser(in)
 }

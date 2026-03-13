@@ -14,7 +14,7 @@ import (
 
 type ConversationServiceServer struct {
 	svcCtx *svc.ServiceContext
-	pb_conversationpb.UnimplementedConversationServiceServer
+	pb.UnimplementedConversationServiceServer
 }
 
 func NewConversationServiceServer(svcCtx *svc.ServiceContext) *ConversationServiceServer {
@@ -23,32 +23,32 @@ func NewConversationServiceServer(svcCtx *svc.ServiceContext) *ConversationServi
 	}
 }
 
-func (s *ConversationServiceServer) CreateConversation(ctx context.Context, in *pb_conversationpb.CreateConversationRequest) (*pb_conversationpb.CreateConversationResponse, error) {
+func (s *ConversationServiceServer) CreateConversation(ctx context.Context, in *pb.CreateConversationRequest) (*pb.CreateConversationResponse, error) {
 	l := logic.NewCreateConversationLogic(ctx, s.svcCtx)
 	return l.CreateConversation(in)
 }
 
-func (s *ConversationServiceServer) AddMember(ctx context.Context, in *pb_conversationpb.AddMemberRequest) (*pb_conversationpb.AddMemberResponse, error) {
+func (s *ConversationServiceServer) AddMember(ctx context.Context, in *pb.AddMemberRequest) (*pb.AddMemberResponse, error) {
 	l := logic.NewAddMemberLogic(ctx, s.svcCtx)
 	return l.AddMember(in)
 }
 
-func (s *ConversationServiceServer) RemoveMember(ctx context.Context, in *pb_conversationpb.RemoveMemberRequest) (*pb_conversationpb.RemoveMemberResponse, error) {
+func (s *ConversationServiceServer) RemoveMember(ctx context.Context, in *pb.RemoveMemberRequest) (*pb.RemoveMemberResponse, error) {
 	l := logic.NewRemoveMemberLogic(ctx, s.svcCtx)
 	return l.RemoveMember(in)
 }
 
-func (s *ConversationServiceServer) ListUserConversations(ctx context.Context, in *pb_conversationpb.ListUserConversationsRequest) (*pb_conversationpb.ListUserConversationsResponse, error) {
+func (s *ConversationServiceServer) ListUserConversations(ctx context.Context, in *pb.ListUserConversationsRequest) (*pb.ListUserConversationsResponse, error) {
 	l := logic.NewListUserConversationsLogic(ctx, s.svcCtx)
 	return l.ListUserConversations(in)
 }
 
-func (s *ConversationServiceServer) GetConversation(ctx context.Context, in *pb_conversationpb.GetConversationRequest) (*pb_conversationpb.GetConversationResponse, error) {
+func (s *ConversationServiceServer) GetConversation(ctx context.Context, in *pb.GetConversationRequest) (*pb.GetConversationResponse, error) {
 	l := logic.NewGetConversationLogic(ctx, s.svcCtx)
 	return l.GetConversation(in)
 }
 
-func (s *ConversationServiceServer) ListMembers(ctx context.Context, in *pb_conversationpb.ListMembersRequest) (*pb_conversationpb.ListMembersResponse, error) {
+func (s *ConversationServiceServer) ListMembers(ctx context.Context, in *pb.ListMembersRequest) (*pb.ListMembersResponse, error) {
 	l := logic.NewListMembersLogic(ctx, s.svcCtx)
 	return l.ListMembers(in)
 }

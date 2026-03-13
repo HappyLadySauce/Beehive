@@ -14,7 +14,7 @@ import (
 
 type AuthServiceServer struct {
 	svcCtx *svc.ServiceContext
-	pb_authpb.UnimplementedAuthServiceServer
+	pb.UnimplementedAuthServiceServer
 }
 
 func NewAuthServiceServer(svcCtx *svc.ServiceContext) *AuthServiceServer {
@@ -23,22 +23,22 @@ func NewAuthServiceServer(svcCtx *svc.ServiceContext) *AuthServiceServer {
 	}
 }
 
-func (s *AuthServiceServer) Login(ctx context.Context, in *pb_authpb.LoginRequest) (*pb_authpb.LoginResponse, error) {
+func (s *AuthServiceServer) Login(ctx context.Context, in *pb.LoginRequest) (*pb.LoginResponse, error) {
 	l := logic.NewLoginLogic(ctx, s.svcCtx)
 	return l.Login(in)
 }
 
-func (s *AuthServiceServer) TokenLogin(ctx context.Context, in *pb_authpb.TokenLoginRequest) (*pb_authpb.LoginResponse, error) {
+func (s *AuthServiceServer) TokenLogin(ctx context.Context, in *pb.TokenLoginRequest) (*pb.LoginResponse, error) {
 	l := logic.NewTokenLoginLogic(ctx, s.svcCtx)
 	return l.TokenLogin(in)
 }
 
-func (s *AuthServiceServer) ValidateToken(ctx context.Context, in *pb_authpb.ValidateTokenRequest) (*pb_authpb.ValidateTokenResponse, error) {
+func (s *AuthServiceServer) ValidateToken(ctx context.Context, in *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
 	l := logic.NewValidateTokenLogic(ctx, s.svcCtx)
 	return l.ValidateToken(in)
 }
 
-func (s *AuthServiceServer) Logout(ctx context.Context, in *pb_authpb.LogoutRequest) (*pb_authpb.LogoutResponse, error) {
+func (s *AuthServiceServer) Logout(ctx context.Context, in *pb.LogoutRequest) (*pb.LogoutResponse, error) {
 	l := logic.NewLogoutLogic(ctx, s.svcCtx)
 	return l.Logout(in)
 }

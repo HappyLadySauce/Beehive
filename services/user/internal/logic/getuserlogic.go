@@ -23,8 +23,8 @@ func NewGetUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserLo
 	}
 }
 
-func (l *GetUserLogic) GetUser(in *pb_userpb.GetUserRequest) (*pb_userpb.GetUserResponse, error) {
+func (l *GetUserLogic) GetUser(in *pb.GetUserRequest) (*pb.GetUserResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_userpb.GetUserResponse{}, nil
+	return &pb.GetUserResponse{}, nil
 }

@@ -23,8 +23,8 @@ func NewGetUserPresenceLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 	}
 }
 
-func (l *GetUserPresenceLogic) GetUserPresence(in *pb_presencepb.GetUserPresenceRequest) (*pb_presencepb.GetUserPresenceResponse, error) {
+func (l *GetUserPresenceLogic) GetUserPresence(in *pb.GetUserPresenceRequest) (*pb.GetUserPresenceResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_presencepb.GetUserPresenceResponse{}, nil
+	return &pb.GetUserPresenceResponse{}, nil
 }

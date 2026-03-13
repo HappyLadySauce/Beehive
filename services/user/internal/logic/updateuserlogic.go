@@ -23,8 +23,8 @@ func NewUpdateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Update
 	}
 }
 
-func (l *UpdateUserLogic) UpdateUser(in *pb_userpb.UpdateUserRequest) (*pb_userpb.UpdateUserResponse, error) {
+func (l *UpdateUserLogic) UpdateUser(in *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_userpb.UpdateUserResponse{}, nil
+	return &pb.UpdateUserResponse{}, nil
 }

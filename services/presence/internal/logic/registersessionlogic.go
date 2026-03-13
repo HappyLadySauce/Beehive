@@ -23,8 +23,8 @@ func NewRegisterSessionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *R
 	}
 }
 
-func (l *RegisterSessionLogic) RegisterSession(in *pb_presencepb.RegisterSessionRequest) (*pb_presencepb.RegisterSessionResponse, error) {
+func (l *RegisterSessionLogic) RegisterSession(in *pb.RegisterSessionRequest) (*pb.RegisterSessionResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_presencepb.RegisterSessionResponse{}, nil
+	return &pb.RegisterSessionResponse{}, nil
 }

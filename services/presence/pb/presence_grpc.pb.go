@@ -4,7 +4,7 @@
 // - protoc             v3.19.4
 // source: proto/presence.proto
 
-package presencepb
+package pb
 
 import (
 	context "context"

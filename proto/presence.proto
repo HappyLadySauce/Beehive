@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package beehive.presence;
 
-option go_package = "services/presence/pb;presencepb";
+option go_package = "./services/presence/pb";
 
 service PresenceService {
   rpc RegisterSession(RegisterSessionRequest) returns (RegisterSessionResponse);

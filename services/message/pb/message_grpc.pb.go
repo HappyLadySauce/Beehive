@@ -4,7 +4,7 @@
 // - protoc             v3.19.4
 // source: proto/message.proto
 
-package messagepb
+package pb
 
 import (
 	context "context"

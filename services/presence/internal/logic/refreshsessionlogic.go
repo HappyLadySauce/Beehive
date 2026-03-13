@@ -23,8 +23,8 @@ func NewRefreshSessionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Re
 	}
 }
 
-func (l *RefreshSessionLogic) RefreshSession(in *pb_presencepb.RefreshSessionRequest) (*pb_presencepb.RefreshSessionResponse, error) {
+func (l *RefreshSessionLogic) RefreshSession(in *pb.RefreshSessionRequest) (*pb.RefreshSessionResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_presencepb.RefreshSessionResponse{}, nil
+	return &pb.RefreshSessionResponse{}, nil
 }

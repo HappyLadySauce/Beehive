@@ -14,14 +14,14 @@ import (
 )
 
 type (
-	GetHistoryRequest       = pb_messagepb.GetHistoryRequest
-	GetHistoryResponse      = pb_messagepb.GetHistoryResponse
-	GetLastMessagesRequest  = pb_messagepb.GetLastMessagesRequest
-	GetLastMessagesResponse = pb_messagepb.GetLastMessagesResponse
-	MessageBody             = pb_messagepb.MessageBody
-	MessageRecord           = pb_messagepb.MessageRecord
-	PostMessageRequest      = pb_messagepb.PostMessageRequest
-	PostMessageResponse     = pb_messagepb.PostMessageResponse
+	GetHistoryRequest       = pb.GetHistoryRequest
+	GetHistoryResponse      = pb.GetHistoryResponse
+	GetLastMessagesRequest  = pb.GetLastMessagesRequest
+	GetLastMessagesResponse = pb.GetLastMessagesResponse
+	MessageBody             = pb.MessageBody
+	MessageRecord           = pb.MessageRecord
+	PostMessageRequest      = pb.PostMessageRequest
+	PostMessageResponse     = pb.PostMessageResponse
 
 	MessageService interface {
 		PostMessage(ctx context.Context, in *PostMessageRequest, opts ...grpc.CallOption) (*PostMessageResponse, error)
@@ -41,16 +41,16 @@ func NewMessageService(cli zrpc.Client) MessageService {
 }
 
 func (m *defaultMessageService) PostMessage(ctx context.Context, in *PostMessageRequest, opts ...grpc.CallOption) (*PostMessageResponse, error) {
-	client := pb_messagepb.NewMessageServiceClient(m.cli.Conn())
+	client := pb.NewMessageServiceClient(m.cli.Conn())
 	return client.PostMessage(ctx, in, opts...)
 }
 
 func (m *defaultMessageService) GetHistory(ctx context.Context, in *GetHistoryRequest, opts ...grpc.CallOption) (*GetHistoryResponse, error) {
-	client := pb_messagepb.NewMessageServiceClient(m.cli.Conn())
+	client := pb.NewMessageServiceClient(m.cli.Conn())
 	return client.GetHistory(ctx, in, opts...)
 }
 
 func (m *defaultMessageService) GetLastMessages(ctx context.Context, in *GetLastMessagesRequest, opts ...grpc.CallOption) (*GetLastMessagesResponse, error) {
-	client := pb_messagepb.NewMessageServiceClient(m.cli.Conn())
+	client := pb.NewMessageServiceClient(m.cli.Conn())
 	return client.GetLastMessages(ctx, in, opts...)
 }

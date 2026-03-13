@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package beehive.auth;
 
-option go_package = "services/auth/pb;authpb";
+option go_package = "./services/auth/pb";
 
 service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse);

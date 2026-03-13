@@ -23,8 +23,8 @@ func NewCreateConversationLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 	}
 }
 
-func (l *CreateConversationLogic) CreateConversation(in *pb_conversationpb.CreateConversationRequest) (*pb_conversationpb.CreateConversationResponse, error) {
+func (l *CreateConversationLogic) CreateConversation(in *pb.CreateConversationRequest) (*pb.CreateConversationResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_conversationpb.CreateConversationResponse{}, nil
+	return &pb.CreateConversationResponse{}, nil
 }

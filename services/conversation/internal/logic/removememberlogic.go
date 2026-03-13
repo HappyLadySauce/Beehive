@@ -23,8 +23,8 @@ func NewRemoveMemberLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Remo
 	}
 }
 
-func (l *RemoveMemberLogic) RemoveMember(in *pb_conversationpb.RemoveMemberRequest) (*pb_conversationpb.RemoveMemberResponse, error) {
+func (l *RemoveMemberLogic) RemoveMember(in *pb.RemoveMemberRequest) (*pb.RemoveMemberResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_conversationpb.RemoveMemberResponse{}, nil
+	return &pb.RemoveMemberResponse{}, nil
 }

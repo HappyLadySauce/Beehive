@@ -14,13 +14,13 @@ import (
 )
 
 type (
-	LoginRequest          = pb_authpb.LoginRequest
-	LoginResponse         = pb_authpb.LoginResponse
-	LogoutRequest         = pb_authpb.LogoutRequest
-	LogoutResponse        = pb_authpb.LogoutResponse
-	TokenLoginRequest     = pb_authpb.TokenLoginRequest
-	ValidateTokenRequest  = pb_authpb.ValidateTokenRequest
-	ValidateTokenResponse = pb_authpb.ValidateTokenResponse
+	LoginRequest          = pb.LoginRequest
+	LoginResponse         = pb.LoginResponse
+	LogoutRequest         = pb.LogoutRequest
+	LogoutResponse        = pb.LogoutResponse
+	TokenLoginRequest     = pb.TokenLoginRequest
+	ValidateTokenRequest  = pb.ValidateTokenRequest
+	ValidateTokenResponse = pb.ValidateTokenResponse
 
 	AuthService interface {
 		Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
@@ -41,21 +41,21 @@ func NewAuthService(cli zrpc.Client) AuthService {
 }
 
 func (m *defaultAuthService) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
-	client := pb_authpb.NewAuthServiceClient(m.cli.Conn())
+	client := pb.NewAuthServiceClient(m.cli.Conn())
 	return client.Login(ctx, in, opts...)
 }
 
 func (m *defaultAuthService) TokenLogin(ctx context.Context, in *TokenLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
-	client := pb_authpb.NewAuthServiceClient(m.cli.Conn())
+	client := pb.NewAuthServiceClient(m.cli.Conn())
 	return client.TokenLogin(ctx, in, opts...)
 }
 
 func (m *defaultAuthService) ValidateToken(ctx context.Context, in *ValidateTokenRequest, opts ...grpc.CallOption) (*ValidateTokenResponse, error) {
-	client := pb_authpb.NewAuthServiceClient(m.cli.Conn())
+	client := pb.NewAuthServiceClient(m.cli.Conn())
 	return client.ValidateToken(ctx, in, opts...)
 }
 
 func (m *defaultAuthService) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
-	client := pb_authpb.NewAuthServiceClient(m.cli.Conn())
+	client := pb.NewAuthServiceClient(m.cli.Conn())
 	return client.Logout(ctx, in, opts...)
 }

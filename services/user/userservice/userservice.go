@@ -14,13 +14,13 @@ import (
 )
 
 type (
-	BatchGetUsersRequest  = pb_userpb.BatchGetUsersRequest
-	BatchGetUsersResponse = pb_userpb.BatchGetUsersResponse
-	GetUserRequest        = pb_userpb.GetUserRequest
-	GetUserResponse       = pb_userpb.GetUserResponse
-	UpdateUserRequest     = pb_userpb.UpdateUserRequest
-	UpdateUserResponse    = pb_userpb.UpdateUserResponse
-	User                  = pb_userpb.User
+	BatchGetUsersRequest  = pb.BatchGetUsersRequest
+	BatchGetUsersResponse = pb.BatchGetUsersResponse
+	GetUserRequest        = pb.GetUserRequest
+	GetUserResponse       = pb.GetUserResponse
+	UpdateUserRequest     = pb.UpdateUserRequest
+	UpdateUserResponse    = pb.UpdateUserResponse
+	User                  = pb.User
 
 	UserService interface {
 		GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
@@ -40,16 +40,16 @@ func NewUserService(cli zrpc.Client) UserService {
 }
 
 func (m *defaultUserService) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
-	client := pb_userpb.NewUserServiceClient(m.cli.Conn())
+	client := pb.NewUserServiceClient(m.cli.Conn())
 	return client.GetUser(ctx, in, opts...)
 }
 
 func (m *defaultUserService) BatchGetUsers(ctx context.Context, in *BatchGetUsersRequest, opts ...grpc.CallOption) (*BatchGetUsersResponse, error) {
-	client := pb_userpb.NewUserServiceClient(m.cli.Conn())
+	client := pb.NewUserServiceClient(m.cli.Conn())
 	return client.BatchGetUsers(ctx, in, opts...)
 }
 
 func (m *defaultUserService) UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error) {
-	client := pb_userpb.NewUserServiceClient(m.cli.Conn())
+	client := pb.NewUserServiceClient(m.cli.Conn())
 	return client.UpdateUser(ctx, in, opts...)
 }

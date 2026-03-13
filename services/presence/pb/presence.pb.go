@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: proto/presence.proto
 
-package presencepb
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -623,7 +623,7 @@ const file_proto_presence_proto_rawDesc = "" +
 	"\x11UnregisterSession\x12*.beehive.presence.UnregisterSessionRequest\x1a+.beehive.presence.UnregisterSessionResponse\x12c\n" +
 	"\x0eRefreshSession\x12'.beehive.presence.RefreshSessionRequest\x1a(.beehive.presence.RefreshSessionResponse\x12l\n" +
 	"\x11GetOnlineSessions\x12*.beehive.presence.GetOnlineSessionsRequest\x1a+.beehive.presence.GetOnlineSessionsResponse\x12f\n" +
-	"\x0fGetUserPresence\x12(.beehive.presence.GetUserPresenceRequest\x1a).beehive.presence.GetUserPresenceResponseB!Z\x1fservices/presence/pb;presencepbb\x06proto3"
+	"\x0fGetUserPresence\x12(.beehive.presence.GetUserPresenceRequest\x1a).beehive.presence.GetUserPresenceResponseB\x18Z\x16./services/presence/pbb\x06proto3"
 
 var (
 	file_proto_presence_proto_rawDescOnce sync.Once

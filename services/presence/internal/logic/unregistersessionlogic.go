@@ -23,8 +23,8 @@ func NewUnregisterSessionLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *UnregisterSessionLogic) UnregisterSession(in *pb_presencepb.UnregisterSessionRequest) (*pb_presencepb.UnregisterSessionResponse, error) {
+func (l *UnregisterSessionLogic) UnregisterSession(in *pb.UnregisterSessionRequest) (*pb.UnregisterSessionResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_presencepb.UnregisterSessionResponse{}, nil
+	return &pb.UnregisterSessionResponse{}, nil
 }

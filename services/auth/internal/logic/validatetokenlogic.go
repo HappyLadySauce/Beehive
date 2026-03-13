@@ -23,8 +23,8 @@ func NewValidateTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Val
 	}
 }
 
-func (l *ValidateTokenLogic) ValidateToken(in *pb_authpb.ValidateTokenRequest) (*pb_authpb.ValidateTokenResponse, error) {
+func (l *ValidateTokenLogic) ValidateToken(in *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_authpb.ValidateTokenResponse{}, nil
+	return &pb.ValidateTokenResponse{}, nil
 }

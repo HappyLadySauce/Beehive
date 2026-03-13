@@ -14,20 +14,20 @@ import (
 )
 
 type (
-	AddMemberRequest              = pb_conversationpb.AddMemberRequest
-	AddMemberResponse             = pb_conversationpb.AddMemberResponse
-	ConversationInfo              = pb_conversationpb.ConversationInfo
-	CreateConversationRequest     = pb_conversationpb.CreateConversationRequest
-	CreateConversationResponse    = pb_conversationpb.CreateConversationResponse
-	GetConversationRequest        = pb_conversationpb.GetConversationRequest
-	GetConversationResponse       = pb_conversationpb.GetConversationResponse
-	ListMembersRequest            = pb_conversationpb.ListMembersRequest
-	ListMembersResponse           = pb_conversationpb.ListMembersResponse
-	ListUserConversationsRequest  = pb_conversationpb.ListUserConversationsRequest
-	ListUserConversationsResponse = pb_conversationpb.ListUserConversationsResponse
-	MemberInfo                    = pb_conversationpb.MemberInfo
-	RemoveMemberRequest           = pb_conversationpb.RemoveMemberRequest
-	RemoveMemberResponse          = pb_conversationpb.RemoveMemberResponse
+	AddMemberRequest              = pb.AddMemberRequest
+	AddMemberResponse             = pb.AddMemberResponse
+	ConversationInfo              = pb.ConversationInfo
+	CreateConversationRequest     = pb.CreateConversationRequest
+	CreateConversationResponse    = pb.CreateConversationResponse
+	GetConversationRequest        = pb.GetConversationRequest
+	GetConversationResponse       = pb.GetConversationResponse
+	ListMembersRequest            = pb.ListMembersRequest
+	ListMembersResponse           = pb.ListMembersResponse
+	ListUserConversationsRequest  = pb.ListUserConversationsRequest
+	ListUserConversationsResponse = pb.ListUserConversationsResponse
+	MemberInfo                    = pb.MemberInfo
+	RemoveMemberRequest           = pb.RemoveMemberRequest
+	RemoveMemberResponse          = pb.RemoveMemberResponse
 
 	ConversationService interface {
 		CreateConversation(ctx context.Context, in *CreateConversationRequest, opts ...grpc.CallOption) (*CreateConversationResponse, error)
@@ -50,31 +50,31 @@ func NewConversationService(cli zrpc.Client) ConversationService {
 }
 
 func (m *defaultConversationService) CreateConversation(ctx context.Context, in *CreateConversationRequest, opts ...grpc.CallOption) (*CreateConversationResponse, error) {
-	client := pb_conversationpb.NewConversationServiceClient(m.cli.Conn())
+	client := pb.NewConversationServiceClient(m.cli.Conn())
 	return client.CreateConversation(ctx, in, opts...)
 }
 
 func (m *defaultConversationService) AddMember(ctx context.Context, in *AddMemberRequest, opts ...grpc.CallOption) (*AddMemberResponse, error) {
-	client := pb_conversationpb.NewConversationServiceClient(m.cli.Conn())
+	client := pb.NewConversationServiceClient(m.cli.Conn())
 	return client.AddMember(ctx, in, opts...)
 }
 
 func (m *defaultConversationService) RemoveMember(ctx context.Context, in *RemoveMemberRequest, opts ...grpc.CallOption) (*RemoveMemberResponse, error) {
-	client := pb_conversationpb.NewConversationServiceClient(m.cli.Conn())
+	client := pb.NewConversationServiceClient(m.cli.Conn())
 	return client.RemoveMember(ctx, in, opts...)
 }
 
 func (m *defaultConversationService) ListUserConversations(ctx context.Context, in *ListUserConversationsRequest, opts ...grpc.CallOption) (*ListUserConversationsResponse, error) {
-	client := pb_conversationpb.NewConversationServiceClient(m.cli.Conn())
+	client := pb.NewConversationServiceClient(m.cli.Conn())
 	return client.ListUserConversations(ctx, in, opts...)
 }
 
 func (m *defaultConversationService) GetConversation(ctx context.Context, in *GetConversationRequest, opts ...grpc.CallOption) (*GetConversationResponse, error) {
-	client := pb_conversationpb.NewConversationServiceClient(m.cli.Conn())
+	client := pb.NewConversationServiceClient(m.cli.Conn())
 	return client.GetConversation(ctx, in, opts...)
 }
 
 func (m *defaultConversationService) ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersResponse, error) {
-	client := pb_conversationpb.NewConversationServiceClient(m.cli.Conn())
+	client := pb.NewConversationServiceClient(m.cli.Conn())
 	return client.ListMembers(ctx, in, opts...)
 }

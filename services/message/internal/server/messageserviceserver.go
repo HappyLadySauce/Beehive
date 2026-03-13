@@ -14,7 +14,7 @@ import (
 
 type MessageServiceServer struct {
 	svcCtx *svc.ServiceContext
-	pb_messagepb.UnimplementedMessageServiceServer
+	pb.UnimplementedMessageServiceServer
 }
 
 func NewMessageServiceServer(svcCtx *svc.ServiceContext) *MessageServiceServer {
@@ -23,17 +23,17 @@ func NewMessageServiceServer(svcCtx *svc.ServiceContext) *MessageServiceServer {
 	}
 }
 
-func (s *MessageServiceServer) PostMessage(ctx context.Context, in *pb_messagepb.PostMessageRequest) (*pb_messagepb.PostMessageResponse, error) {
+func (s *MessageServiceServer) PostMessage(ctx context.Context, in *pb.PostMessageRequest) (*pb.PostMessageResponse, error) {
 	l := logic.NewPostMessageLogic(ctx, s.svcCtx)
 	return l.PostMessage(in)
 }
 
-func (s *MessageServiceServer) GetHistory(ctx context.Context, in *pb_messagepb.GetHistoryRequest) (*pb_messagepb.GetHistoryResponse, error) {
+func (s *MessageServiceServer) GetHistory(ctx context.Context, in *pb.GetHistoryRequest) (*pb.GetHistoryResponse, error) {
 	l := logic.NewGetHistoryLogic(ctx, s.svcCtx)
 	return l.GetHistory(in)
 }
 
-func (s *MessageServiceServer) GetLastMessages(ctx context.Context, in *pb_messagepb.GetLastMessagesRequest) (*pb_messagepb.GetLastMessagesResponse, error) {
+func (s *MessageServiceServer) GetLastMessages(ctx context.Context, in *pb.GetLastMessagesRequest) (*pb.GetLastMessagesResponse, error) {
 	l := logic.NewGetLastMessagesLogic(ctx, s.svcCtx)
 	return l.GetLastMessages(in)
 }

@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: proto/conversation.proto
 
-package conversationpb
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -806,7 +806,7 @@ const file_proto_conversation_proto_rawDesc = "" +
 	"\fRemoveMember\x12).beehive.conversation.RemoveMemberRequest\x1a*.beehive.conversation.RemoveMemberResponse\x12\x80\x01\n" +
 	"\x15ListUserConversations\x122.beehive.conversation.ListUserConversationsRequest\x1a3.beehive.conversation.ListUserConversationsResponse\x12n\n" +
 	"\x0fGetConversation\x12,.beehive.conversation.GetConversationRequest\x1a-.beehive.conversation.GetConversationResponse\x12b\n" +
-	"\vListMembers\x12(.beehive.conversation.ListMembersRequest\x1a).beehive.conversation.ListMembersResponseB)Z'services/conversation/pb;conversationpbb\x06proto3"
+	"\vListMembers\x12(.beehive.conversation.ListMembersRequest\x1a).beehive.conversation.ListMembersResponseB\x1cZ\x1a./services/conversation/pbb\x06proto3"
 
 var (
 	file_proto_conversation_proto_rawDescOnce sync.Once

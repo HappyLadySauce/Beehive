@@ -4,7 +4,7 @@
 // 	protoc        v3.19.4
 // source: proto/user.proto
 
-package userpb
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -417,7 +417,7 @@ const file_proto_user_proto_rawDesc = "" +
 	"\aGetUser\x12\x1c.beehive.user.GetUserRequest\x1a\x1d.beehive.user.GetUserResponse\x12X\n" +
 	"\rBatchGetUsers\x12\".beehive.user.BatchGetUsersRequest\x1a#.beehive.user.BatchGetUsersResponse\x12O\n" +
 	"\n" +
-	"UpdateUser\x12\x1f.beehive.user.UpdateUserRequest\x1a .beehive.user.UpdateUserResponseB\x19Z\x17services/user/pb;userpbb\x06proto3"
+	"UpdateUser\x12\x1f.beehive.user.UpdateUserRequest\x1a .beehive.user.UpdateUserResponseB\x14Z\x12./services/user/pbb\x06proto3"
 
 var (
 	file_proto_user_proto_rawDescOnce sync.Once

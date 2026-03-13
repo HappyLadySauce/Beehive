@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package beehive.conversation;
 
-option go_package = "services/conversation/pb;conversationpb";
+option go_package = "./services/conversation/pb";
 
 service ConversationService {
   rpc CreateConversation(CreateConversationRequest) returns (CreateConversationResponse);

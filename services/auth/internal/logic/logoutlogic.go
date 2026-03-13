@@ -23,8 +23,8 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 	}
 }
 
-func (l *LogoutLogic) Logout(in *pb_authpb.LogoutRequest) (*pb_authpb.LogoutResponse, error) {
+func (l *LogoutLogic) Logout(in *pb.LogoutRequest) (*pb.LogoutResponse, error) {
 	// todo: add your logic here and delete this line
 
-	return &pb_authpb.LogoutResponse{}, nil
+	return &pb.LogoutResponse{}, nil
 }

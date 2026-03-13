@@ -111,12 +111,9 @@ func (l *BatchGetUsersLogic) BatchGetUsers(in *pb.BatchGetUsersRequest) (*pb.Bat
 		}
 	}
 
-	// 3. 按原始请求顺序组装返回（包括重复 ID），只返回存在的用户
-	result := make([]*pb.User, 0, len(in.Ids))
-	for _, id := range in.GetIds() {
-		if id == "" {
-			continue
-		}
+	// 3. 按去重后的请求顺序组装返回，只返回存在的用户
+	result := make([]*pb.User, 0, len(ids))
+	for _, id := range ids {
 		if u, ok := usersByID[id]; ok {
 			result = append(result, u)
 		}

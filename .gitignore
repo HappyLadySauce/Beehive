@@ -7,3 +7,5 @@
 _output
 
 etc/
+data/
+logs/

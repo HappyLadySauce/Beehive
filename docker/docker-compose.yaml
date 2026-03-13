@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: beehive-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: beehive
+      POSTGRES_USER: beehive
+      POSTGRES_PASSWORD: beehive
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../data/postgresql:/var/lib/postgresql/data
+    networks:
+      - beehive-net
+
+  redis:
+    image: redis:8-alpine
+    container_name: beehive-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - ../data/redis:/data
+    networks:
+      - beehive-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: beehive-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ../data/rabbitmq:/var/lib/rabbitmq
+    networks:
+      - beehive-net
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.15
+    container_name: beehive-etcd
+    restart: unless-stopped
+    environment:
+      ETCD_NAME: beehive-etcd
+      ETCD_DATA_DIR: /etcd-data
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: http://beehive-etcd:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://beehive-etcd:2380
+      ETCD_INITIAL_CLUSTER: beehive-etcd=http://beehive-etcd:2380
+      ETCD_INITIAL_CLUSTER_STATE: new
+      ETCD_INITIAL_CLUSTER_TOKEN: beehive-etcd-token
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    volumes:
+      - ../data/etcd:/etcd-data
+    networks:
+      - beehive-net
+
+networks:
+  beehive-net:
+    driver: bridge

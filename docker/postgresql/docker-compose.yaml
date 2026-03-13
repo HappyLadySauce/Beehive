@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: beehive-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: beehive
+      POSTGRES_USER: beehive
+      POSTGRES_PASSWORD: beehive
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../../data/postgresql:/var/lib/postgresql/data
+    networks:
+      - beehive-net
+
+networks:
+  beehive-net:
+    driver: bridge

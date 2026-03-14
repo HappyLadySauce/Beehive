@@ -11,7 +11,7 @@ type Message struct {
 	ID             string     `gorm:"column:id;type:uuid;primaryKey"`
 	ServerMsgID    string     `gorm:"column:server_msg_id;type:text;uniqueIndex;not null"`
 	ClientMsgID    string     `gorm:"column:client_msg_id;type:text;not null"`
-	ConversationID string     `gorm:"column:conversation_id;type:varchar(20);not null"`
+	ConversationID string     `gorm:"column:conversation_id;type:varchar(36);not null"`
 	FromUserID     string     `gorm:"column:from_user_id;type:char(10);not null"`
 	// ToUserID 可为空：群聊/广播消息时为 NULL，点对点消息时为 10 位用户 ID
 	ToUserID   *string   `gorm:"column:to_user_id;type:char(10)"`

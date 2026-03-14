@@ -471,30 +471,50 @@ func (l *WsEntryLogic) handleConversationCreate(c *ws.Connection, env *ws.Envelo
 		}
 		memberIds = []string{c.UserID, toUserId}
 	}
-	resp, err := l.svcCtx.ConversationSvc.CreateConversation(l.ctx, &conversationservice.CreateConversationRequest{
-		Type:      payload.Type,
-		Name:      payload.Name,
-		MemberIds: memberIds,
-	})
-	if err != nil {
-		if s, ok := status.FromError(err); ok {
-			switch s.Code() {
-			case codes.InvalidArgument:
-				l.sendError(c, env.Tid, "bad_request", s.Message())
-				return
-			case codes.AlreadyExists:
+	var conversationId string
+	if payload.Type == "single" && len(memberIds) == 2 {
+		// 单聊：同一对用户只保留一个会话，查找或创建
+		findResp, err := l.svcCtx.ConversationSvc.FindOrCreateSingleConversation(l.ctx, &conversationservice.FindOrCreateSingleConversationRequest{
+			UserId_1: memberIds[0],
+			UserId_2: memberIds[1],
+		})
+		if err != nil {
+			if s, ok := status.FromError(err); ok && s.Code() == codes.InvalidArgument {
 				l.sendError(c, env.Tid, "bad_request", s.Message())
 				return
 			}
+			l.Errorf("find or create single conversation failed: %v", err)
+			l.sendError(c, env.Tid, "internal_error", err.Error())
+			return
 		}
-		l.Errorf("create conversation failed: %v", err)
-		l.sendError(c, env.Tid, "internal_error", err.Error())
-		return
+		conversationId = findResp.ConversationId
+	} else {
+		resp, err := l.svcCtx.ConversationSvc.CreateConversation(l.ctx, &conversationservice.CreateConversationRequest{
+			Type:      payload.Type,
+			Name:      payload.Name,
+			MemberIds: memberIds,
+		})
+		if err != nil {
+			if s, ok := status.FromError(err); ok {
+				switch s.Code() {
+				case codes.InvalidArgument:
+					l.sendError(c, env.Tid, "bad_request", s.Message())
+					return
+				case codes.AlreadyExists:
+					l.sendError(c, env.Tid, "bad_request", s.Message())
+					return
+				}
+			}
+			l.Errorf("create conversation failed: %v", err)
+			l.sendError(c, env.Tid, "internal_error", err.Error())
+			return
+		}
+		conversationId = resp.ConversationId
 	}
 	_ = c.WriteJSON(&ws.Envelope{
 		Type:    "conversation.create.ok",
 		Tid:     env.Tid,
-		Payload: map[string]any{"conversationId": resp.ConversationId},
+		Payload: map[string]any{"conversationId": conversationId},
 		Error:   nil,
 	})
 }

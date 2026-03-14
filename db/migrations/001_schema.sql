@@ -57,9 +57,9 @@ CREATE TABLE IF NOT EXISTS user_roles (
 );
 CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON user_roles (user_id);
 
--- conversations: 单聊 id 为 UUID 字符串，群聊 id 为 11 位数字字符串
+-- conversations: 单聊 id 为 UUID 字符串(36)，群聊 id 为 11 位数字字符串
 CREATE TABLE IF NOT EXISTS conversations (
-    id            VARCHAR(20) PRIMARY KEY,
+    id            VARCHAR(36) PRIMARY KEY,
     type          TEXT NOT NULL DEFAULT 'single',
     name          TEXT NOT NULL DEFAULT '',
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -71,7 +71,7 @@ CREATE INDEX IF NOT EXISTS idx_conversations_last_active_at ON conversations (la
 -- conversation_members
 CREATE TABLE IF NOT EXISTS conversation_members (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    conversation_id VARCHAR(20) NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
+    conversation_id VARCHAR(36) NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
     user_id         VARCHAR(10) NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     role            TEXT NOT NULL DEFAULT 'member',
     status          TEXT NOT NULL DEFAULT 'active',
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS messages (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     server_msg_id    TEXT NOT NULL UNIQUE,
     client_msg_id    TEXT NOT NULL DEFAULT '',
-    conversation_id  VARCHAR(20) NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
+    conversation_id  VARCHAR(36) NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
     from_user_id     VARCHAR(10) NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     to_user_id       VARCHAR(10) REFERENCES users (id) ON DELETE SET NULL,
     body_type        TEXT NOT NULL DEFAULT 'text',
@@ -100,7 +100,7 @@ CREATE INDEX IF NOT EXISTS idx_messages_server_msg_id ON messages (server_msg_id
 -- conversation_read: Message 服务 GORM 可能自动建表，此处显式创建以保持一致
 CREATE TABLE IF NOT EXISTS conversation_read (
     user_id               VARCHAR(10) NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    conversation_id       VARCHAR(20) NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
+    conversation_id       VARCHAR(36) NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
     last_read_server_time BIGINT NOT NULL DEFAULT 0,
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, conversation_id)

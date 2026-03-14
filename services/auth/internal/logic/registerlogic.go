@@ -61,6 +61,7 @@ func (l *RegisterLogic) Register(in *pb.RegisterRequest) (*pb.LoginResponse, err
 		Status:       "normal",
 	}
 	const maxRetries = 10
+	created := false
 	for i := 0; i < maxRetries; i++ {
 		if err := l.svcCtx.UserMod.Create(user); err != nil {
 			var pqErr *pq.Error
@@ -71,7 +72,11 @@ func (l *RegisterLogic) Register(in *pb.RegisterRequest) (*pb.LoginResponse, err
 			}
 			return nil, status.Errorf(codes.Internal, "create user failed: %v", err)
 		}
+		created = true
 		break
+	}
+	if !created {
+		return nil, status.Errorf(codes.Internal, "create user failed: too many id conflicts, please retry")
 	}
 
 	roles, err := l.svcCtx.RBACMod.GetUserRoles(userID)

@@ -50,13 +50,15 @@ func (l *CreateConversationLogic) CreateConversation(in *pb.CreateConversationRe
 				LastActiveAt: now,
 			}
 			var members []*model.ConversationMember
-			for i, uid := range in.GetMemberIds() {
+			firstMember := true
+			for _, uid := range in.GetMemberIds() {
 				if uid == "" {
 					continue
 				}
 				role := "member"
-				if i == 0 {
+				if firstMember {
 					role = "owner"
+					firstMember = false
 				}
 				members = append(members, &model.ConversationMember{
 					ID:             uuid.Must(uuid.NewUUID()).String(),
@@ -89,13 +91,15 @@ func (l *CreateConversationLogic) CreateConversation(in *pb.CreateConversationRe
 		LastActiveAt: now,
 	}
 	var members []*model.ConversationMember
-	for i, uid := range in.GetMemberIds() {
+	firstMember := true
+	for _, uid := range in.GetMemberIds() {
 		if uid == "" {
 			continue
 		}
 		role := "member"
-		if i == 0 {
+		if firstMember {
 			role = "owner"
+			firstMember = false
 		}
 		members = append(members, &model.ConversationMember{
 			ID:             uuid.Must(uuid.NewUUID()).String(),

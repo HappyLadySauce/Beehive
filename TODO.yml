@@ -39,6 +39,20 @@ areas:
         owner: ""
         tags: [gateway, conversation, message, rpc]
         notes: "配置 ConversationRpcConf/MessageRpcConf（Etcd）；支持 conversation.list（聚合 ListUserConversations + GetLastMessages）、message.send、message.history；未配置时返回 unavailable"
+      - id: message-delivery-push
+        title: 消息实时投递（message.push）
+        status: pending
+        service: gateway
+        owner: ""
+        tags: [gateway, message, mq, presence]
+        notes: "消费 RabbitMQ message.created，按会话成员查 Presence 得到在线连接，经 Gateway 向 WebSocket 推送 message.push；可独立 Delivery 服务或在 Gateway 内实现（设计参考 docs/backend/gateway-design.md 4.2）"
+      - id: conversation-ws-create-member
+        title: Gateway 暴露 conversation.create / addMember / removeMember
+        status: pending
+        service: gateway
+        owner: ""
+        tags: [gateway, conversation, rpc]
+        notes: "WS 增加 conversation.create、conversation.addMember、conversation.removeMember 的 type 分发，调用 ConversationService 对应 RPC，返回 .ok（文档见 docs/API/websocket-client-api.md 6.2）"
   - id: backend-core
     name: 后端核心服务
     items:
@@ -82,9 +96,23 @@ areas:
         owner: ""
         tags: [user, db, rpc]
         notes: "基于 PostgreSQL（GORM）+ Redis（go-redis）实现 user_profiles 读写与缓存，提供 GetUser/BatchGetUsers/UpdateUser 能力（设计参考 docs/backend/services-design.md, docs/backend/storage-and-mq.md）"
+      - id: unread-count
+        title: 会话未读计数（unreadCount）
+        status: pending
+        service: message
+        owner: ""
+        tags: [message, conversation, db, redis]
+        notes: "未读数据模型与存储（按用户+会话）；提供查询/已读更新能力；Gateway 在 conversation.list 聚合时填入 unreadCount（当前固定为 0）"
+      - id: message-read-receipt
+        title: 已读回执（message.read）
+        status: pending
+        service: message
+        owner: ""
+        tags: [message, gateway, rpc]
+        notes: "API 已定义 message.read / message.read.ok；后端存储已读记录并暴露 RPC 或扩展 MessageService；Gateway 处理 message.read 并返回 .ok；可选发布已读事件（见 docs/API/websocket-client-api.md 4.3）"
 
   - id: admin
-    name: 管理后台服务
+    name: 管理后台服务（优先级放最后）
     items:
       - id: admin-service
         title: 设计与实现 AdminAPIService（独立 HTTP 服务）
@@ -92,12 +120,12 @@ areas:
         service: adminapi
         owner: ""
         tags: [admin, http, auth, rpc]
-        notes: "按 development-workflow 先定义 api/admin.api 再 goctl 生成 services/adminapi。已实现：认证中间件（Bearer + AuthService.ValidateToken）、用户详情/会话/踢下线、会话详情/成员/消息、配置与运维占位；ListUsers/封禁/配置等可后续对接 RPC 或 etcd；按路由 CheckPermission 可选（设计参考 docs/API/admin-http-api.md, docs/frontend/admin-app.md）"
+        notes: "按 development-workflow 先定义 api/admin.api 再 goctl 生成 services/adminapi。已实现：认证中间件（Bearer + AuthService.ValidateToken）、用户详情/会话/踢下线、会话详情/成员/消息、配置与运维占位；ListUsers/封禁/配置等可后续对接 RPC 或 etcd（设计参考 docs/API/admin-http-api.md, docs/frontend/admin-app.md）"
       - id: admin-permission-middleware
         title: Admin 按路由权限校验（CheckPermission）
         status: pending
         service: adminapi
         owner: ""
         tags: [admin, rbac, middleware]
-        notes: "对敏感路由按 admin-http-api.md 要求调用 AuthService.CheckPermission（如 admin.user.read、admin.user.ban、admin.conversation.read、admin.message.read、admin.config.read/write、admin.ops.use）"
+        notes: "【最后做】对敏感路由按 admin-http-api.md 调用 AuthService.CheckPermission（如 admin.user.read、admin.user.ban、admin.conversation.read、admin.message.read、admin.config.read/write、admin.ops.use）"
 

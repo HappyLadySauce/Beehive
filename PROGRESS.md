@@ -55,19 +55,45 @@
   - 认证：`internal/middleware/authmiddleware.go` 从 `Authorization: Bearer <token>` 取 token，调用 AuthService.ValidateToken，将 userId 写入 context；除 `GET /admin/healthz` 外均需认证。
   - 接口实现：GetUser/GetUserSessions/KickUser 调用 User/Presence RPC；GetConversation/ListMembers/ListConversationMessages 调用 Conversation/Message RPC；ListUsers/Ban/Unban/ListConversations/Config/Ops 为占位或空数据，后续可对接 ListUsers RPC、封禁状态、etcd 配置等。
 
-## 三、正在进行 / 阻塞项
+## 三、待完善内容（Admin 放最后）
 
-- **Admin 后续可选**（见 `TODO.yml`）：
-  - `admin-permission-middleware`：按路由注入 CheckPermission 中间件（如 `admin.user.read`、`admin.conversation.read`）；ListUsers/封禁/配置等对接具体 RPC 或 etcd。
-- **可选后续**：
-  - 消息投递与 `message.push`：消费 RabbitMQ `message.created`，查 Presence 得到在线连接，经 Gateway 向 WebSocket 推送 `message.push`（可独立 Delivery 服务或 Gateway 内实现）。
+### 核心 IM 能力（优先）
+
+1. **消息实时投递 `message.push`**（见 `TODO.yml` 中 `message-delivery-push`）  
+   - 现状：PostMessage 已写库并发布 RabbitMQ `message.created`，但对端收不到实时推送。  
+   - 待做：消费 `message.created`，按会话成员查 Presence 得到在线连接，经 Gateway 向对应 WebSocket 发 `message.push`。可独立 Delivery 服务或在 Gateway 内实现。
+
+2. **会话创建/成员管理的 WebSocket 暴露**（见 `conversation-ws-create-member`）  
+   - 现状：ConversationService 已有 CreateConversation、AddMember、RemoveMember，Gateway 未在 WS 中暴露。  
+   - 待做：Gateway 增加 `conversation.create`、`conversation.addMember`、`conversation.removeMember` 的 type 分发与 RPC 调用，返回对应 `.ok`。
+
+3. **会话列表未读计数 `unreadCount`**  
+   - 现状：`conversation.list.ok` 的 items 中 `unreadCount` 固定为 0。  
+   - 待做：未读数据模型（按用户+会话存储）、Message 或独立服务提供「未读查询/已读更新」能力，Gateway 聚合时填入 `unreadCount`。
+
+4. **已读回执 `message.read`**（见 `message-read-receipt`）  
+   - 现状：API 已定义 `message.read` / `message.read.ok`，后端未实现。  
+   - 待做：已读记录存储与 RPC（或扩展 MessageService），Gateway 处理 `message.read` 并调用；可选发布已读事件供对端/统计使用。
+
+### 体验与稳定性（随后）
+
+5. **单聊会话解析**：`message.send` 在未传 `conversationId` 仅传 `toUserId` 时，按 toUserId 查找或创建单聊会话并写入消息（当前要求必填 conversationId）。
+
+6. **限流**：Gateway 对 `message.send` 等按 userId 做 Redis 限流，触发时返回 `rate_limited`（见 `docs/API/websocket-client-api.md`）。
+
+### Admin 相关（最后）
+
+7. **Admin 按路由权限校验**（见 `TODO.yml` 中 `admin-permission-middleware`）：CheckPermission 中间件、ListUsers/封禁/配置等对接 RPC 或 etcd。
+
+---
 
 ## 四、下一步计划
 
 - **优先顺序**：
-  1. ~~`gateway-ws-upgrade`~~、~~`gateway-auth-integration`~~、~~`gateway-presence-integration`~~、~~`auth-service`~~、~~`user-service`~~、~~`presence-service`~~、~~`message-service`~~、~~`conversation-service`~~、~~`gateway-conversation-message-integration`~~、~~`admin-service` 骨架与核心接口~~（已完成）。
-  2. **当前可选**：Admin 按路由 CheckPermission 中间件；消息投递与 `message.push`（Delivery 或 Gateway 内消费 MQ 并推送）。
-  3. 随后：未读计数、已读回执等按产品需求推进。
+  1. ~~网关与五大 RPC 基础集成~~（已完成）。
+  2. **当前建议**：消息投递 `message.push` → 会话 WS 暴露（create/addMember/removeMember）→ 未读计数 → 已读回执 `message.read`。
+  3. 随后：单聊会话解析、限流、测试与部署文档。
+  4. **最后**：Admin 权限中间件与占位接口对接。
 
 - 实现前请对照：
   - Gateway：`docs/backend/gateway-design.md`、`docs/API/websocket-client-api.md`。

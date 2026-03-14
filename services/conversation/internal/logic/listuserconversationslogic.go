@@ -54,6 +54,10 @@ func (l *ListUserConversationsLogic) ListUserConversations(in *pb.ListUserConver
 	items := make([]*pb.ConversationInfo, 0, len(list))
 	for _, c := range list {
 		count, _ := l.svcCtx.Conv.CountMembers(c.ID)
+		joinType := c.JoinType
+		if joinType == "" {
+			joinType = "approval"
+		}
 		items = append(items, &pb.ConversationInfo{
 			Id:            c.ID,
 			Type:          c.Type,
@@ -61,6 +65,8 @@ func (l *ListUserConversationsLogic) ListUserConversations(in *pb.ListUserConver
 			MemberCount:   int32(count),
 			CreatedAt:     c.CreatedAt.Unix(),
 			LastActiveAt:  c.LastActiveAt.Unix(),
+			Announcement:  c.Announcement,
+			JoinType:      joinType,
 		})
 	}
 	var nextCursor string

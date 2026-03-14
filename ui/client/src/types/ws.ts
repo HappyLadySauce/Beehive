@@ -126,6 +126,7 @@ export interface ConversationItem {
   name: string
   avatar: string
   type: 'single' | 'group' | 'channel'
+  memberCount?: number
   lastMessage?: {
     serverMsgId: string
     preview: string

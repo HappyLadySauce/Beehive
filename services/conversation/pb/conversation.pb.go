@@ -317,6 +317,8 @@ type ConversationInfo struct {
 	MemberCount   int32                  `protobuf:"varint,4,opt,name=member_count,json=memberCount,proto3" json:"member_count,omitempty"`
 	CreatedAt     int64                  `protobuf:"varint,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	LastActiveAt  int64                  `protobuf:"varint,6,opt,name=last_active_at,json=lastActiveAt,proto3" json:"last_active_at,omitempty"`
+	Announcement  string                 `protobuf:"bytes,7,opt,name=announcement,proto3" json:"announcement,omitempty"`         // 群公告，仅群聊使用
+	JoinType      string                 `protobuf:"bytes,8,opt,name=join_type,json=joinType,proto3" json:"join_type,omitempty"` // 群加入方式：approval=需审批，direct=直接加入，仅群聊有效
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -391,6 +393,20 @@ func (x *ConversationInfo) GetLastActiveAt() int64 {
 		return x.LastActiveAt
 	}
 	return 0
+}
+
+func (x *ConversationInfo) GetAnnouncement() string {
+	if x != nil {
+		return x.Announcement
+	}
+	return ""
+}
+
+func (x *ConversationInfo) GetJoinType() string {
+	if x != nil {
+		return x.JoinType
+	}
+	return ""
 }
 
 type ListUserConversationsRequest struct {
@@ -845,6 +861,482 @@ func (x *FindOrCreateSingleConversationResponse) GetConversationId() string {
 	return ""
 }
 
+type ApplyJoinGroupRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConversationId string                 `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	UserId         string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Message        string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ApplyJoinGroupRequest) Reset() {
+	*x = ApplyJoinGroupRequest{}
+	mi := &file_proto_conversation_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApplyJoinGroupRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplyJoinGroupRequest) ProtoMessage() {}
+
+func (x *ApplyJoinGroupRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplyJoinGroupRequest.ProtoReflect.Descriptor instead.
+func (*ApplyJoinGroupRequest) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ApplyJoinGroupRequest) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
+func (x *ApplyJoinGroupRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ApplyJoinGroupRequest) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type ApplyJoinGroupResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	Joined        bool                   `protobuf:"varint,2,opt,name=joined,proto3" json:"joined,omitempty"` // true 表示已直接加入（join_type=direct），无需审批
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApplyJoinGroupResponse) Reset() {
+	*x = ApplyJoinGroupResponse{}
+	mi := &file_proto_conversation_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApplyJoinGroupResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplyJoinGroupResponse) ProtoMessage() {}
+
+func (x *ApplyJoinGroupResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplyJoinGroupResponse.ProtoReflect.Descriptor instead.
+func (*ApplyJoinGroupResponse) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ApplyJoinGroupResponse) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *ApplyJoinGroupResponse) GetJoined() bool {
+	if x != nil {
+		return x.Joined
+	}
+	return false
+}
+
+type ListJoinRequestsRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConversationId string                 `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	UserId         string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // 调用方（群主/管理员）
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ListJoinRequestsRequest) Reset() {
+	*x = ListJoinRequestsRequest{}
+	mi := &file_proto_conversation_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListJoinRequestsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListJoinRequestsRequest) ProtoMessage() {}
+
+func (x *ListJoinRequestsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListJoinRequestsRequest.ProtoReflect.Descriptor instead.
+func (*ListJoinRequestsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ListJoinRequestsRequest) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
+func (x *ListJoinRequestsRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type JoinRequestItem struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	RequestId      string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	ConversationId string                 `protobuf:"bytes,2,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	UserId         string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Message        string                 `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
+	CreatedAt      int64                  `protobuf:"varint,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *JoinRequestItem) Reset() {
+	*x = JoinRequestItem{}
+	mi := &file_proto_conversation_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinRequestItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinRequestItem) ProtoMessage() {}
+
+func (x *JoinRequestItem) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinRequestItem.ProtoReflect.Descriptor instead.
+func (*JoinRequestItem) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *JoinRequestItem) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *JoinRequestItem) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
+func (x *JoinRequestItem) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *JoinRequestItem) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *JoinRequestItem) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+type ListJoinRequestsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*JoinRequestItem     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListJoinRequestsResponse) Reset() {
+	*x = ListJoinRequestsResponse{}
+	mi := &file_proto_conversation_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListJoinRequestsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListJoinRequestsResponse) ProtoMessage() {}
+
+func (x *ListJoinRequestsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListJoinRequestsResponse.ProtoReflect.Descriptor instead.
+func (*ListJoinRequestsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListJoinRequestsResponse) GetItems() []*JoinRequestItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type ApproveJoinRequestRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConversationId string                 `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	RequestId      string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	UserId         string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // 审批人（群主/管理员）
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ApproveJoinRequestRequest) Reset() {
+	*x = ApproveJoinRequestRequest{}
+	mi := &file_proto_conversation_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApproveJoinRequestRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApproveJoinRequestRequest) ProtoMessage() {}
+
+func (x *ApproveJoinRequestRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApproveJoinRequestRequest.ProtoReflect.Descriptor instead.
+func (*ApproveJoinRequestRequest) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ApproveJoinRequestRequest) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
+func (x *ApproveJoinRequestRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *ApproveJoinRequestRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type ApproveJoinRequestResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApproveJoinRequestResponse) Reset() {
+	*x = ApproveJoinRequestResponse{}
+	mi := &file_proto_conversation_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApproveJoinRequestResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApproveJoinRequestResponse) ProtoMessage() {}
+
+func (x *ApproveJoinRequestResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApproveJoinRequestResponse.ProtoReflect.Descriptor instead.
+func (*ApproveJoinRequestResponse) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{22}
+}
+
+type DeclineJoinRequestRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConversationId string                 `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	RequestId      string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	UserId         string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *DeclineJoinRequestRequest) Reset() {
+	*x = DeclineJoinRequestRequest{}
+	mi := &file_proto_conversation_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeclineJoinRequestRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeclineJoinRequestRequest) ProtoMessage() {}
+
+func (x *DeclineJoinRequestRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeclineJoinRequestRequest.ProtoReflect.Descriptor instead.
+func (*DeclineJoinRequestRequest) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *DeclineJoinRequestRequest) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
+func (x *DeclineJoinRequestRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *DeclineJoinRequestRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type DeclineJoinRequestResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeclineJoinRequestResponse) Reset() {
+	*x = DeclineJoinRequestResponse{}
+	mi := &file_proto_conversation_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeclineJoinRequestResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeclineJoinRequestResponse) ProtoMessage() {}
+
+func (x *DeclineJoinRequestResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeclineJoinRequestResponse.ProtoReflect.Descriptor instead.
+func (*DeclineJoinRequestResponse) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{24}
+}
+
 var File_proto_conversation_proto protoreflect.FileDescriptor
 
 const file_proto_conversation_proto_rawDesc = "" +
@@ -865,7 +1357,7 @@ const file_proto_conversation_proto_rawDesc = "" +
 	"\x13RemoveMemberRequest\x12'\n" +
 	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"\x16\n" +
-	"\x14RemoveMemberResponse\"\xb2\x01\n" +
+	"\x14RemoveMemberResponse\"\xf3\x01\n" +
 	"\x10ConversationInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x12\n" +
@@ -873,7 +1365,9 @@ const file_proto_conversation_proto_rawDesc = "" +
 	"\fmember_count\x18\x04 \x01(\x05R\vmemberCount\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\x03R\tcreatedAt\x12$\n" +
-	"\x0elast_active_at\x18\x06 \x01(\x03R\flastActiveAt\"e\n" +
+	"\x0elast_active_at\x18\x06 \x01(\x03R\flastActiveAt\x12\"\n" +
+	"\fannouncement\x18\a \x01(\tR\fannouncement\x12\x1b\n" +
+	"\tjoin_type\x18\b \x01(\tR\bjoinType\"e\n" +
 	"\x1cListUserConversationsRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
@@ -900,7 +1394,41 @@ const file_proto_conversation_proto_rawDesc = "" +
 	"\tuser_id_1\x18\x01 \x01(\tR\auserId1\x12\x1a\n" +
 	"\tuser_id_2\x18\x02 \x01(\tR\auserId2\"Q\n" +
 	"&FindOrCreateSingleConversationResponse\x12'\n" +
-	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId2\xc8\x06\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\"s\n" +
+	"\x15ApplyJoinGroupRequest\x12'\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"O\n" +
+	"\x16ApplyJoinGroupResponse\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12\x16\n" +
+	"\x06joined\x18\x02 \x01(\bR\x06joined\"[\n" +
+	"\x17ListJoinRequestsRequest\x12'\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"\xab\x01\n" +
+	"\x0fJoinRequestItem\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12'\n" +
+	"\x0fconversation_id\x18\x02 \x01(\tR\x0econversationId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x18\n" +
+	"\amessage\x18\x04 \x01(\tR\amessage\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\x03R\tcreatedAt\"W\n" +
+	"\x18ListJoinRequestsResponse\x12;\n" +
+	"\x05items\x18\x01 \x03(\v2%.beehive.conversation.JoinRequestItemR\x05items\"|\n" +
+	"\x19ApproveJoinRequestRequest\x12'\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"\x1c\n" +
+	"\x1aApproveJoinRequestResponse\"|\n" +
+	"\x19DeclineJoinRequestRequest\x12'\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"\x1c\n" +
+	"\x1aDeclineJoinRequestResponse2\x9a\n" +
+	"\n" +
 	"\x13ConversationService\x12w\n" +
 	"\x12CreateConversation\x12/.beehive.conversation.CreateConversationRequest\x1a0.beehive.conversation.CreateConversationResponse\x12\\\n" +
 	"\tAddMember\x12&.beehive.conversation.AddMemberRequest\x1a'.beehive.conversation.AddMemberResponse\x12e\n" +
@@ -908,7 +1436,11 @@ const file_proto_conversation_proto_rawDesc = "" +
 	"\x15ListUserConversations\x122.beehive.conversation.ListUserConversationsRequest\x1a3.beehive.conversation.ListUserConversationsResponse\x12n\n" +
 	"\x0fGetConversation\x12,.beehive.conversation.GetConversationRequest\x1a-.beehive.conversation.GetConversationResponse\x12b\n" +
 	"\vListMembers\x12(.beehive.conversation.ListMembersRequest\x1a).beehive.conversation.ListMembersResponse\x12\x9b\x01\n" +
-	"\x1eFindOrCreateSingleConversation\x12;.beehive.conversation.FindOrCreateSingleConversationRequest\x1a<.beehive.conversation.FindOrCreateSingleConversationResponseB<Z:github.com/HappyLadySauce/Beehive/services/conversation/pbb\x06proto3"
+	"\x1eFindOrCreateSingleConversation\x12;.beehive.conversation.FindOrCreateSingleConversationRequest\x1a<.beehive.conversation.FindOrCreateSingleConversationResponse\x12k\n" +
+	"\x0eApplyJoinGroup\x12+.beehive.conversation.ApplyJoinGroupRequest\x1a,.beehive.conversation.ApplyJoinGroupResponse\x12q\n" +
+	"\x10ListJoinRequests\x12-.beehive.conversation.ListJoinRequestsRequest\x1a..beehive.conversation.ListJoinRequestsResponse\x12w\n" +
+	"\x12ApproveJoinRequest\x12/.beehive.conversation.ApproveJoinRequestRequest\x1a0.beehive.conversation.ApproveJoinRequestResponse\x12w\n" +
+	"\x12DeclineJoinRequest\x12/.beehive.conversation.DeclineJoinRequestRequest\x1a0.beehive.conversation.DeclineJoinRequestResponseB\x1cZ\x1a./services/conversation/pbb\x06proto3"
 
 var (
 	file_proto_conversation_proto_rawDescOnce sync.Once
@@ -922,7 +1454,7 @@ func file_proto_conversation_proto_rawDescGZIP() []byte {
 	return file_proto_conversation_proto_rawDescData
 }
 
-var file_proto_conversation_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_proto_conversation_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_proto_conversation_proto_goTypes = []any{
 	(*CreateConversationRequest)(nil),              // 0: beehive.conversation.CreateConversationRequest
 	(*CreateConversationResponse)(nil),             // 1: beehive.conversation.CreateConversationResponse
@@ -940,30 +1472,48 @@ var file_proto_conversation_proto_goTypes = []any{
 	(*ListMembersResponse)(nil),                    // 13: beehive.conversation.ListMembersResponse
 	(*FindOrCreateSingleConversationRequest)(nil),  // 14: beehive.conversation.FindOrCreateSingleConversationRequest
 	(*FindOrCreateSingleConversationResponse)(nil), // 15: beehive.conversation.FindOrCreateSingleConversationResponse
+	(*ApplyJoinGroupRequest)(nil),                  // 16: beehive.conversation.ApplyJoinGroupRequest
+	(*ApplyJoinGroupResponse)(nil),                 // 17: beehive.conversation.ApplyJoinGroupResponse
+	(*ListJoinRequestsRequest)(nil),                // 18: beehive.conversation.ListJoinRequestsRequest
+	(*JoinRequestItem)(nil),                        // 19: beehive.conversation.JoinRequestItem
+	(*ListJoinRequestsResponse)(nil),               // 20: beehive.conversation.ListJoinRequestsResponse
+	(*ApproveJoinRequestRequest)(nil),              // 21: beehive.conversation.ApproveJoinRequestRequest
+	(*ApproveJoinRequestResponse)(nil),             // 22: beehive.conversation.ApproveJoinRequestResponse
+	(*DeclineJoinRequestRequest)(nil),              // 23: beehive.conversation.DeclineJoinRequestRequest
+	(*DeclineJoinRequestResponse)(nil),             // 24: beehive.conversation.DeclineJoinRequestResponse
 }
 var file_proto_conversation_proto_depIdxs = []int32{
 	6,  // 0: beehive.conversation.ListUserConversationsResponse.items:type_name -> beehive.conversation.ConversationInfo
 	6,  // 1: beehive.conversation.GetConversationResponse.conversation:type_name -> beehive.conversation.ConversationInfo
 	12, // 2: beehive.conversation.ListMembersResponse.items:type_name -> beehive.conversation.MemberInfo
-	0,  // 3: beehive.conversation.ConversationService.CreateConversation:input_type -> beehive.conversation.CreateConversationRequest
-	2,  // 4: beehive.conversation.ConversationService.AddMember:input_type -> beehive.conversation.AddMemberRequest
-	4,  // 5: beehive.conversation.ConversationService.RemoveMember:input_type -> beehive.conversation.RemoveMemberRequest
-	7,  // 6: beehive.conversation.ConversationService.ListUserConversations:input_type -> beehive.conversation.ListUserConversationsRequest
-	9,  // 7: beehive.conversation.ConversationService.GetConversation:input_type -> beehive.conversation.GetConversationRequest
-	11, // 8: beehive.conversation.ConversationService.ListMembers:input_type -> beehive.conversation.ListMembersRequest
-	14, // 9: beehive.conversation.ConversationService.FindOrCreateSingleConversation:input_type -> beehive.conversation.FindOrCreateSingleConversationRequest
-	1,  // 10: beehive.conversation.ConversationService.CreateConversation:output_type -> beehive.conversation.CreateConversationResponse
-	3,  // 11: beehive.conversation.ConversationService.AddMember:output_type -> beehive.conversation.AddMemberResponse
-	5,  // 12: beehive.conversation.ConversationService.RemoveMember:output_type -> beehive.conversation.RemoveMemberResponse
-	8,  // 13: beehive.conversation.ConversationService.ListUserConversations:output_type -> beehive.conversation.ListUserConversationsResponse
-	10, // 14: beehive.conversation.ConversationService.GetConversation:output_type -> beehive.conversation.GetConversationResponse
-	13, // 15: beehive.conversation.ConversationService.ListMembers:output_type -> beehive.conversation.ListMembersResponse
-	15, // 16: beehive.conversation.ConversationService.FindOrCreateSingleConversation:output_type -> beehive.conversation.FindOrCreateSingleConversationResponse
-	10, // [10:17] is the sub-list for method output_type
-	3,  // [3:10] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	19, // 3: beehive.conversation.ListJoinRequestsResponse.items:type_name -> beehive.conversation.JoinRequestItem
+	0,  // 4: beehive.conversation.ConversationService.CreateConversation:input_type -> beehive.conversation.CreateConversationRequest
+	2,  // 5: beehive.conversation.ConversationService.AddMember:input_type -> beehive.conversation.AddMemberRequest
+	4,  // 6: beehive.conversation.ConversationService.RemoveMember:input_type -> beehive.conversation.RemoveMemberRequest
+	7,  // 7: beehive.conversation.ConversationService.ListUserConversations:input_type -> beehive.conversation.ListUserConversationsRequest
+	9,  // 8: beehive.conversation.ConversationService.GetConversation:input_type -> beehive.conversation.GetConversationRequest
+	11, // 9: beehive.conversation.ConversationService.ListMembers:input_type -> beehive.conversation.ListMembersRequest
+	14, // 10: beehive.conversation.ConversationService.FindOrCreateSingleConversation:input_type -> beehive.conversation.FindOrCreateSingleConversationRequest
+	16, // 11: beehive.conversation.ConversationService.ApplyJoinGroup:input_type -> beehive.conversation.ApplyJoinGroupRequest
+	18, // 12: beehive.conversation.ConversationService.ListJoinRequests:input_type -> beehive.conversation.ListJoinRequestsRequest
+	21, // 13: beehive.conversation.ConversationService.ApproveJoinRequest:input_type -> beehive.conversation.ApproveJoinRequestRequest
+	23, // 14: beehive.conversation.ConversationService.DeclineJoinRequest:input_type -> beehive.conversation.DeclineJoinRequestRequest
+	1,  // 15: beehive.conversation.ConversationService.CreateConversation:output_type -> beehive.conversation.CreateConversationResponse
+	3,  // 16: beehive.conversation.ConversationService.AddMember:output_type -> beehive.conversation.AddMemberResponse
+	5,  // 17: beehive.conversation.ConversationService.RemoveMember:output_type -> beehive.conversation.RemoveMemberResponse
+	8,  // 18: beehive.conversation.ConversationService.ListUserConversations:output_type -> beehive.conversation.ListUserConversationsResponse
+	10, // 19: beehive.conversation.ConversationService.GetConversation:output_type -> beehive.conversation.GetConversationResponse
+	13, // 20: beehive.conversation.ConversationService.ListMembers:output_type -> beehive.conversation.ListMembersResponse
+	15, // 21: beehive.conversation.ConversationService.FindOrCreateSingleConversation:output_type -> beehive.conversation.FindOrCreateSingleConversationResponse
+	17, // 22: beehive.conversation.ConversationService.ApplyJoinGroup:output_type -> beehive.conversation.ApplyJoinGroupResponse
+	20, // 23: beehive.conversation.ConversationService.ListJoinRequests:output_type -> beehive.conversation.ListJoinRequestsResponse
+	22, // 24: beehive.conversation.ConversationService.ApproveJoinRequest:output_type -> beehive.conversation.ApproveJoinRequestResponse
+	24, // 25: beehive.conversation.ConversationService.DeclineJoinRequest:output_type -> beehive.conversation.DeclineJoinRequestResponse
+	15, // [15:26] is the sub-list for method output_type
+	4,  // [4:15] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_proto_conversation_proto_init() }
@@ -977,7 +1527,7 @@ func file_proto_conversation_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_conversation_proto_rawDesc), len(file_proto_conversation_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

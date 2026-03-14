@@ -57,3 +57,23 @@ func (s *UserServiceServer) RemoveContact(ctx context.Context, in *pb.RemoveCont
 	l := logic.NewRemoveContactLogic(ctx, s.svcCtx)
 	return l.RemoveContact(in)
 }
+
+func (s *UserServiceServer) CreateContactRequest(ctx context.Context, in *pb.CreateContactRequestRequest) (*pb.CreateContactRequestResponse, error) {
+	l := logic.NewCreateContactRequestLogic(ctx, s.svcCtx)
+	return l.CreateContactRequest(in)
+}
+
+func (s *UserServiceServer) ListContactRequests(ctx context.Context, in *pb.ListContactRequestsRequest) (*pb.ListContactRequestsResponse, error) {
+	l := logic.NewListContactRequestsLogic(ctx, s.svcCtx)
+	return l.ListContactRequests(in)
+}
+
+func (s *UserServiceServer) AcceptContactRequest(ctx context.Context, in *pb.AcceptContactRequestRequest) (*pb.AcceptContactRequestResponse, error) {
+	l := logic.NewAcceptContactRequestLogic(ctx, s.svcCtx)
+	return l.AcceptContactRequest(in)
+}
+
+func (s *UserServiceServer) DeclineContactRequest(ctx context.Context, in *pb.DeclineContactRequestRequest) (*pb.DeclineContactRequestResponse, error) {
+	l := logic.NewDeclineContactRequestLogic(ctx, s.svcCtx)
+	return l.DeclineContactRequest(in)
+}

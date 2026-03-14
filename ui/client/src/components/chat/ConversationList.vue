@@ -12,7 +12,9 @@
               <n-avatar round size="medium">{{ (c.name || c.id).slice(0, 1) }}</n-avatar>
             </n-badge>
           </template>
-          <template #header>{{ c.name || c.id }}</template>
+          <template #header>
+            {{ c.type === 'group' && c.memberCount != null ? `${c.name || c.id}(${c.memberCount})` : (c.name || c.id) }}
+          </template>
           <template #header-extra>
             <n-time :time="c.lastActiveAt * 1000" type="relative" />
           </template>

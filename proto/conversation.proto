@@ -13,6 +13,11 @@ service ConversationService {
   rpc ListMembers(ListMembersRequest) returns (ListMembersResponse);
   // FindOrCreateSingleConversation 查找或创建两人单聊会话，返回 conversation_id
   rpc FindOrCreateSingleConversation(FindOrCreateSingleConversationRequest) returns (FindOrCreateSingleConversationResponse);
+  // 群申请/审批
+  rpc ApplyJoinGroup(ApplyJoinGroupRequest) returns (ApplyJoinGroupResponse);
+  rpc ListJoinRequests(ListJoinRequestsRequest) returns (ListJoinRequestsResponse);
+  rpc ApproveJoinRequest(ApproveJoinRequestRequest) returns (ApproveJoinRequestResponse);
+  rpc DeclineJoinRequest(DeclineJoinRequestRequest) returns (DeclineJoinRequestResponse);
 }
 
 message CreateConversationRequest {
@@ -47,6 +52,8 @@ message ConversationInfo {
   int32 member_count = 4;
   int64 created_at = 5;
   int64 last_active_at = 6;
+  string announcement = 7;   // 群公告，仅群聊使用
+  string join_type = 8;       // 群加入方式：approval=需审批，direct=直接加入，仅群聊有效
 }
 
 message ListUserConversationsRequest {
@@ -91,4 +98,48 @@ message FindOrCreateSingleConversationRequest {
 message FindOrCreateSingleConversationResponse {
   string conversation_id = 1;
 }
+
+message ApplyJoinGroupRequest {
+  string conversation_id = 1;
+  string user_id = 2;
+  string message = 3;
+}
+
+message ApplyJoinGroupResponse {
+  string request_id = 1;
+  bool joined = 2;   // true 表示已直接加入（join_type=direct），无需审批
+}
+
+message ListJoinRequestsRequest {
+  string conversation_id = 1;
+  string user_id = 2;   // 调用方（群主/管理员）
+}
+
+message JoinRequestItem {
+  string request_id = 1;
+  string conversation_id = 2;
+  string user_id = 3;
+  string message = 4;
+  int64 created_at = 5;
+}
+
+message ListJoinRequestsResponse {
+  repeated JoinRequestItem items = 1;
+}
+
+message ApproveJoinRequestRequest {
+  string conversation_id = 1;
+  string request_id = 2;
+  string user_id = 3;   // 审批人（群主/管理员）
+}
+
+message ApproveJoinRequestResponse {}
+
+message DeclineJoinRequestRequest {
+  string conversation_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+}
+
+message DeclineJoinRequestResponse {}
 

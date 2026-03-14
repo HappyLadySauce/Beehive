@@ -16,9 +16,10 @@ type ServiceContext struct {
 
 	DB             *gorm.DB
 	Redis          *redis.Client
-	UserMod        *model.UserModel
-	UserProfileMod *model.UserProfileModel
-	ContactMod     *model.ContactModel
+	UserMod            *model.UserModel
+	UserProfileMod     *model.UserProfileModel
+	ContactMod         *model.ContactModel
+	ContactRequestMod  *model.ContactRequestModel
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -46,8 +47,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:         c,
 		DB:             db,
 		Redis:          rdb,
-		UserMod:        model.NewUserModel(db),
-		UserProfileMod: model.NewUserProfileModel(db),
-		ContactMod:     model.NewContactModel(db),
+		UserMod:           model.NewUserModel(db),
+		UserProfileMod:    model.NewUserProfileModel(db),
+		ContactMod:        model.NewContactModel(db),
+		ContactRequestMod: model.NewContactRequestModel(db),
 	}
 }

@@ -26,6 +26,10 @@ const (
 	ConversationService_GetConversation_FullMethodName                = "/beehive.conversation.ConversationService/GetConversation"
 	ConversationService_ListMembers_FullMethodName                    = "/beehive.conversation.ConversationService/ListMembers"
 	ConversationService_FindOrCreateSingleConversation_FullMethodName = "/beehive.conversation.ConversationService/FindOrCreateSingleConversation"
+	ConversationService_ApplyJoinGroup_FullMethodName                 = "/beehive.conversation.ConversationService/ApplyJoinGroup"
+	ConversationService_ListJoinRequests_FullMethodName               = "/beehive.conversation.ConversationService/ListJoinRequests"
+	ConversationService_ApproveJoinRequest_FullMethodName             = "/beehive.conversation.ConversationService/ApproveJoinRequest"
+	ConversationService_DeclineJoinRequest_FullMethodName             = "/beehive.conversation.ConversationService/DeclineJoinRequest"
 )
 
 // ConversationServiceClient is the client API for ConversationService service.
@@ -40,6 +44,11 @@ type ConversationServiceClient interface {
 	ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersResponse, error)
 	// FindOrCreateSingleConversation 查找或创建两人单聊会话，返回 conversation_id
 	FindOrCreateSingleConversation(ctx context.Context, in *FindOrCreateSingleConversationRequest, opts ...grpc.CallOption) (*FindOrCreateSingleConversationResponse, error)
+	// 群申请/审批
+	ApplyJoinGroup(ctx context.Context, in *ApplyJoinGroupRequest, opts ...grpc.CallOption) (*ApplyJoinGroupResponse, error)
+	ListJoinRequests(ctx context.Context, in *ListJoinRequestsRequest, opts ...grpc.CallOption) (*ListJoinRequestsResponse, error)
+	ApproveJoinRequest(ctx context.Context, in *ApproveJoinRequestRequest, opts ...grpc.CallOption) (*ApproveJoinRequestResponse, error)
+	DeclineJoinRequest(ctx context.Context, in *DeclineJoinRequestRequest, opts ...grpc.CallOption) (*DeclineJoinRequestResponse, error)
 }
 
 type conversationServiceClient struct {
@@ -120,6 +129,46 @@ func (c *conversationServiceClient) FindOrCreateSingleConversation(ctx context.C
 	return out, nil
 }
 
+func (c *conversationServiceClient) ApplyJoinGroup(ctx context.Context, in *ApplyJoinGroupRequest, opts ...grpc.CallOption) (*ApplyJoinGroupResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApplyJoinGroupResponse)
+	err := c.cc.Invoke(ctx, ConversationService_ApplyJoinGroup_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *conversationServiceClient) ListJoinRequests(ctx context.Context, in *ListJoinRequestsRequest, opts ...grpc.CallOption) (*ListJoinRequestsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListJoinRequestsResponse)
+	err := c.cc.Invoke(ctx, ConversationService_ListJoinRequests_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *conversationServiceClient) ApproveJoinRequest(ctx context.Context, in *ApproveJoinRequestRequest, opts ...grpc.CallOption) (*ApproveJoinRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApproveJoinRequestResponse)
+	err := c.cc.Invoke(ctx, ConversationService_ApproveJoinRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *conversationServiceClient) DeclineJoinRequest(ctx context.Context, in *DeclineJoinRequestRequest, opts ...grpc.CallOption) (*DeclineJoinRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeclineJoinRequestResponse)
+	err := c.cc.Invoke(ctx, ConversationService_DeclineJoinRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ConversationServiceServer is the server API for ConversationService service.
 // All implementations must embed UnimplementedConversationServiceServer
 // for forward compatibility.
@@ -132,6 +181,11 @@ type ConversationServiceServer interface {
 	ListMembers(context.Context, *ListMembersRequest) (*ListMembersResponse, error)
 	// FindOrCreateSingleConversation 查找或创建两人单聊会话，返回 conversation_id
 	FindOrCreateSingleConversation(context.Context, *FindOrCreateSingleConversationRequest) (*FindOrCreateSingleConversationResponse, error)
+	// 群申请/审批
+	ApplyJoinGroup(context.Context, *ApplyJoinGroupRequest) (*ApplyJoinGroupResponse, error)
+	ListJoinRequests(context.Context, *ListJoinRequestsRequest) (*ListJoinRequestsResponse, error)
+	ApproveJoinRequest(context.Context, *ApproveJoinRequestRequest) (*ApproveJoinRequestResponse, error)
+	DeclineJoinRequest(context.Context, *DeclineJoinRequestRequest) (*DeclineJoinRequestResponse, error)
 	mustEmbedUnimplementedConversationServiceServer()
 }
 
@@ -162,6 +216,18 @@ func (UnimplementedConversationServiceServer) ListMembers(context.Context, *List
 }
 func (UnimplementedConversationServiceServer) FindOrCreateSingleConversation(context.Context, *FindOrCreateSingleConversationRequest) (*FindOrCreateSingleConversationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method FindOrCreateSingleConversation not implemented")
+}
+func (UnimplementedConversationServiceServer) ApplyJoinGroup(context.Context, *ApplyJoinGroupRequest) (*ApplyJoinGroupResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ApplyJoinGroup not implemented")
+}
+func (UnimplementedConversationServiceServer) ListJoinRequests(context.Context, *ListJoinRequestsRequest) (*ListJoinRequestsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListJoinRequests not implemented")
+}
+func (UnimplementedConversationServiceServer) ApproveJoinRequest(context.Context, *ApproveJoinRequestRequest) (*ApproveJoinRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ApproveJoinRequest not implemented")
+}
+func (UnimplementedConversationServiceServer) DeclineJoinRequest(context.Context, *DeclineJoinRequestRequest) (*DeclineJoinRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeclineJoinRequest not implemented")
 }
 func (UnimplementedConversationServiceServer) mustEmbedUnimplementedConversationServiceServer() {}
 func (UnimplementedConversationServiceServer) testEmbeddedByValue()                             {}
@@ -310,6 +376,78 @@ func _ConversationService_FindOrCreateSingleConversation_Handler(srv interface{}
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ConversationService_ApplyJoinGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApplyJoinGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServiceServer).ApplyJoinGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ConversationService_ApplyJoinGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServiceServer).ApplyJoinGroup(ctx, req.(*ApplyJoinGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ConversationService_ListJoinRequests_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListJoinRequestsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServiceServer).ListJoinRequests(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ConversationService_ListJoinRequests_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServiceServer).ListJoinRequests(ctx, req.(*ListJoinRequestsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ConversationService_ApproveJoinRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApproveJoinRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServiceServer).ApproveJoinRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ConversationService_ApproveJoinRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServiceServer).ApproveJoinRequest(ctx, req.(*ApproveJoinRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ConversationService_DeclineJoinRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeclineJoinRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServiceServer).DeclineJoinRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ConversationService_DeclineJoinRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServiceServer).DeclineJoinRequest(ctx, req.(*DeclineJoinRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ConversationService_ServiceDesc is the grpc.ServiceDesc for ConversationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -344,6 +482,22 @@ var ConversationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FindOrCreateSingleConversation",
 			Handler:    _ConversationService_FindOrCreateSingleConversation_Handler,
+		},
+		{
+			MethodName: "ApplyJoinGroup",
+			Handler:    _ConversationService_ApplyJoinGroup_Handler,
+		},
+		{
+			MethodName: "ListJoinRequests",
+			Handler:    _ConversationService_ListJoinRequests_Handler,
+		},
+		{
+			MethodName: "ApproveJoinRequest",
+			Handler:    _ConversationService_ApproveJoinRequest_Handler,
+		},
+		{
+			MethodName: "DeclineJoinRequest",
+			Handler:    _ConversationService_DeclineJoinRequest_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

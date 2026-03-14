@@ -28,8 +28,17 @@ type (
 	ListUserConversationsRequest           = pb.ListUserConversationsRequest
 	ListUserConversationsResponse          = pb.ListUserConversationsResponse
 	MemberInfo                             = pb.MemberInfo
-	RemoveMemberRequest                    = pb.RemoveMemberRequest
-	RemoveMemberResponse                   = pb.RemoveMemberResponse
+	RemoveMemberRequest    = pb.RemoveMemberRequest
+	RemoveMemberResponse   = pb.RemoveMemberResponse
+
+	ApplyJoinGroupRequest    = pb.ApplyJoinGroupRequest
+	ApplyJoinGroupResponse   = pb.ApplyJoinGroupResponse
+	ListJoinRequestsRequest  = pb.ListJoinRequestsRequest
+	ListJoinRequestsResponse = pb.ListJoinRequestsResponse
+	ApproveJoinRequestRequest  = pb.ApproveJoinRequestRequest
+	ApproveJoinRequestResponse = pb.ApproveJoinRequestResponse
+	DeclineJoinRequestRequest  = pb.DeclineJoinRequestRequest
+	DeclineJoinRequestResponse = pb.DeclineJoinRequestResponse
 
 	ConversationService interface {
 		CreateConversation(ctx context.Context, in *CreateConversationRequest, opts ...grpc.CallOption) (*CreateConversationResponse, error)
@@ -39,6 +48,10 @@ type (
 		GetConversation(ctx context.Context, in *GetConversationRequest, opts ...grpc.CallOption) (*GetConversationResponse, error)
 		ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersResponse, error)
 		FindOrCreateSingleConversation(ctx context.Context, in *FindOrCreateSingleConversationRequest, opts ...grpc.CallOption) (*FindOrCreateSingleConversationResponse, error)
+		ApplyJoinGroup(ctx context.Context, in *ApplyJoinGroupRequest, opts ...grpc.CallOption) (*ApplyJoinGroupResponse, error)
+		ListJoinRequests(ctx context.Context, in *ListJoinRequestsRequest, opts ...grpc.CallOption) (*ListJoinRequestsResponse, error)
+		ApproveJoinRequest(ctx context.Context, in *ApproveJoinRequestRequest, opts ...grpc.CallOption) (*ApproveJoinRequestResponse, error)
+		DeclineJoinRequest(ctx context.Context, in *DeclineJoinRequestRequest, opts ...grpc.CallOption) (*DeclineJoinRequestResponse, error)
 	}
 
 	defaultConversationService struct {
@@ -85,4 +98,24 @@ func (m *defaultConversationService) ListMembers(ctx context.Context, in *ListMe
 func (m *defaultConversationService) FindOrCreateSingleConversation(ctx context.Context, in *FindOrCreateSingleConversationRequest, opts ...grpc.CallOption) (*FindOrCreateSingleConversationResponse, error) {
 	client := pb.NewConversationServiceClient(m.cli.Conn())
 	return client.FindOrCreateSingleConversation(ctx, in, opts...)
+}
+
+func (m *defaultConversationService) ApplyJoinGroup(ctx context.Context, in *ApplyJoinGroupRequest, opts ...grpc.CallOption) (*ApplyJoinGroupResponse, error) {
+	client := pb.NewConversationServiceClient(m.cli.Conn())
+	return client.ApplyJoinGroup(ctx, in, opts...)
+}
+
+func (m *defaultConversationService) ListJoinRequests(ctx context.Context, in *ListJoinRequestsRequest, opts ...grpc.CallOption) (*ListJoinRequestsResponse, error) {
+	client := pb.NewConversationServiceClient(m.cli.Conn())
+	return client.ListJoinRequests(ctx, in, opts...)
+}
+
+func (m *defaultConversationService) ApproveJoinRequest(ctx context.Context, in *ApproveJoinRequestRequest, opts ...grpc.CallOption) (*ApproveJoinRequestResponse, error) {
+	client := pb.NewConversationServiceClient(m.cli.Conn())
+	return client.ApproveJoinRequest(ctx, in, opts...)
+}
+
+func (m *defaultConversationService) DeclineJoinRequest(ctx context.Context, in *DeclineJoinRequestRequest, opts ...grpc.CallOption) (*DeclineJoinRequestResponse, error) {
+	client := pb.NewConversationServiceClient(m.cli.Conn())
+	return client.DeclineJoinRequest(ctx, in, opts...)
 }

@@ -57,3 +57,23 @@ func (s *ConversationServiceServer) FindOrCreateSingleConversation(ctx context.C
 	l := logic.NewFindOrCreateSingleConversationLogic(ctx, s.svcCtx)
 	return l.FindOrCreateSingleConversation(in)
 }
+
+func (s *ConversationServiceServer) ApplyJoinGroup(ctx context.Context, in *pb.ApplyJoinGroupRequest) (*pb.ApplyJoinGroupResponse, error) {
+	l := logic.NewApplyJoinGroupLogic(ctx, s.svcCtx)
+	return l.ApplyJoinGroup(in)
+}
+
+func (s *ConversationServiceServer) ListJoinRequests(ctx context.Context, in *pb.ListJoinRequestsRequest) (*pb.ListJoinRequestsResponse, error) {
+	l := logic.NewListJoinRequestsLogic(ctx, s.svcCtx)
+	return l.ListJoinRequests(in)
+}
+
+func (s *ConversationServiceServer) ApproveJoinRequest(ctx context.Context, in *pb.ApproveJoinRequestRequest) (*pb.ApproveJoinRequestResponse, error) {
+	l := logic.NewApproveJoinRequestLogic(ctx, s.svcCtx)
+	return l.ApproveJoinRequest(in)
+}
+
+func (s *ConversationServiceServer) DeclineJoinRequest(ctx context.Context, in *pb.DeclineJoinRequestRequest) (*pb.DeclineJoinRequestResponse, error) {
+	l := logic.NewDeclineJoinRequestLogic(ctx, s.svcCtx)
+	return l.DeclineJoinRequest(in)
+}

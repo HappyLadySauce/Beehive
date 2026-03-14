@@ -370,6 +370,9 @@
         "name": "Alice",
         "avatar": "",
         "type": "single",              // single | group | channel
+        "memberCount": 2,
+        "announcement": "",
+        "joinType": "approval",        // 仅群聊有效：approval=需审批加入，direct=直接加入
         "lastMessage": {
           "serverMsgId": "msg_789",
           "preview": "hello",
@@ -559,6 +562,76 @@
 }
 ```
 
+- **获取会话详情：`conversation.get` / `conversation.get.ok`**
+
+仅当前用户为该会话成员时可请求。用于群聊窗口拉取群名称、人数、公告等。
+
+请求：
+
+```json
+{
+  "type": "conversation.get",
+  "tid": "get-1",
+  "payload": { "id": "10000000001" }
+}
+```
+
+- `id`：会话 ID（单聊 UUID 或群聊 11 位群号）
+
+成功响应：
+
+```json
+{
+  "type": "conversation.get.ok",
+  "tid": "get-1",
+  "payload": {
+    "id": "10000000001",
+    "type": "group",
+    "name": "测试群",
+    "memberCount": 26,
+    "announcement": "群公告内容",
+    "joinType": "approval",
+    "createdAt": 1234567890,
+    "lastActiveAt": 1234567890
+  },
+  "error": null
+}
+```
+
+- `joinType`：仅群聊有效，`approval`=需审批加入，`direct`=直接加入（申请即入群）。
+
+- **获取会话成员列表：`conversation.listMembers` / `conversation.listMembers.ok`**
+
+仅当前用户为该会话成员时可请求。用于群聊右侧栏展示成员及群主/管理员角色。
+
+请求：
+
+```json
+{
+  "type": "conversation.listMembers",
+  "tid": "lm-1",
+  "payload": { "conversationId": "10000000001" }
+}
+```
+
+成功响应：
+
+```json
+{
+  "type": "conversation.listMembers.ok",
+  "tid": "lm-1",
+  "payload": {
+    "members": [
+      { "userId": "1000000002", "role": "owner", "joinedAt": 1234567890, "status": "active" },
+      { "userId": "1000000003", "role": "member", "joinedAt": 1234567890, "status": "active" }
+    ]
+  },
+  "error": null
+}
+```
+
+- `role`：`owner` | `admin` | `member`
+
 - **联系人：`contact.list` / `contact.add` / `contact.remove`**
 
   - **请求：`contact.list`**
@@ -606,7 +679,126 @@
 
   - **成功响应：`contact.remove.ok`**
 
-- 后续可扩展：`contact.request` / `contact.accept`（好友申请/通过流程）。
+- **好友申请：`contact.request` / `contact.requestList` / `contact.accept` / `contact.decline`**
+
+  - **请求：`contact.request`**（发起好友申请）
+
+    ```json
+    {
+      "type": "contact.request",
+      "tid": "cr-1",
+      "payload": {
+        "toUserId": "1234567890",
+        "toUsername": "alice",
+        "toAccount": "1234567890",
+        "message": "你好"
+      }
+    }
+    ```
+
+    - `toUserId` / `toUsername` / `toAccount` 三选一，表示对方用户；`message` 可选留言。
+
+  - **成功响应：`contact.request.ok`**
+
+    ```json
+    {
+      "type": "contact.request.ok",
+      "tid": "cr-1",
+      "payload": { "requestId": "uuid" },
+      "error": null
+    }
+    ```
+
+  - **请求：`contact.requestList`**（拉取发给当前用户的待处理好友申请）
+
+    ```json
+    { "type": "contact.requestList", "tid": "crl-1", "payload": {} }
+    ```
+
+  - **成功响应：`contact.requestList.ok`**
+
+    ```json
+    {
+      "type": "contact.requestList.ok",
+      "tid": "crl-1",
+      "payload": {
+        "items": [
+          { "requestId": "uuid", "fromUserId": "1000000002", "toUserId": "1000000003", "message": "你好", "createdAt": 1234567890 }
+        ]
+      },
+      "error": null
+    }
+    ```
+
+  - **请求：`contact.accept`**（通过好友申请）
+
+    ```json
+    {
+      "type": "contact.accept",
+      "tid": "ca-1",
+      "payload": { "requestId": "uuid" }
+    }
+    ```
+
+  - **成功响应：`contact.accept.ok`**
+
+  - **请求：`contact.decline`**（拒绝好友申请）
+
+    ```json
+    {
+      "type": "contact.decline",
+      "tid": "cd-1",
+      "payload": { "requestId": "uuid" }
+    }
+    ```
+
+  - **成功响应：`contact.decline.ok`**
+
+- **群申请/审批：`group.apply` / `group.joinRequestList` / `group.approve` / `group.decline`**
+
+  - **请求：`group.apply`**（申请加群）
+
+    ```json
+    {
+      "type": "group.apply",
+      "tid": "ga-1",
+      "payload": {
+        "conversationId": "10000000001",
+        "message": "申请加入"
+      }
+    }
+    ```
+
+    - 当前用户为申请人；`message` 可选。
+
+  - **成功响应：`group.apply.ok`**
+
+    - payload 含 **`joined`**（boolean）：为 `true` 表示群为「直接加入」模式，已入群；为 `false` 表示需审批，已提交申请。
+    - 需审批时 payload 还含 **`requestId`**，供后续查询；直接加入时无 `requestId`。客户端可根据 `joined` 提示「已加入群聊」或「已提交申请，等待管理员通过」。
+
+  - **请求：`group.joinRequestList`**（群主/管理员拉取待审批入群申请）
+
+    ```json
+    {
+      "type": "group.joinRequestList",
+      "tid": "gjr-1",
+      "payload": { "conversationId": "10000000001" }
+    }
+    ```
+
+  - **成功响应：`group.joinRequestList.ok`**，payload 含 `items` 数组，每项含 `requestId`、`conversationId`、`userId`、`message`、`createdAt`。
+
+  - **请求：`group.approve`** / **`group.decline`**
+
+    ```json
+    {
+      "type": "group.approve",
+      "tid": "gja-1",
+      "payload": { "conversationId": "10000000001", "requestId": "uuid" }
+    }
+    ```
+
+  - **成功响应：`group.approve.ok`** / **`group.decline.ok`**
 
 ---
 

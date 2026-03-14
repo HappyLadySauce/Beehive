@@ -23,11 +23,20 @@ type (
 	GetUserByUsernameRequest  = pb.GetUserByUsernameRequest
 	ListContactsRequest  = pb.ListContactsRequest
 	ListContactsResponse = pb.ListContactsResponse
-	RemoveContactRequest = pb.RemoveContactRequest
+	RemoveContactRequest  = pb.RemoveContactRequest
 	RemoveContactResponse = pb.RemoveContactResponse
-	UpdateUserRequest    = pb.UpdateUserRequest
-	UpdateUserResponse   = pb.UpdateUserResponse
-	User                 = pb.User
+	UpdateUserRequest     = pb.UpdateUserRequest
+	UpdateUserResponse    = pb.UpdateUserResponse
+	User                  = pb.User
+
+	CreateContactRequestRequest  = pb.CreateContactRequestRequest
+	CreateContactRequestResponse = pb.CreateContactRequestResponse
+	ListContactRequestsRequest   = pb.ListContactRequestsRequest
+	ListContactRequestsResponse = pb.ListContactRequestsResponse
+	AcceptContactRequestRequest  = pb.AcceptContactRequestRequest
+	AcceptContactRequestResponse = pb.AcceptContactRequestResponse
+	DeclineContactRequestRequest = pb.DeclineContactRequestRequest
+	DeclineContactRequestResponse = pb.DeclineContactRequestResponse
 
 	UserService interface {
 		GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
@@ -37,6 +46,10 @@ type (
 		AddContact(ctx context.Context, in *AddContactRequest, opts ...grpc.CallOption) (*AddContactResponse, error)
 		ListContacts(ctx context.Context, in *ListContactsRequest, opts ...grpc.CallOption) (*ListContactsResponse, error)
 		RemoveContact(ctx context.Context, in *RemoveContactRequest, opts ...grpc.CallOption) (*RemoveContactResponse, error)
+		CreateContactRequest(ctx context.Context, in *CreateContactRequestRequest, opts ...grpc.CallOption) (*CreateContactRequestResponse, error)
+		ListContactRequests(ctx context.Context, in *ListContactRequestsRequest, opts ...grpc.CallOption) (*ListContactRequestsResponse, error)
+		AcceptContactRequest(ctx context.Context, in *AcceptContactRequestRequest, opts ...grpc.CallOption) (*AcceptContactRequestResponse, error)
+		DeclineContactRequest(ctx context.Context, in *DeclineContactRequestRequest, opts ...grpc.CallOption) (*DeclineContactRequestResponse, error)
 	}
 
 	defaultUserService struct {
@@ -83,4 +96,24 @@ func (m *defaultUserService) ListContacts(ctx context.Context, in *ListContactsR
 func (m *defaultUserService) RemoveContact(ctx context.Context, in *RemoveContactRequest, opts ...grpc.CallOption) (*RemoveContactResponse, error) {
 	client := pb.NewUserServiceClient(m.cli.Conn())
 	return client.RemoveContact(ctx, in, opts...)
+}
+
+func (m *defaultUserService) CreateContactRequest(ctx context.Context, in *CreateContactRequestRequest, opts ...grpc.CallOption) (*CreateContactRequestResponse, error) {
+	client := pb.NewUserServiceClient(m.cli.Conn())
+	return client.CreateContactRequest(ctx, in, opts...)
+}
+
+func (m *defaultUserService) ListContactRequests(ctx context.Context, in *ListContactRequestsRequest, opts ...grpc.CallOption) (*ListContactRequestsResponse, error) {
+	client := pb.NewUserServiceClient(m.cli.Conn())
+	return client.ListContactRequests(ctx, in, opts...)
+}
+
+func (m *defaultUserService) AcceptContactRequest(ctx context.Context, in *AcceptContactRequestRequest, opts ...grpc.CallOption) (*AcceptContactRequestResponse, error) {
+	client := pb.NewUserServiceClient(m.cli.Conn())
+	return client.AcceptContactRequest(ctx, in, opts...)
+}
+
+func (m *defaultUserService) DeclineContactRequest(ctx context.Context, in *DeclineContactRequestRequest, opts ...grpc.CallOption) (*DeclineContactRequestResponse, error) {
+	client := pb.NewUserServiceClient(m.cli.Conn())
+	return client.DeclineContactRequest(ctx, in, opts...)
 }

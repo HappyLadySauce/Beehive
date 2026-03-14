@@ -693,6 +693,451 @@ func (*RemoveContactResponse) Descriptor() ([]byte, []int) {
 	return file_proto_user_proto_rawDescGZIP(), []int{13}
 }
 
+// 好友申请
+type CreateContactRequestRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FromUserId    string                 `protobuf:"bytes,1,opt,name=from_user_id,json=fromUserId,proto3" json:"from_user_id,omitempty"`
+	ToUserId      string                 `protobuf:"bytes,2,opt,name=to_user_id,json=toUserId,proto3" json:"to_user_id,omitempty"`
+	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateContactRequestRequest) Reset() {
+	*x = CreateContactRequestRequest{}
+	mi := &file_proto_user_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateContactRequestRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateContactRequestRequest) ProtoMessage() {}
+
+func (x *CreateContactRequestRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateContactRequestRequest.ProtoReflect.Descriptor instead.
+func (*CreateContactRequestRequest) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *CreateContactRequestRequest) GetFromUserId() string {
+	if x != nil {
+		return x.FromUserId
+	}
+	return ""
+}
+
+func (x *CreateContactRequestRequest) GetToUserId() string {
+	if x != nil {
+		return x.ToUserId
+	}
+	return ""
+}
+
+func (x *CreateContactRequestRequest) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type CreateContactRequestResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateContactRequestResponse) Reset() {
+	*x = CreateContactRequestResponse{}
+	mi := &file_proto_user_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateContactRequestResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateContactRequestResponse) ProtoMessage() {}
+
+func (x *CreateContactRequestResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateContactRequestResponse.ProtoReflect.Descriptor instead.
+func (*CreateContactRequestResponse) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *CreateContactRequestResponse) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type ListContactRequestsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // 当前用户 ID，返回发给该用户的待处理申请（to_user_id = user_id, status = pending）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListContactRequestsRequest) Reset() {
+	*x = ListContactRequestsRequest{}
+	mi := &file_proto_user_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListContactRequestsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListContactRequestsRequest) ProtoMessage() {}
+
+func (x *ListContactRequestsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListContactRequestsRequest.ProtoReflect.Descriptor instead.
+func (*ListContactRequestsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ListContactRequestsRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type ContactRequestItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	FromUserId    string                 `protobuf:"bytes,2,opt,name=from_user_id,json=fromUserId,proto3" json:"from_user_id,omitempty"`
+	ToUserId      string                 `protobuf:"bytes,3,opt,name=to_user_id,json=toUserId,proto3" json:"to_user_id,omitempty"`
+	Message       string                 `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ContactRequestItem) Reset() {
+	*x = ContactRequestItem{}
+	mi := &file_proto_user_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ContactRequestItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ContactRequestItem) ProtoMessage() {}
+
+func (x *ContactRequestItem) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ContactRequestItem.ProtoReflect.Descriptor instead.
+func (*ContactRequestItem) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ContactRequestItem) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *ContactRequestItem) GetFromUserId() string {
+	if x != nil {
+		return x.FromUserId
+	}
+	return ""
+}
+
+func (x *ContactRequestItem) GetToUserId() string {
+	if x != nil {
+		return x.ToUserId
+	}
+	return ""
+}
+
+func (x *ContactRequestItem) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ContactRequestItem) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+type ListContactRequestsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*ContactRequestItem  `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListContactRequestsResponse) Reset() {
+	*x = ListContactRequestsResponse{}
+	mi := &file_proto_user_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListContactRequestsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListContactRequestsResponse) ProtoMessage() {}
+
+func (x *ListContactRequestsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListContactRequestsResponse.ProtoReflect.Descriptor instead.
+func (*ListContactRequestsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ListContactRequestsResponse) GetItems() []*ContactRequestItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type AcceptContactRequestRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // 当前用户（接收方）
+	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AcceptContactRequestRequest) Reset() {
+	*x = AcceptContactRequestRequest{}
+	mi := &file_proto_user_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcceptContactRequestRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcceptContactRequestRequest) ProtoMessage() {}
+
+func (x *AcceptContactRequestRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcceptContactRequestRequest.ProtoReflect.Descriptor instead.
+func (*AcceptContactRequestRequest) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *AcceptContactRequestRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *AcceptContactRequestRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type AcceptContactRequestResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AcceptContactRequestResponse) Reset() {
+	*x = AcceptContactRequestResponse{}
+	mi := &file_proto_user_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcceptContactRequestResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcceptContactRequestResponse) ProtoMessage() {}
+
+func (x *AcceptContactRequestResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcceptContactRequestResponse.ProtoReflect.Descriptor instead.
+func (*AcceptContactRequestResponse) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{20}
+}
+
+type DeclineContactRequestRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeclineContactRequestRequest) Reset() {
+	*x = DeclineContactRequestRequest{}
+	mi := &file_proto_user_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeclineContactRequestRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeclineContactRequestRequest) ProtoMessage() {}
+
+func (x *DeclineContactRequestRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeclineContactRequestRequest.ProtoReflect.Descriptor instead.
+func (*DeclineContactRequestRequest) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *DeclineContactRequestRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *DeclineContactRequestRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type DeclineContactRequestResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeclineContactRequestResponse) Reset() {
+	*x = DeclineContactRequestResponse{}
+	mi := &file_proto_user_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeclineContactRequestResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeclineContactRequestResponse) ProtoMessage() {}
+
+func (x *DeclineContactRequestResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeclineContactRequestResponse.ProtoReflect.Descriptor instead.
+func (*DeclineContactRequestResponse) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{22}
+}
+
 var File_proto_user_proto protoreflect.FileDescriptor
 
 const file_proto_user_proto_rawDesc = "" +
@@ -734,7 +1179,40 @@ const file_proto_user_proto_rawDesc = "" +
 	"\x14RemoveContactRequest\x12\x19\n" +
 	"\bowner_id\x18\x01 \x01(\tR\aownerId\x12&\n" +
 	"\x0fcontact_user_id\x18\x02 \x01(\tR\rcontactUserId\"\x17\n" +
-	"\x15RemoveContactResponse2\xde\x04\n" +
+	"\x15RemoveContactResponse\"w\n" +
+	"\x1bCreateContactRequestRequest\x12 \n" +
+	"\ffrom_user_id\x18\x01 \x01(\tR\n" +
+	"fromUserId\x12\x1c\n" +
+	"\n" +
+	"to_user_id\x18\x02 \x01(\tR\btoUserId\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"=\n" +
+	"\x1cCreateContactRequestResponse\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\"5\n" +
+	"\x1aListContactRequestsRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"\xac\x01\n" +
+	"\x12ContactRequestItem\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12 \n" +
+	"\ffrom_user_id\x18\x02 \x01(\tR\n" +
+	"fromUserId\x12\x1c\n" +
+	"\n" +
+	"to_user_id\x18\x03 \x01(\tR\btoUserId\x12\x18\n" +
+	"\amessage\x18\x04 \x01(\tR\amessage\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\x03R\tcreatedAt\"U\n" +
+	"\x1bListContactRequestsResponse\x126\n" +
+	"\x05items\x18\x01 \x03(\v2 .beehive.user.ContactRequestItemR\x05items\"U\n" +
+	"\x1bAcceptContactRequestRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"\x1e\n" +
+	"\x1cAcceptContactRequestResponse\"V\n" +
+	"\x1cDeclineContactRequestRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"\x1f\n" +
+	"\x1dDeclineContactRequestResponse2\x9a\b\n" +
 	"\vUserService\x12F\n" +
 	"\aGetUser\x12\x1c.beehive.user.GetUserRequest\x1a\x1d.beehive.user.GetUserResponse\x12Z\n" +
 	"\x11GetUserByUsername\x12&.beehive.user.GetUserByUsernameRequest\x1a\x1d.beehive.user.GetUserResponse\x12X\n" +
@@ -744,7 +1222,11 @@ const file_proto_user_proto_rawDesc = "" +
 	"\n" +
 	"AddContact\x12\x1f.beehive.user.AddContactRequest\x1a .beehive.user.AddContactResponse\x12U\n" +
 	"\fListContacts\x12!.beehive.user.ListContactsRequest\x1a\".beehive.user.ListContactsResponse\x12X\n" +
-	"\rRemoveContact\x12\".beehive.user.RemoveContactRequest\x1a#.beehive.user.RemoveContactResponseB\x14Z\x12./services/user/pbb\x06proto3"
+	"\rRemoveContact\x12\".beehive.user.RemoveContactRequest\x1a#.beehive.user.RemoveContactResponse\x12m\n" +
+	"\x14CreateContactRequest\x12).beehive.user.CreateContactRequestRequest\x1a*.beehive.user.CreateContactRequestResponse\x12j\n" +
+	"\x13ListContactRequests\x12(.beehive.user.ListContactRequestsRequest\x1a).beehive.user.ListContactRequestsResponse\x12m\n" +
+	"\x14AcceptContactRequest\x12).beehive.user.AcceptContactRequestRequest\x1a*.beehive.user.AcceptContactRequestResponse\x12p\n" +
+	"\x15DeclineContactRequest\x12*.beehive.user.DeclineContactRequestRequest\x1a+.beehive.user.DeclineContactRequestResponseB\x14Z\x12./services/user/pbb\x06proto3"
 
 var (
 	file_proto_user_proto_rawDescOnce sync.Once
@@ -758,46 +1240,64 @@ func file_proto_user_proto_rawDescGZIP() []byte {
 	return file_proto_user_proto_rawDescData
 }
 
-var file_proto_user_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_proto_user_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_proto_user_proto_goTypes = []any{
-	(*GetUserByUsernameRequest)(nil), // 0: beehive.user.GetUserByUsernameRequest
-	(*GetUserRequest)(nil),           // 1: beehive.user.GetUserRequest
-	(*GetUserResponse)(nil),          // 2: beehive.user.GetUserResponse
-	(*BatchGetUsersRequest)(nil),     // 3: beehive.user.BatchGetUsersRequest
-	(*BatchGetUsersResponse)(nil),    // 4: beehive.user.BatchGetUsersResponse
-	(*UpdateUserRequest)(nil),        // 5: beehive.user.UpdateUserRequest
-	(*UpdateUserResponse)(nil),       // 6: beehive.user.UpdateUserResponse
-	(*User)(nil),                     // 7: beehive.user.User
-	(*AddContactRequest)(nil),        // 8: beehive.user.AddContactRequest
-	(*AddContactResponse)(nil),       // 9: beehive.user.AddContactResponse
-	(*ListContactsRequest)(nil),      // 10: beehive.user.ListContactsRequest
-	(*ListContactsResponse)(nil),     // 11: beehive.user.ListContactsResponse
-	(*RemoveContactRequest)(nil),     // 12: beehive.user.RemoveContactRequest
-	(*RemoveContactResponse)(nil),    // 13: beehive.user.RemoveContactResponse
+	(*GetUserByUsernameRequest)(nil),      // 0: beehive.user.GetUserByUsernameRequest
+	(*GetUserRequest)(nil),                // 1: beehive.user.GetUserRequest
+	(*GetUserResponse)(nil),               // 2: beehive.user.GetUserResponse
+	(*BatchGetUsersRequest)(nil),          // 3: beehive.user.BatchGetUsersRequest
+	(*BatchGetUsersResponse)(nil),         // 4: beehive.user.BatchGetUsersResponse
+	(*UpdateUserRequest)(nil),             // 5: beehive.user.UpdateUserRequest
+	(*UpdateUserResponse)(nil),            // 6: beehive.user.UpdateUserResponse
+	(*User)(nil),                          // 7: beehive.user.User
+	(*AddContactRequest)(nil),             // 8: beehive.user.AddContactRequest
+	(*AddContactResponse)(nil),            // 9: beehive.user.AddContactResponse
+	(*ListContactsRequest)(nil),           // 10: beehive.user.ListContactsRequest
+	(*ListContactsResponse)(nil),          // 11: beehive.user.ListContactsResponse
+	(*RemoveContactRequest)(nil),          // 12: beehive.user.RemoveContactRequest
+	(*RemoveContactResponse)(nil),         // 13: beehive.user.RemoveContactResponse
+	(*CreateContactRequestRequest)(nil),   // 14: beehive.user.CreateContactRequestRequest
+	(*CreateContactRequestResponse)(nil),  // 15: beehive.user.CreateContactRequestResponse
+	(*ListContactRequestsRequest)(nil),    // 16: beehive.user.ListContactRequestsRequest
+	(*ContactRequestItem)(nil),            // 17: beehive.user.ContactRequestItem
+	(*ListContactRequestsResponse)(nil),   // 18: beehive.user.ListContactRequestsResponse
+	(*AcceptContactRequestRequest)(nil),   // 19: beehive.user.AcceptContactRequestRequest
+	(*AcceptContactRequestResponse)(nil),  // 20: beehive.user.AcceptContactRequestResponse
+	(*DeclineContactRequestRequest)(nil),  // 21: beehive.user.DeclineContactRequestRequest
+	(*DeclineContactRequestResponse)(nil), // 22: beehive.user.DeclineContactRequestResponse
 }
 var file_proto_user_proto_depIdxs = []int32{
 	7,  // 0: beehive.user.GetUserResponse.user:type_name -> beehive.user.User
 	7,  // 1: beehive.user.BatchGetUsersResponse.users:type_name -> beehive.user.User
 	7,  // 2: beehive.user.UpdateUserResponse.user:type_name -> beehive.user.User
-	1,  // 3: beehive.user.UserService.GetUser:input_type -> beehive.user.GetUserRequest
-	0,  // 4: beehive.user.UserService.GetUserByUsername:input_type -> beehive.user.GetUserByUsernameRequest
-	3,  // 5: beehive.user.UserService.BatchGetUsers:input_type -> beehive.user.BatchGetUsersRequest
-	5,  // 6: beehive.user.UserService.UpdateUser:input_type -> beehive.user.UpdateUserRequest
-	8,  // 7: beehive.user.UserService.AddContact:input_type -> beehive.user.AddContactRequest
-	10, // 8: beehive.user.UserService.ListContacts:input_type -> beehive.user.ListContactsRequest
-	12, // 9: beehive.user.UserService.RemoveContact:input_type -> beehive.user.RemoveContactRequest
-	2,  // 10: beehive.user.UserService.GetUser:output_type -> beehive.user.GetUserResponse
-	2,  // 11: beehive.user.UserService.GetUserByUsername:output_type -> beehive.user.GetUserResponse
-	4,  // 12: beehive.user.UserService.BatchGetUsers:output_type -> beehive.user.BatchGetUsersResponse
-	6,  // 13: beehive.user.UserService.UpdateUser:output_type -> beehive.user.UpdateUserResponse
-	9,  // 14: beehive.user.UserService.AddContact:output_type -> beehive.user.AddContactResponse
-	11, // 15: beehive.user.UserService.ListContacts:output_type -> beehive.user.ListContactsResponse
-	13, // 16: beehive.user.UserService.RemoveContact:output_type -> beehive.user.RemoveContactResponse
-	10, // [10:17] is the sub-list for method output_type
-	3,  // [3:10] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	17, // 3: beehive.user.ListContactRequestsResponse.items:type_name -> beehive.user.ContactRequestItem
+	1,  // 4: beehive.user.UserService.GetUser:input_type -> beehive.user.GetUserRequest
+	0,  // 5: beehive.user.UserService.GetUserByUsername:input_type -> beehive.user.GetUserByUsernameRequest
+	3,  // 6: beehive.user.UserService.BatchGetUsers:input_type -> beehive.user.BatchGetUsersRequest
+	5,  // 7: beehive.user.UserService.UpdateUser:input_type -> beehive.user.UpdateUserRequest
+	8,  // 8: beehive.user.UserService.AddContact:input_type -> beehive.user.AddContactRequest
+	10, // 9: beehive.user.UserService.ListContacts:input_type -> beehive.user.ListContactsRequest
+	12, // 10: beehive.user.UserService.RemoveContact:input_type -> beehive.user.RemoveContactRequest
+	14, // 11: beehive.user.UserService.CreateContactRequest:input_type -> beehive.user.CreateContactRequestRequest
+	16, // 12: beehive.user.UserService.ListContactRequests:input_type -> beehive.user.ListContactRequestsRequest
+	19, // 13: beehive.user.UserService.AcceptContactRequest:input_type -> beehive.user.AcceptContactRequestRequest
+	21, // 14: beehive.user.UserService.DeclineContactRequest:input_type -> beehive.user.DeclineContactRequestRequest
+	2,  // 15: beehive.user.UserService.GetUser:output_type -> beehive.user.GetUserResponse
+	2,  // 16: beehive.user.UserService.GetUserByUsername:output_type -> beehive.user.GetUserResponse
+	4,  // 17: beehive.user.UserService.BatchGetUsers:output_type -> beehive.user.BatchGetUsersResponse
+	6,  // 18: beehive.user.UserService.UpdateUser:output_type -> beehive.user.UpdateUserResponse
+	9,  // 19: beehive.user.UserService.AddContact:output_type -> beehive.user.AddContactResponse
+	11, // 20: beehive.user.UserService.ListContacts:output_type -> beehive.user.ListContactsResponse
+	13, // 21: beehive.user.UserService.RemoveContact:output_type -> beehive.user.RemoveContactResponse
+	15, // 22: beehive.user.UserService.CreateContactRequest:output_type -> beehive.user.CreateContactRequestResponse
+	18, // 23: beehive.user.UserService.ListContactRequests:output_type -> beehive.user.ListContactRequestsResponse
+	20, // 24: beehive.user.UserService.AcceptContactRequest:output_type -> beehive.user.AcceptContactRequestResponse
+	22, // 25: beehive.user.UserService.DeclineContactRequest:output_type -> beehive.user.DeclineContactRequestResponse
+	15, // [15:26] is the sub-list for method output_type
+	4,  // [4:15] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_proto_user_proto_init() }
@@ -811,7 +1311,7 @@ func file_proto_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_user_proto_rawDesc), len(file_proto_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -14,6 +14,7 @@ type ServiceContext struct {
 	Config config.Config
 	DB     *gorm.DB
 	Conv   *model.ConversationModel
+	JoinReq *model.GroupJoinRequestModel
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -31,8 +32,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		sqlDB.SetConnMaxLifetime(time.Hour)
 	}
 	return &ServiceContext{
-		Config: c,
-		DB:     db,
-		Conv:   model.NewConversationModel(db),
+		Config:  c,
+		DB:      db,
+		Conv:    model.NewConversationModel(db),
+		JoinReq: model.NewGroupJoinRequestModel(db),
 	}
 }

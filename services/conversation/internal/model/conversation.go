@@ -7,10 +7,13 @@ import (
 )
 
 // Conversation 对应 conversations 表。单聊 id 为 UUID 字符串，群聊 id 为 11 位数字字符串。
+// JoinType 仅群聊有效：approval=需审批加入，direct=直接加入。
 type Conversation struct {
 	ID           string    `gorm:"column:id;type:varchar(36);primaryKey"`
 	Type         string    `gorm:"column:type;type:text;not null;default:single"`
 	Name         string    `gorm:"column:name;type:text;not null;default:''"`
+	Announcement string    `gorm:"column:announcement;type:text;not null;default:''"`
+	JoinType     string    `gorm:"column:join_type;type:text;not null;default:approval"`
 	CreatedAt    time.Time `gorm:"column:created_at;type:timestamptz;not null"`
 	LastActiveAt time.Time `gorm:"column:last_active_at;type:timestamptz;not null"`
 }

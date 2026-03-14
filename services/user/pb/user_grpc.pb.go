@@ -19,13 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_GetUser_FullMethodName           = "/beehive.user.UserService/GetUser"
-	UserService_GetUserByUsername_FullMethodName = "/beehive.user.UserService/GetUserByUsername"
-	UserService_BatchGetUsers_FullMethodName     = "/beehive.user.UserService/BatchGetUsers"
-	UserService_UpdateUser_FullMethodName        = "/beehive.user.UserService/UpdateUser"
-	UserService_AddContact_FullMethodName        = "/beehive.user.UserService/AddContact"
-	UserService_ListContacts_FullMethodName      = "/beehive.user.UserService/ListContacts"
-	UserService_RemoveContact_FullMethodName     = "/beehive.user.UserService/RemoveContact"
+	UserService_GetUser_FullMethodName               = "/beehive.user.UserService/GetUser"
+	UserService_GetUserByUsername_FullMethodName     = "/beehive.user.UserService/GetUserByUsername"
+	UserService_BatchGetUsers_FullMethodName         = "/beehive.user.UserService/BatchGetUsers"
+	UserService_UpdateUser_FullMethodName            = "/beehive.user.UserService/UpdateUser"
+	UserService_AddContact_FullMethodName            = "/beehive.user.UserService/AddContact"
+	UserService_ListContacts_FullMethodName          = "/beehive.user.UserService/ListContacts"
+	UserService_RemoveContact_FullMethodName         = "/beehive.user.UserService/RemoveContact"
+	UserService_CreateContactRequest_FullMethodName  = "/beehive.user.UserService/CreateContactRequest"
+	UserService_ListContactRequests_FullMethodName   = "/beehive.user.UserService/ListContactRequests"
+	UserService_AcceptContactRequest_FullMethodName  = "/beehive.user.UserService/AcceptContactRequest"
+	UserService_DeclineContactRequest_FullMethodName = "/beehive.user.UserService/DeclineContactRequest"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -40,6 +44,11 @@ type UserServiceClient interface {
 	AddContact(ctx context.Context, in *AddContactRequest, opts ...grpc.CallOption) (*AddContactResponse, error)
 	ListContacts(ctx context.Context, in *ListContactsRequest, opts ...grpc.CallOption) (*ListContactsResponse, error)
 	RemoveContact(ctx context.Context, in *RemoveContactRequest, opts ...grpc.CallOption) (*RemoveContactResponse, error)
+	// 好友申请
+	CreateContactRequest(ctx context.Context, in *CreateContactRequestRequest, opts ...grpc.CallOption) (*CreateContactRequestResponse, error)
+	ListContactRequests(ctx context.Context, in *ListContactRequestsRequest, opts ...grpc.CallOption) (*ListContactRequestsResponse, error)
+	AcceptContactRequest(ctx context.Context, in *AcceptContactRequestRequest, opts ...grpc.CallOption) (*AcceptContactRequestResponse, error)
+	DeclineContactRequest(ctx context.Context, in *DeclineContactRequestRequest, opts ...grpc.CallOption) (*DeclineContactRequestResponse, error)
 }
 
 type userServiceClient struct {
@@ -120,6 +129,46 @@ func (c *userServiceClient) RemoveContact(ctx context.Context, in *RemoveContact
 	return out, nil
 }
 
+func (c *userServiceClient) CreateContactRequest(ctx context.Context, in *CreateContactRequestRequest, opts ...grpc.CallOption) (*CreateContactRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateContactRequestResponse)
+	err := c.cc.Invoke(ctx, UserService_CreateContactRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) ListContactRequests(ctx context.Context, in *ListContactRequestsRequest, opts ...grpc.CallOption) (*ListContactRequestsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListContactRequestsResponse)
+	err := c.cc.Invoke(ctx, UserService_ListContactRequests_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) AcceptContactRequest(ctx context.Context, in *AcceptContactRequestRequest, opts ...grpc.CallOption) (*AcceptContactRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AcceptContactRequestResponse)
+	err := c.cc.Invoke(ctx, UserService_AcceptContactRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) DeclineContactRequest(ctx context.Context, in *DeclineContactRequestRequest, opts ...grpc.CallOption) (*DeclineContactRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeclineContactRequestResponse)
+	err := c.cc.Invoke(ctx, UserService_DeclineContactRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -132,6 +181,11 @@ type UserServiceServer interface {
 	AddContact(context.Context, *AddContactRequest) (*AddContactResponse, error)
 	ListContacts(context.Context, *ListContactsRequest) (*ListContactsResponse, error)
 	RemoveContact(context.Context, *RemoveContactRequest) (*RemoveContactResponse, error)
+	// 好友申请
+	CreateContactRequest(context.Context, *CreateContactRequestRequest) (*CreateContactRequestResponse, error)
+	ListContactRequests(context.Context, *ListContactRequestsRequest) (*ListContactRequestsResponse, error)
+	AcceptContactRequest(context.Context, *AcceptContactRequestRequest) (*AcceptContactRequestResponse, error)
+	DeclineContactRequest(context.Context, *DeclineContactRequestRequest) (*DeclineContactRequestResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -162,6 +216,18 @@ func (UnimplementedUserServiceServer) ListContacts(context.Context, *ListContact
 }
 func (UnimplementedUserServiceServer) RemoveContact(context.Context, *RemoveContactRequest) (*RemoveContactResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RemoveContact not implemented")
+}
+func (UnimplementedUserServiceServer) CreateContactRequest(context.Context, *CreateContactRequestRequest) (*CreateContactRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateContactRequest not implemented")
+}
+func (UnimplementedUserServiceServer) ListContactRequests(context.Context, *ListContactRequestsRequest) (*ListContactRequestsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListContactRequests not implemented")
+}
+func (UnimplementedUserServiceServer) AcceptContactRequest(context.Context, *AcceptContactRequestRequest) (*AcceptContactRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AcceptContactRequest not implemented")
+}
+func (UnimplementedUserServiceServer) DeclineContactRequest(context.Context, *DeclineContactRequestRequest) (*DeclineContactRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeclineContactRequest not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -310,6 +376,78 @@ func _UserService_RemoveContact_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_CreateContactRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateContactRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).CreateContactRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_CreateContactRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).CreateContactRequest(ctx, req.(*CreateContactRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_ListContactRequests_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListContactRequestsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ListContactRequests(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_ListContactRequests_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ListContactRequests(ctx, req.(*ListContactRequestsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_AcceptContactRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AcceptContactRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).AcceptContactRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_AcceptContactRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).AcceptContactRequest(ctx, req.(*AcceptContactRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_DeclineContactRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeclineContactRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).DeclineContactRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_DeclineContactRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).DeclineContactRequest(ctx, req.(*DeclineContactRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -344,6 +482,22 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveContact",
 			Handler:    _UserService_RemoveContact_Handler,
+		},
+		{
+			MethodName: "CreateContactRequest",
+			Handler:    _UserService_CreateContactRequest_Handler,
+		},
+		{
+			MethodName: "ListContactRequests",
+			Handler:    _UserService_ListContactRequests_Handler,
+		},
+		{
+			MethodName: "AcceptContactRequest",
+			Handler:    _UserService_AcceptContactRequest_Handler,
+		},
+		{
+			MethodName: "DeclineContactRequest",
+			Handler:    _UserService_DeclineContactRequest_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

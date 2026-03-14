@@ -1,3 +1,4 @@
+# 执行顺序：设计文档 → 后端项（memberCount/群公告/conversation.get-listMembers/好友申请/群申请）→ 前端项
 version: 1
 updated_at: 2026-03-14
 areas:
@@ -128,4 +129,72 @@ areas:
         owner: ""
         tags: [admin, rbac, middleware]
         notes: "已实现 PermissionMiddleware(permission)，路由按权限分组注册；admin.user.read/ban、admin.conversation.read、admin.message.read、admin.config.read/write、admin.ops.use；无权限或 RPC 错误返回 code 1003（见 docs/API/admin-http-api.md）"
+      - id: conversation-list-member-count
+        title: 会话列表 conversation.list.ok 透传 memberCount
+        status: done
+        service: gateway
+        owner: ""
+        tags: [gateway, conversation]
+        notes: "handleConversationList 中每个 item 增加 memberCount（来自 ListUserConversations 的 ConversationInfo），依赖 conversation-service 已有返回"
+      - id: group-announcement
+        title: 群公告（DB + Proto + Conversation + Gateway）
+        status: done
+        service: conversation
+        owner: ""
+        tags: [conversation, db, gateway]
+        notes: "conversations 表增加 announcement；ConversationInfo 增加 announcement；GetConversation/ListUserConversations 填充；conversation.list/get 透传"
+      - id: conversation-get-list-members
+        title: WS conversation.get 与 conversation.listMembers
+        status: done
+        service: gateway
+        owner: ""
+        tags: [gateway, conversation]
+        notes: "Gateway 新增 type 分发 conversation.get、conversation.listMembers，调用 ConversationService 对应 RPC，供群聊窗口拉取群详情与成员（含 role）"
+      - id: contact-request
+        title: 好友申请（contact_requests + User RPC + Gateway WS）
+        status: done
+        service: user
+        owner: ""
+        tags: [user, gateway, db]
+        notes: "contact_requests 表；UserService CreateContactRequest/ListContactRequests/Accept/Decline；Gateway contact.request/requestList/accept/decline"
+      - id: group-join-request
+        title: 群申请/审批（group_join_requests + RPC + Gateway，可选）
+        status: done
+        service: conversation
+        owner: ""
+        tags: [conversation, gateway, db]
+        notes: "group_join_requests 表；ApplyJoinGroup/ListJoinRequests/Approve/Decline；Gateway group.apply/joinRequestList/approve/decline"
+  - id: frontend-client
+    name: IM 客户端前端（M2）
+    items:
+      - id: frontend-design-doc
+        title: 编写/完善前端设计文档（与参考图对应、操作与 WS 依赖）
+        status: done
+        owner: ""
+        tags: [frontend, docs]
+        notes: "完善 docs/frontend/im-client-redesign.md：与参考图对应关系、左侧栏/群聊窗口/操作与依赖表；与 PROGRESS.md、TODO.yml 执行计划一致"
+      - id: frontend-layout
+        title: 左侧栏 Beehive+头像、收起仅保留头像
+        status: done
+        owner: ""
+        tags: [frontend, layout]
+        notes: "AppShell 左侧顶部展示 Beehive 与用户头像，collapse 时隐藏 Beehive 保留头像；见 docs/frontend/im-client-redesign.md"
+      - id: frontend-nav-list
+        title: 消息/联系人/设置 导航与列表
+        status: done
+        owner: ""
+        tags: [frontend, nav]
+        notes: "导航第一项消息（会话列表含群人数）、第二项联系人（好友与群、搜索）、最底设置"
+      - id: frontend-group-sidebar
+        title: 群聊窗口 标题(人数)+右侧群公告与成员
+        status: done
+        owner: ""
+        tags: [frontend, chat]
+        notes: "依赖 conversation.get、conversation.listMembers；群聊时显示右侧栏群公告与成员（群主/管理员标识）"
+      - id: frontend-notifications-actions
+        title: 好友/群通知、退出群聊、删除好友 操作入口
+        status: done
+        owner: ""
+        tags: [frontend, contacts]
+        notes: "联系人页好友通知/群通知入口；群聊更多菜单退出群聊；联系人列表删除好友；依赖 contact.requestList、group.joinRequestList 等"
 

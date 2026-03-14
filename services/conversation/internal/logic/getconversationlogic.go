@@ -42,6 +42,10 @@ func (l *GetConversationLogic) GetConversation(in *pb.GetConversationRequest) (*
 		l.Errorf("count members failed: %v", err)
 		return nil, status.Errorf(codes.Internal, "count members failed: %v", err)
 	}
+	joinType := c.JoinType
+	if joinType == "" {
+		joinType = "approval"
+	}
 	return &pb.GetConversationResponse{
 		Conversation: &pb.ConversationInfo{
 			Id:            c.ID,
@@ -50,6 +54,8 @@ func (l *GetConversationLogic) GetConversation(in *pb.GetConversationRequest) (*
 			MemberCount:   int32(count),
 			CreatedAt:     c.CreatedAt.Unix(),
 			LastActiveAt:  c.LastActiveAt.Unix(),
+			Announcement:  c.Announcement,
+			JoinType:      joinType,
 		},
 	}, nil
 }

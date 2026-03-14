@@ -1,14 +1,27 @@
 <template>
   <n-layout has-sider class="app-shell">
-    <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="240" show-trigger>
-      <div class="sidebar-header">
-        <span class="logo">Beehive</span>
+    <n-layout-sider v-model:collapsed="siderCollapsed" bordered collapse-mode="width" :collapsed-width="64" :width="240" show-trigger>
+      <div class="sidebar-header" :class="{ collapsed: siderCollapsed }">
+        <span v-show="!siderCollapsed" class="logo">Beehive</span>
+        <n-dropdown :options="userOptions" trigger="click" @select="handleUserSelect">
+          <n-button quaternary circle class="sidebar-avatar">
+            <n-avatar round size="small">{{ userInitial }}</n-avatar>
+          </n-button>
+        </n-dropdown>
       </div>
-      <n-menu
-        :options="menuOptions"
-        :value="currentMenu"
-        @update:value="handleMenuSelect"
-      />
+      <div class="sidebar-nav">
+        <n-menu
+          :options="mainMenuOptions"
+          :value="currentMenu"
+          @update:value="handleMenuSelect"
+        />
+        <n-menu
+          :options="bottomMenuOptions"
+          :value="currentMenu"
+          @update:value="handleMenuSelect"
+          class="bottom-menu"
+        />
+      </div>
     </n-layout-sider>
     <n-layout>
       <n-layout-header bordered class="header">
@@ -27,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NLayout, NLayoutSider, NLayoutHeader, NLayoutContent, NMenu, NButton, NAvatar, NDropdown } from 'naive-ui'
 import type { MenuOption } from 'naive-ui'
@@ -37,9 +50,13 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
-const menuOptions: MenuOption[] = [
-  { label: '会话', key: 'chats', path: '/app/chats' },
+const siderCollapsed = ref(false)
+
+const mainMenuOptions: MenuOption[] = [
+  { label: '消息', key: 'chats', path: '/app/chats' },
   { label: '联系人', key: 'contacts', path: '/app/contacts' },
+]
+const bottomMenuOptions: MenuOption[] = [
   { label: '设置', key: 'settings', path: '/app/settings' },
 ]
 
@@ -54,7 +71,7 @@ const currentMenu = computed(() => {
 const headerTitle = computed(() => {
   if (route.path.startsWith('/app/settings')) return '设置'
   if (route.path.startsWith('/app/contacts')) return '联系人'
-  return '会话'
+  return '消息'
 })
 
 const userInitial = computed(() => {
@@ -69,7 +86,7 @@ const userOptions = [
 ]
 
 function handleMenuSelect(key: string) {
-  const opt = menuOptions.find((o) => o.key === key)
+  const opt = [...mainMenuOptions, ...bottomMenuOptions].find((o) => o.key === key)
   if (opt && 'path' in opt) router.push(opt.path as string)
 }
 
@@ -89,9 +106,33 @@ function handleUserSelect(key: string) {
   padding: 16px;
   font-weight: 600;
   border-bottom: 1px solid var(--n-border-color);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sidebar-header.collapsed {
+  justify-content: center;
+  padding: 12px;
+}
+.sidebar-header .sidebar-avatar {
+  flex-shrink: 0;
 }
 .logo {
   font-size: 1.25rem;
+  flex: 1;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.sidebar-nav .n-menu {
+  flex: 1;
+}
+.sidebar-nav .bottom-menu {
+  margin-top: auto;
+  flex: 0;
 }
 .header {
   display: flex;

@@ -27,6 +27,9 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const auth = useAuthStore()
+  if (to.path === '/') {
+    return { path: auth.loggedIn ? '/app/chats' : '/auth/login' }
+  }
   if (to.meta.requiresAuth && !auth.loggedIn) {
     return { path: '/auth/login', query: { redirect: to.fullPath } }
   }

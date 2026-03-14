@@ -13,6 +13,11 @@ service UserService {
   rpc AddContact(AddContactRequest) returns (AddContactResponse);
   rpc ListContacts(ListContactsRequest) returns (ListContactsResponse);
   rpc RemoveContact(RemoveContactRequest) returns (RemoveContactResponse);
+  // 好友申请
+  rpc CreateContactRequest(CreateContactRequestRequest) returns (CreateContactRequestResponse);
+  rpc ListContactRequests(ListContactRequestsRequest) returns (ListContactRequestsResponse);
+  rpc AcceptContactRequest(AcceptContactRequestRequest) returns (AcceptContactRequestResponse);
+  rpc DeclineContactRequest(DeclineContactRequestRequest) returns (DeclineContactRequestResponse);
 }
 
 message GetUserByUsernameRequest {
@@ -75,4 +80,45 @@ message RemoveContactRequest {
 }
 
 message RemoveContactResponse {}
+
+// 好友申请
+message CreateContactRequestRequest {
+  string from_user_id = 1;
+  string to_user_id = 2;
+  string message = 3;
+}
+
+message CreateContactRequestResponse {
+  string request_id = 1;
+}
+
+message ListContactRequestsRequest {
+  string user_id = 1;   // 当前用户 ID，返回发给该用户的待处理申请（to_user_id = user_id, status = pending）
+}
+
+message ContactRequestItem {
+  string request_id = 1;
+  string from_user_id = 2;
+  string to_user_id = 3;
+  string message = 4;
+  int64 created_at = 5;
+}
+
+message ListContactRequestsResponse {
+  repeated ContactRequestItem items = 1;
+}
+
+message AcceptContactRequestRequest {
+  string user_id = 1;      // 当前用户（接收方）
+  string request_id = 2;
+}
+
+message AcceptContactRequestResponse {}
+
+message DeclineContactRequestRequest {
+  string user_id = 1;
+  string request_id = 2;
+}
+
+message DeclineContactRequestResponse {}
 

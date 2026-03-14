@@ -88,6 +88,10 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 		l.handleConversationAddMember(c, env)
 	case "conversation.removeMember":
 		l.handleConversationRemoveMember(c, env)
+	case "conversation.get":
+		l.handleConversationGet(c, env)
+	case "conversation.listMembers":
+		l.handleConversationListMembers(c, env)
 	case "message.send":
 		l.handleMessageSend(c, env)
 	case "message.history":
@@ -100,6 +104,22 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 		l.handleContactAdd(c, env)
 	case "contact.remove":
 		l.handleContactRemove(c, env)
+	case "contact.request":
+		l.handleContactRequest(c, env)
+	case "contact.requestList":
+		l.handleContactRequestList(c, env)
+	case "contact.accept":
+		l.handleContactAccept(c, env)
+	case "contact.decline":
+		l.handleContactDecline(c, env)
+	case "group.apply":
+		l.handleGroupApply(c, env)
+	case "group.joinRequestList":
+		l.handleGroupJoinRequestList(c, env)
+	case "group.approve":
+		l.handleGroupApprove(c, env)
+	case "group.decline":
+		l.handleGroupDecline(c, env)
 	default:
 		l.sendError(c, env.Tid, "bad_request", "unknown type: "+env.Type)
 	}
@@ -393,11 +413,18 @@ func (l *WsEntryLogic) handleConversationList(c *ws.Connection, env *ws.Envelope
 				unread = int(n)
 			}
 		}
+		joinType := item.JoinType
+		if joinType == "" {
+			joinType = "approval"
+		}
 		entry := map[string]any{
 			"id":            item.Id,
 			"name":          item.Name,
 			"avatar":        "",
 			"type":          item.Type,
+			"memberCount":   item.MemberCount,
+			"announcement":  item.Announcement,
+			"joinType":      joinType,
 			"unreadCount":   unread,
 			"lastActiveAt":  item.LastActiveAt,
 		}
@@ -609,6 +636,127 @@ func (l *WsEntryLogic) handleConversationRemoveMember(c *ws.Connection, env *ws.
 		Type:    "conversation.removeMember.ok",
 		Tid:     env.Tid,
 		Payload: map[string]any{},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleConversationGet(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.ConversationSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "conversation service not configured")
+		return
+	}
+	var payload struct {
+		Id string `json:"id"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.Id == "" {
+		l.sendError(c, env.Tid, "bad_request", "id is required")
+		return
+	}
+	membersResp, err := l.svcCtx.ConversationSvc.ListMembers(l.ctx, &conversationservice.ListMembersRequest{ConversationId: payload.Id})
+	if err != nil {
+		if s, ok := status.FromError(err); ok && s.Code() == codes.NotFound {
+			l.sendError(c, env.Tid, "not_found", s.Message())
+			return
+		}
+		l.Errorf("list members for get failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	var isMember bool
+	for _, m := range membersResp.Items {
+		if m.UserId == c.UserID && m.Status == "active" {
+			isMember = true
+			break
+		}
+	}
+	if !isMember {
+		l.sendError(c, env.Tid, "forbidden", "not a member of this conversation")
+		return
+	}
+	resp, err := l.svcCtx.ConversationSvc.GetConversation(l.ctx, &conversationservice.GetConversationRequest{Id: payload.Id})
+	if err != nil {
+		if s, ok := status.FromError(err); ok && s.Code() == codes.NotFound {
+			l.sendError(c, env.Tid, "not_found", s.Message())
+			return
+		}
+		l.Errorf("get conversation failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	conv := resp.Conversation
+	joinType := conv.GetJoinType()
+	if joinType == "" {
+		joinType = "approval"
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type: "conversation.get.ok",
+		Tid:  env.Tid,
+		Payload: map[string]any{
+			"id":            conv.Id,
+			"type":          conv.Type,
+			"name":          conv.Name,
+			"memberCount":   conv.MemberCount,
+			"announcement":  conv.Announcement,
+			"joinType":      joinType,
+			"createdAt":    conv.CreatedAt,
+			"lastActiveAt": conv.LastActiveAt,
+		},
+		Error: nil,
+	})
+}
+
+func (l *WsEntryLogic) handleConversationListMembers(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.ConversationSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "conversation service not configured")
+		return
+	}
+	var payload struct {
+		ConversationId string `json:"conversationId"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ConversationId == "" {
+		l.sendError(c, env.Tid, "bad_request", "conversationId is required")
+		return
+	}
+	resp, err := l.svcCtx.ConversationSvc.ListMembers(l.ctx, &conversationservice.ListMembersRequest{ConversationId: payload.ConversationId})
+	if err != nil {
+		if s, ok := status.FromError(err); ok && s.Code() == codes.NotFound {
+			l.sendError(c, env.Tid, "not_found", s.Message())
+			return
+		}
+		l.Errorf("list members failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	var isMember bool
+	for _, m := range resp.Items {
+		if m.UserId == c.UserID && m.Status == "active" {
+			isMember = true
+			break
+		}
+	}
+	if !isMember {
+		l.sendError(c, env.Tid, "forbidden", "not a member of this conversation")
+		return
+	}
+	members := make([]map[string]any, 0, len(resp.Items))
+	for _, m := range resp.Items {
+		members = append(members, map[string]any{
+			"userId":   m.UserId,
+			"role":     m.Role,
+			"joinedAt": m.JoinedAt,
+			"status":   m.Status,
+		})
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "conversation.listMembers.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{"members": members},
 		Error:   nil,
 	})
 }
@@ -921,6 +1069,353 @@ func (l *WsEntryLogic) handleContactRemove(c *ws.Connection, env *ws.Envelope) {
 	}
 	_ = c.WriteJSON(&ws.Envelope{
 		Type:    "contact.remove.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleContactRequest(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.UserSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "user service not configured")
+		return
+	}
+	var payload struct {
+		ToUserId   string `json:"toUserId"`
+		ToUsername  string `json:"toUsername"`
+		ToAccount   string `json:"toAccount"`
+		Message    string `json:"message"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	var toUserID string
+	switch {
+	case payload.ToUserId != "":
+		toUserID = payload.ToUserId
+	case payload.ToAccount != "":
+		u, err := l.svcCtx.UserSvc.GetUser(l.ctx, &userservice.GetUserRequest{Id: payload.ToAccount})
+		if err != nil || u.GetUser() == nil {
+			l.sendError(c, env.Tid, "not_found", "to user not found")
+			return
+		}
+		toUserID = u.GetUser().GetId()
+	case payload.ToUsername != "":
+		u, err := l.svcCtx.UserSvc.GetUserByUsername(l.ctx, &userservice.GetUserByUsernameRequest{Username: payload.ToUsername})
+		if err != nil || u.GetUser() == nil {
+			l.sendError(c, env.Tid, "not_found", "to user not found")
+			return
+		}
+		toUserID = u.GetUser().GetId()
+	default:
+		l.sendError(c, env.Tid, "bad_request", "toUserId, toUsername or toAccount is required")
+		return
+	}
+	resp, err := l.svcCtx.UserSvc.CreateContactRequest(l.ctx, &userservice.CreateContactRequestRequest{
+		FromUserId: c.UserID,
+		ToUserId:   toUserID,
+		Message:    payload.Message,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.AlreadyExists:
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			case codes.NotFound:
+				l.sendError(c, env.Tid, "not_found", s.Message())
+				return
+			}
+		}
+		l.Errorf("create contact request failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "contact.request.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{"requestId": resp.GetRequestId()},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleContactRequestList(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.UserSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "user service not configured")
+		return
+	}
+	resp, err := l.svcCtx.UserSvc.ListContactRequests(l.ctx, &userservice.ListContactRequestsRequest{UserId: c.UserID})
+	if err != nil {
+		l.Errorf("list contact requests failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	items := make([]map[string]any, 0, len(resp.GetItems()))
+	for _, it := range resp.GetItems() {
+		items = append(items, map[string]any{
+			"requestId":  it.GetRequestId(),
+			"fromUserId": it.GetFromUserId(),
+			"toUserId":   it.GetToUserId(),
+			"message":    it.GetMessage(),
+			"createdAt":  it.GetCreatedAt(),
+		})
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "contact.requestList.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{"items": items},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleContactAccept(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.UserSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "user service not configured")
+		return
+	}
+	var payload struct {
+		RequestId string `json:"requestId"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.RequestId == "" {
+		l.sendError(c, env.Tid, "bad_request", "requestId is required")
+		return
+	}
+	_, err := l.svcCtx.UserSvc.AcceptContactRequest(l.ctx, &userservice.AcceptContactRequestRequest{
+		UserId:    c.UserID,
+		RequestId: payload.RequestId,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok && s.Code() == codes.NotFound {
+			l.sendError(c, env.Tid, "not_found", s.Message())
+			return
+		}
+		l.Errorf("accept contact request failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "contact.accept.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleContactDecline(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.UserSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "user service not configured")
+		return
+	}
+	var payload struct {
+		RequestId string `json:"requestId"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.RequestId == "" {
+		l.sendError(c, env.Tid, "bad_request", "requestId is required")
+		return
+	}
+	_, err := l.svcCtx.UserSvc.DeclineContactRequest(l.ctx, &userservice.DeclineContactRequestRequest{
+		UserId:    c.UserID,
+		RequestId: payload.RequestId,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok && s.Code() == codes.NotFound {
+			l.sendError(c, env.Tid, "not_found", s.Message())
+			return
+		}
+		l.Errorf("decline contact request failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "contact.decline.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleGroupApply(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.ConversationSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "conversation service not configured")
+		return
+	}
+	var payload struct {
+		ConversationId string `json:"conversationId"`
+		Message        string `json:"message"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ConversationId == "" {
+		l.sendError(c, env.Tid, "bad_request", "conversationId is required")
+		return
+	}
+	resp, err := l.svcCtx.ConversationSvc.ApplyJoinGroup(l.ctx, &conversationservice.ApplyJoinGroupRequest{
+		ConversationId: payload.ConversationId,
+		UserId:         c.UserID,
+		Message:        payload.Message,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.NotFound:
+				l.sendError(c, env.Tid, "not_found", s.Message())
+				return
+			case codes.AlreadyExists:
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			}
+		}
+		l.Errorf("apply join group failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	respPayload := map[string]any{"joined": resp.GetJoined()}
+	if resp.GetRequestId() != "" {
+		respPayload["requestId"] = resp.GetRequestId()
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "group.apply.ok",
+		Tid:     env.Tid,
+		Payload: respPayload,
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleGroupJoinRequestList(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.ConversationSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "conversation service not configured")
+		return
+	}
+	var payload struct {
+		ConversationId string `json:"conversationId"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ConversationId == "" {
+		l.sendError(c, env.Tid, "bad_request", "conversationId is required")
+		return
+	}
+	resp, err := l.svcCtx.ConversationSvc.ListJoinRequests(l.ctx, &conversationservice.ListJoinRequestsRequest{
+		ConversationId: payload.ConversationId,
+		UserId:         c.UserID,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok && s.Code() == codes.PermissionDenied {
+			l.sendError(c, env.Tid, "forbidden", s.Message())
+			return
+		}
+		l.Errorf("list join requests failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	items := make([]map[string]any, 0, len(resp.GetItems()))
+	for _, it := range resp.GetItems() {
+		items = append(items, map[string]any{
+			"requestId":      it.GetRequestId(),
+			"conversationId": it.GetConversationId(),
+			"userId":         it.GetUserId(),
+			"message":        it.GetMessage(),
+			"createdAt":      it.GetCreatedAt(),
+		})
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "group.joinRequestList.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{"items": items},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleGroupApprove(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.ConversationSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "conversation service not configured")
+		return
+	}
+	var payload struct {
+		ConversationId string `json:"conversationId"`
+		RequestId      string `json:"requestId"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ConversationId == "" || payload.RequestId == "" {
+		l.sendError(c, env.Tid, "bad_request", "conversationId and requestId are required")
+		return
+	}
+	_, err := l.svcCtx.ConversationSvc.ApproveJoinRequest(l.ctx, &conversationservice.ApproveJoinRequestRequest{
+		ConversationId: payload.ConversationId,
+		RequestId:      payload.RequestId,
+		UserId:         c.UserID,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.PermissionDenied:
+				l.sendError(c, env.Tid, "forbidden", s.Message())
+				return
+			case codes.NotFound:
+				l.sendError(c, env.Tid, "not_found", s.Message())
+				return
+			}
+		}
+		l.Errorf("approve join request failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "group.approve.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleGroupDecline(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.ConversationSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "conversation service not configured")
+		return
+	}
+	var payload struct {
+		ConversationId string `json:"conversationId"`
+		RequestId      string `json:"requestId"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ConversationId == "" || payload.RequestId == "" {
+		l.sendError(c, env.Tid, "bad_request", "conversationId and requestId are required")
+		return
+	}
+	_, err := l.svcCtx.ConversationSvc.DeclineJoinRequest(l.ctx, &conversationservice.DeclineJoinRequestRequest{
+		ConversationId: payload.ConversationId,
+		RequestId:      payload.RequestId,
+		UserId:         c.UserID,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.PermissionDenied:
+				l.sendError(c, env.Tid, "forbidden", s.Message())
+				return
+			case codes.NotFound:
+				l.sendError(c, env.Tid, "not_found", s.Message())
+				return
+			}
+		}
+		l.Errorf("decline join request failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "group.decline.ok",
 		Tid:     env.Tid,
 		Payload: map[string]any{},
 		Error:   nil,

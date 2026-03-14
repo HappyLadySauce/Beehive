@@ -1,8 +1,9 @@
 ## 当前里程碑
 
-- **Milestone**：M1 - 网关服务最小可用（Gateway 先于后端 RPC 落地）
+- **Milestone**：M2 - IM 客户端界面重设计与群管/好友流程
 - **状态**：进行中
 - **时间范围**：2026-03 ～ 2026-04
+- **参考**：M1 已完成；M2 见 `docs/frontend/im-client-redesign.md`，执行计划见 TODO.yml 中 `frontend-client` 与相关 backend/gateway 项。
 
 ## 一、整体进展概览
 
@@ -83,6 +84,27 @@
 
 6. **Admin 按路由权限校验**（见 `TODO.yml` 中 `admin-permission-middleware`）：**已完成**。CheckPermission 中间件已实现，路由按 admin.user.read/ban、admin.conversation.read、admin.message.read、admin.config.read/write、admin.ops.use 分组；ListUsers/封禁/配置等占位接口可后续对接 RPC 或 etcd。
 
+### M2 - IM 客户端重设计与群管/好友（进行中）
+
+**分阶段执行计划**（详见 TODO.yml 执行顺序）：
+
+- **阶段 0**：前端设计文档与执行计划（不写代码）  
+  - 完善 `docs/frontend/im-client-redesign.md`：与参考图对应、操作与 WS 依赖表。  
+  - 定好 PROGRESS.md / TODO.yml 为唯一执行计划入口。
+
+- **阶段 1 - 后端**（优先）：  
+  7. 会话列表 memberCount 透传（Gateway conversation.list.ok）。  
+  8. 群公告全链路（DB 已有 003；Conversation 读/填 announcement；Gateway 透传）。  
+  9. conversation.get / conversation.listMembers（Gateway WS，群详情与成员含 role）。  
+  10. 好友申请与通过（contact_requests + User RPC + Gateway contact.request/requestList/accept/decline）。  
+  11. 群申请与审批（可选）：group_join_requests + RPC + Gateway group.apply/joinRequestList/approve/decline。
+
+- **阶段 2 - 前端**：  
+  12. 左侧栏 Beehive+头像（收起仅保留头像）。  
+  13. 消息/联系人/设置 导航与列表。  
+  14. 群聊窗口标题(人数)+右侧群公告与成员。  
+  15. 好友/群通知与退出群聊、删除好友 操作入口。
+
 ---
 
 ## 四、下一步计划
@@ -90,7 +112,7 @@
 - **优先顺序**：
   1. ~~网关与五大 RPC 基础集成~~、~~消息投递 `message.push`~~（已完成）。
   2. ~~会话 WS 暴露~~、~~未读计数~~、~~已读回执 `message.read`~~、~~单聊会话解析~~、~~限流~~（已完成）。
-  3. 随后：测试与部署文档、可选已读事件发布。
+  3. **M2**：**先**完成后端（memberCount、群公告、conversation.get/listMembers、好友申请、群申请可选），**再**按 im-client-redesign 做前端（左侧栏、消息/联系人/设置、群聊右侧栏、通知与操作）。执行时按 TODO.yml 中「设计文档 → 后端项 → 前端项」顺序勾选。
   4. ~~Admin 权限中间件~~（已完成）；占位接口对接可后续迭代。
 
 - 实现前请对照：

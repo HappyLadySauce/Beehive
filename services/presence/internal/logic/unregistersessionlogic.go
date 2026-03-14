@@ -3,10 +3,13 @@ package logic
 import (
 	"context"
 
+	"github.com/HappyLadySauce/Beehive/services/presence/internal/session"
 	"github.com/HappyLadySauce/Beehive/services/presence/internal/svc"
 	"github.com/HappyLadySauce/Beehive/services/presence/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type UnregisterSessionLogic struct {
@@ -24,7 +27,21 @@ func NewUnregisterSessionLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *UnregisterSessionLogic) UnregisterSession(in *pb.UnregisterSessionRequest) (*pb.UnregisterSessionResponse, error) {
-	// todo: add your logic here and delete this line
+	if in.GetUserId() == "" || in.GetConnId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id and conn_id are required")
+	}
+
+	userConnsKey := session.UserConnsKey(in.GetUserId())
+	sessionKey := session.SessionKey(in.GetUserId(), in.GetConnId())
+
+	pipe := l.svcCtx.Redis.Pipeline()
+	pipe.SRem(l.ctx, userConnsKey, in.GetConnId())
+	pipe.Del(l.ctx, sessionKey)
+	_, err := pipe.Exec(l.ctx)
+	if err != nil {
+		l.Errorf("unregister session redis error: %v", err)
+		return nil, status.Errorf(codes.Internal, "unregister session failed: %v", err)
+	}
 
 	return &pb.UnregisterSessionResponse{}, nil
 }

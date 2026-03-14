@@ -77,7 +77,15 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 }
 
 func (l *WsEntryLogic) handlePresencePing(c *ws.Connection, env *ws.Envelope) {
-	// 后续在此调用 PresenceService.RefreshSession
+	if c.UserID != "" {
+		_, err := l.svcCtx.PresenceSvc.RefreshSession(l.ctx, &presenceservice.RefreshSessionRequest{
+			UserId: c.UserID,
+			ConnId: c.ConnID,
+		})
+		if err != nil {
+			l.Errorf("refresh session failed for user %s conn %s: %v", c.UserID, c.ConnID, err)
+		}
+	}
 	_ = c.WriteJSON(&ws.Envelope{
 		Type:    "presence.ping.ok",
 		Tid:     env.Tid,

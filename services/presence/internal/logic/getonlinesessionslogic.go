@@ -7,6 +7,8 @@ import (
 	"github.com/HappyLadySauce/Beehive/services/presence/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type GetOnlineSessionsLogic struct {
@@ -24,7 +26,13 @@ func NewGetOnlineSessionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *GetOnlineSessionsLogic) GetOnlineSessions(in *pb.GetOnlineSessionsRequest) (*pb.GetOnlineSessionsResponse, error) {
-	// todo: add your logic here and delete this line
-
-	return &pb.GetOnlineSessionsResponse{}, nil
+	if in.GetUserId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "user_id is required")
+	}
+	sessions, err := getSessionsForUser(l.ctx, l.svcCtx.Redis, in.GetUserId())
+	if err != nil {
+		l.Errorf("get online sessions error: %v", err)
+		return nil, status.Errorf(codes.Internal, "get online sessions failed: %v", err)
+	}
+	return &pb.GetOnlineSessionsResponse{Sessions: sessions}, nil
 }

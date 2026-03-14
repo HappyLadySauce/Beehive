@@ -73,3 +73,19 @@ func loadToken(ctx context.Context, rdb *redis.Client, token string) (string, []
 	return payload.UserID, payload.Roles, ttl, nil
 }
 
+// loadAndTouchToken 在 loadToken 基础上，若 extendTTL > 0 则对 key 执行 Expire 续期并返回 extendTTL 作为剩余 TTL。
+// 用于 TokenLogin 等「校验并保持会话活跃」场景；key 不存在或解析失败时行为与 loadToken 一致，不做续期。
+func loadAndTouchToken(ctx context.Context, rdb *redis.Client, token string, extendTTL time.Duration) (string, []string, time.Duration, error) {
+	userID, roles, ttl, err := loadToken(ctx, rdb, token)
+	if err != nil || userID == "" {
+		return userID, roles, ttl, err
+	}
+	if extendTTL <= 0 {
+		return userID, roles, ttl, nil
+	}
+	key := tokenKey(token)
+	if err := rdb.Expire(ctx, key, extendTTL).Err(); err != nil {
+		return "", nil, 0, fmt.Errorf("token touch failed: %w", err)
+	}
+	return userID, roles, extendTTL, nil
+}

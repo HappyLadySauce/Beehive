@@ -81,6 +81,7 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 
 func (l *WsEntryLogic) handlePresencePing(c *ws.Connection, env *ws.Envelope) {
 	if c.UserID != "" {
+		l.Infow("rpc call", logx.Field("method", "presence.RefreshSession"), logx.Field("userId", c.UserID), logx.Field("connId", c.ConnID))
 		_, err := l.svcCtx.PresenceSvc.RefreshSession(l.ctx, &presenceservice.RefreshSessionRequest{
 			UserId: c.UserID,
 			ConnId: c.ConnID,
@@ -103,6 +104,7 @@ func (l *WsEntryLogic) handleUserMe(c *ws.Connection, env *ws.Envelope) {
 		l.sendError(c, env.Tid, "unavailable", "user service not configured")
 		return
 	}
+	l.Infow("rpc call", logx.Field("method", "user.GetUser"), logx.Field("userId", c.UserID))
 	resp, err := l.svcCtx.UserSvc.GetUser(l.ctx, &userservice.GetUserRequest{Id: c.UserID})
 	if err != nil {
 		l.Errorf("get user me failed for %s: %v", c.UserID, err)
@@ -149,6 +151,7 @@ func (l *WsEntryLogic) handleAuth(c *ws.Connection, env *ws.Envelope) {
 		if !l.bindJSONPayload(c, env, &payload) {
 			return
 		}
+		l.Infow("rpc call", logx.Field("method", "auth.Login"), logx.Field("username", payload.Username))
 		resp, err := l.svcCtx.AuthSvc.Login(l.ctx, &authservice.LoginRequest{
 			Username: payload.Username,
 			Password: payload.Password,
@@ -167,6 +170,7 @@ func (l *WsEntryLogic) handleAuth(c *ws.Connection, env *ws.Envelope) {
 		if !l.bindJSONPayload(c, env, &payload) {
 			return
 		}
+		l.Infow("rpc call", logx.Field("method", "auth.TokenLogin"))
 		resp, err := l.svcCtx.AuthSvc.TokenLogin(l.ctx, &authservice.TokenLoginRequest{
 			AccessToken: payload.AccessToken,
 			DeviceId:    payload.DeviceID,
@@ -190,11 +194,13 @@ func (l *WsEntryLogic) handleAuthLogout(c *ws.Connection, env *ws.Envelope) {
 		return
 	}
 	if payload.AccessToken != "" {
+		l.Infow("rpc call", logx.Field("method", "auth.Logout"))
 		_, _ = l.svcCtx.AuthSvc.Logout(l.ctx, &authservice.LogoutRequest{
 			AccessToken: payload.AccessToken,
 		})
 	}
 	if c.UserID != "" {
+		l.Infow("rpc call", logx.Field("method", "presence.UnregisterSession"), logx.Field("userId", c.UserID), logx.Field("connId", c.ConnID))
 		_, _ = l.svcCtx.PresenceSvc.UnregisterSession(l.ctx, &presenceservice.UnregisterSessionRequest{
 			UserId: c.UserID,
 			ConnId: c.ConnID,
@@ -216,6 +222,7 @@ func (l *WsEntryLogic) afterAuthSuccess(c *ws.Connection, env *ws.Envelope, resp
 		return
 	}
 	// 先向 Presence 注册会话，确保在线状态成功记录；失败则不认为登录成功。
+	l.Infow("rpc call", logx.Field("method", "presence.RegisterSession"), logx.Field("userId", resp.UserId), logx.Field("connId", c.ConnID))
 	if _, err := l.svcCtx.PresenceSvc.RegisterSession(l.ctx, &presenceservice.RegisterSessionRequest{
 		UserId:     resp.UserId,
 		GatewayId:  l.svcCtx.Config.GatewayID,

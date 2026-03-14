@@ -6,15 +6,16 @@ INSERT INTO roles (id, name, description)
 VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'user', 'normal user')
 ON CONFLICT (id) DO NOTHING;
 
--- 测试用户（密码 password123 的 bcrypt 哈希）
+-- 测试用户（密码 password123 的 bcrypt 哈希，由 db/scripts/gen_bcrypt.go 生成）
+-- ON CONFLICT 时更新 password_hash，便于重新执行迁移或修正哈希后生效
 INSERT INTO users (id, username, password_hash, status)
 VALUES (
     'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
     'testuser',
-    '$2a$10$SMzAjyVPlzmRkxBb6NjnH.rTyhgMGFrfkKM5fhshqeQ8F4kUSAgb.',
+    '$2a$10$Btjw1bDKXWA0jG7UUiw9OO51wzHFNBw.IvB.OoZl.35xYwlmBNYYq',
     'normal'
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash;
 
 -- 绑定角色
 INSERT INTO user_roles (user_id, role_id)

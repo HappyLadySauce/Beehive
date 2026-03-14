@@ -1,0 +1,199 @@
+# Beehive Gateway WebSocket API（与 docs/API/websocket-client-api.md 对齐）
+asyncapi: 2.6.0
+info:
+  title: Beehive WebSocket Client API
+  version: 1.0.0
+  description: |
+    IM Web 客户端通过 Gateway /ws 使用的统一 JSON 协议。
+    Envelope 结构：type, tid, payload, error。
+servers:
+  development:
+    url: ws://127.0.0.1:8080/ws
+    protocol: ws
+channels:
+  /ws:
+    description: WebSocket 单连接，多消息类型
+    bindings:
+      ws: {}
+    subscribe:
+      message:
+        oneOf:
+          - $ref: "#/components/messages/AuthLoginOk"
+          - $ref: "#/components/messages/AuthTokenLoginOk"
+          - $ref: "#/components/messages/AuthLogoutOk"
+          - $ref: "#/components/messages/PresencePingOk"
+          - $ref: "#/components/messages/UserMeOk"
+          - $ref: "#/components/messages/ErrorResponse"
+    publish:
+      message:
+        oneOf:
+          - $ref: "#/components/messages/AuthLogin"
+          - $ref: "#/components/messages/AuthTokenLogin"
+          - $ref: "#/components/messages/AuthLogout"
+          - $ref: "#/components/messages/PresencePing"
+          - $ref: "#/components/messages/UserMe"
+
+components:
+  schemas:
+    Envelope:
+      type: object
+      properties:
+        type: { type: string, description: "消息类型，如 auth.login.ok" }
+        tid: { type: string, description: "请求-响应配对 ID" }
+        payload: { type: object }
+        error: { $ref: "#/components/schemas/ErrBody" }
+    ErrBody:
+      type: object
+      properties:
+        code: { type: string, example: "unauthorized" }
+        message: { type: string }
+      tags: [{ name: "common" }]
+    AuthLoginPayload:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string }
+        deviceId: { type: string }
+      tags: [{ name: "auth" }]
+    AuthLoginOkPayload:
+      type: object
+      properties:
+        userId: { type: string }
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresIn: { type: integer }
+      tags: [{ name: "auth" }]
+    AuthTokenLoginPayload:
+      type: object
+      required: [accessToken]
+      properties:
+        accessToken: { type: string }
+        deviceId: { type: string }
+      tags: [{ name: "auth" }]
+    PresencePingPayload:
+      type: object
+      properties:
+        clientTime: { type: integer }
+      tags: [{ name: "presence" }]
+    PresencePingOkPayload:
+      type: object
+      properties:
+        serverTime: { type: integer }
+      tags: [{ name: "presence" }]
+    UserMeOkPayload:
+      type: object
+      properties:
+        id: { type: string }
+        nickname: { type: string }
+        avatarUrl: { type: string }
+        bio: { type: string }
+        status: { type: string }
+      tags: [{ name: "user" }]
+  messages:
+    AuthLogin:
+      name: auth.login
+      title: 账号密码登录
+      summary: 客户端发送用户名与密码
+      payload:
+        type: object
+        properties:
+          type: { const: "auth.login" }
+          tid: { type: string }
+          payload: { $ref: "#/components/schemas/AuthLoginPayload" }
+      tags: [{ name: "auth" }]
+    AuthLoginOk:
+      name: auth.login.ok
+      title: 登录成功
+      payload:
+        type: object
+        properties:
+          type: { const: "auth.login.ok" }
+          tid: { type: string }
+          payload: { $ref: "#/components/schemas/AuthLoginOkPayload" }
+      tags: [{ name: "auth" }]
+    AuthTokenLogin:
+      name: auth.tokenLogin
+      title: Token 登录
+      payload:
+        type: object
+        properties:
+          type: { const: "auth.tokenLogin" }
+          tid: { type: string }
+          payload: { $ref: "#/components/schemas/AuthTokenLoginPayload" }
+      tags: [{ name: "auth" }]
+    AuthTokenLoginOk:
+      name: auth.tokenLogin.ok
+      payload:
+        type: object
+        properties:
+          type: { const: "auth.tokenLogin.ok" }
+          tid: { type: string }
+          payload: { $ref: "#/components/schemas/AuthLoginOkPayload" }
+      tags: [{ name: "auth" }]
+    AuthLogout:
+      name: auth.logout
+      title: 登出
+      payload:
+        type: object
+        properties:
+          type: { const: "auth.logout" }
+          tid: { type: string }
+          payload: { type: object }
+      tags: [{ name: "auth" }]
+    AuthLogoutOk:
+      name: auth.logout.ok
+      payload:
+        type: object
+        properties:
+          type: { const: "auth.logout.ok" }
+          tid: { type: string }
+      tags: [{ name: "auth" }]
+    PresencePing:
+      name: presence.ping
+      title: 心跳
+      payload:
+        type: object
+        properties:
+          type: { const: "presence.ping" }
+          tid: { type: string }
+          payload: { $ref: "#/components/schemas/PresencePingPayload" }
+      tags: [{ name: "presence" }]
+    PresencePingOk:
+      name: presence.ping.ok
+      payload:
+        type: object
+        properties:
+          type: { const: "presence.ping.ok" }
+          tid: { type: string }
+          payload: { $ref: "#/components/schemas/PresencePingOkPayload" }
+      tags: [{ name: "presence" }]
+    UserMe:
+      name: user.me
+      title: 获取当前用户资料
+      payload:
+        type: object
+        properties:
+          type: { const: "user.me" }
+          tid: { type: string }
+          payload: { type: object }
+      tags: [{ name: "user" }]
+    UserMeOk:
+      name: user.me.ok
+      payload:
+        type: object
+        properties:
+          type: { const: "user.me.ok" }
+          tid: { type: string }
+          payload: { $ref: "#/components/schemas/UserMeOkPayload" }
+      tags: [{ name: "user" }]
+    ErrorResponse:
+      name: error
+      title: 错误响应
+      payload:
+        type: object
+        properties:
+          type: { type: string }
+          tid: { type: string }
+          error: { $ref: "#/components/schemas/ErrBody" }
+      tags: [{ name: "common" }]

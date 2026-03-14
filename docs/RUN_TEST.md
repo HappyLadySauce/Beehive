@@ -70,10 +70,12 @@
 1. **PostgreSQL**：已创建库 `beehive`，并执行迁移：
    - `db/migrations/001_create_users_and_user_profiles.sql`
    - `db/migrations/002_create_rbac_tables.sql`
+   - `db/migrations/003_seed_test_user.sql`（插入接口测试用用户 testuser / password123）
    - 使用 Docker 时：`docker compose -f docker/docker-compose.yaml up -d postgres`，然后：
      - `docker exec -i beehive-postgres psql -U beehive -d beehive < db/migrations/001_create_users_and_user_profiles.sql`
      - `docker exec -i beehive-postgres psql -U beehive -d beehive < db/migrations/002_create_rbac_tables.sql`
-   - 或本机 `psql -U beehive -d beehive -f db/migrations/001_...sql` 与 `002_...sql`。
+     - `docker exec -i beehive-postgres psql -U beehive -d beehive < db/migrations/003_seed_test_user.sql`
+   - 或本机 `psql -U beehive -d beehive -f db/migrations/001_...sql`、`002_...sql`、`003_...sql`。
 2. **Redis**：本地 6379 可用（无密码）。Docker：`docker compose -f docker/docker-compose.yaml up -d redis`。
 3. **etcd**：用于服务发现。Docker：`docker compose -f docker/docker-compose.yaml up -d etcd`。各服务配置中已使用 `127.0.0.1:2379` 与 Key（如 `beehive.auth.rpc`、`beehive.presence.rpc`）。
 4. **可选**：至少插入一名测试用户与角色（见下方「测试用户与角色」）。

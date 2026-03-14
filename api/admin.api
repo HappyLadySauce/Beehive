@@ -3,6 +3,9 @@ syntax = "v1"
 info (
 	title: "Beehive Admin API"
 	desc:  "管理后台 HTTP API，详见 docs/API/admin-http-api.md。认证：Authorization: Bearer <token>；统一响应 { code, message, data }。"
+	version: "v1"
+	host: "127.0.0.1:8888"
+	basePath: "/admin"
 )
 
 // 统一响应体结构，与 admin-http-api.md 约定一致

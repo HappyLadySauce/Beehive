@@ -11,6 +11,8 @@
 - `websocket-client-api.md`  
   - 定义 WebSocket 的统一消息 Envelope 结构（`type` / `tid` / `payload` / `error`）  
   - 约定认证、心跳、消息发送/推送、会话列表等客户端可见的消息类型与字段
+- `generated/`（WebSocket 按模块文档）  
+  - 由 `test/interface` 下 `pnpm run docs:generate` 从 AsyncAPI 规范生成，按域分文件： [generated/README.md](generated/README.md)（Auth / Presence / User 等）
 - `admin-http-api.md`  
   - 定义 Admin 管理后台使用的 HTTP API 路由、请求/响应模型与错误码
 - `rpc-auth-presence-message-conversation.md`  

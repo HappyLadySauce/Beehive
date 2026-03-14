@@ -1,0 +1,21 @@
+{
+  "name": "beehive-interface-test",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run",
+    "docs:generate": "node scripts/generate-docs.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/ws": "^8.5.13",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.0",
+    "yaml": "^2.6.0"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

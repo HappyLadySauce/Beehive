@@ -21,4 +21,5 @@
 - **统一 Envelope**：客户端与 Gateway 间所有 WebSocket 消息都使用统一的 JSON Envelope，便于前后端对齐与追踪。
 - **服务边界清晰**：业务语义由后端服务负责，Gateway 只做路由和编排；文档中会标出每个接口属于哪个服务。
 - **可落地到 .proto / .api**：接口设计应能较为直接地映射到 go-zero 的 `.proto` / `.api` 文件，方便后续使用 goctl 生成代码。
+- **开发顺序**：凡涉及服务/接口新增或修改，必须先在本目录与 `proto/` 或 `.api` 中定义接口，再生成代码，最后完善实现。详见 `docs/backend/development-workflow.md`。
 

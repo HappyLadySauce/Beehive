@@ -1,0 +1,303 @@
+syntax = "v1"
+
+info (
+	title: "Beehive Admin API"
+	desc:  "管理后台 HTTP API，详见 docs/API/admin-http-api.md。认证：Authorization: Bearer <token>；统一响应 { code, message, data }。"
+)
+
+// 统一响应体结构，与 admin-http-api.md 约定一致
+type AdminEmptyData {}
+
+type UserItem {
+	Id          string `json:"id"`
+	Nickname    string `json:"nickname"`
+	Email       string `json:"email"`
+	Status      string `json:"status"`
+	IsOnline    bool   `json:"isOnline"`
+	LastLoginAt string `json:"lastLoginAt"`
+}
+
+type ListUsersReq {
+	Q        string `form:"q,optional"`
+	Status   string `form:"status,optional"`
+	Online   bool   `form:"online,optional"`
+	Page     int    `form:"page,optional"`
+	PageSize int    `form:"pageSize,optional"`
+}
+
+type ListUsersData {
+	Items    []UserItem `json:"items"`
+	Page     int        `json:"page"`
+	PageSize int        `json:"pageSize"`
+	Total    int        `json:"total"`
+}
+
+type ListUsersResp {
+	Code    int           `json:"code"`
+	Message string        `json:"message"`
+	Data    ListUsersData `json:"data"`
+}
+
+type UserProfile {
+	AvatarUrl string `json:"avatarUrl"`
+	Bio       string `json:"bio"`
+}
+
+type GetUserData {
+	Id          string      `json:"id"`
+	Nickname    string      `json:"nickname"`
+	Email       string      `json:"email"`
+	Status      string      `json:"status"`
+	CreatedAt   string      `json:"createdAt"`
+	LastLoginAt string      `json:"lastLoginAt"`
+	Profile     UserProfile `json:"profile"`
+}
+
+type GetUserReq {
+	Id string `path:"id"`
+}
+
+type GetUserResp {
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    GetUserData `json:"data"`
+}
+
+type SessionItem {
+	GatewayId  string `json:"gatewayId"`
+	ConnId     string `json:"connId"`
+	DeviceId   string `json:"deviceId"`
+	DeviceType string `json:"deviceType"`
+	Ip         string `json:"ip"`
+	LoginAt    string `json:"loginAt"`
+	LastPingAt string `json:"lastPingAt"`
+}
+
+type GetUserSessionsData {
+	Sessions []SessionItem `json:"sessions"`
+}
+
+type GetUserSessionsResp {
+	Code    int                 `json:"code"`
+	Message string              `json:"message"`
+	Data    GetUserSessionsData `json:"data"`
+}
+
+type KickReq {
+	Id         string   `path:"id"`
+	Reason     string   `json:"reason,optional"`
+	SessionIds []string `json:"sessionIds,optional"`
+}
+
+type BanReq {
+	Id     string `path:"id"`
+	Reason string `json:"reason,optional"`
+	Until  string `json:"until,optional"`
+}
+
+type UnbanReq {
+	Id string `path:"id"`
+}
+
+type AdminEmptyResp {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    string `json:"data,omitempty"`
+}
+
+type ConversationItem {
+	Id           string `json:"id"`
+	Type         string `json:"type"`
+	Name         string `json:"name"`
+	MemberCount  int    `json:"memberCount"`
+	CreatedAt    string `json:"createdAt"`
+	LastActiveAt string `json:"lastActiveAt"`
+}
+
+type ListConversationsReq {
+	Type     string `form:"type,optional"`
+	MemberId string `form:"memberId,optional"`
+	Page     int    `form:"page,optional"`
+	PageSize int    `form:"pageSize,optional"`
+}
+
+type ListConversationsData {
+	Items    []ConversationItem `json:"items"`
+	Page     int                `json:"page"`
+	PageSize int                `json:"pageSize"`
+	Total    int                `json:"total"`
+}
+
+type ListConversationsResp {
+	Code    int                   `json:"code"`
+	Message string                `json:"message"`
+	Data    ListConversationsData `json:"data"`
+}
+
+type GetConversationData {
+	Id           string `json:"id"`
+	Type         string `json:"type"`
+	Name         string `json:"name"`
+	MemberCount  int    `json:"memberCount"`
+	CreatedAt    string `json:"createdAt"`
+	LastActiveAt string `json:"lastActiveAt"`
+}
+
+type GetConversationReq {
+	Id string `path:"id"`
+}
+
+type GetConversationResp {
+	Code    int                 `json:"code"`
+	Message string              `json:"message"`
+	Data    GetConversationData `json:"data"`
+}
+
+type MemberItem {
+	UserId   string `json:"userId"`
+	Role     string `json:"role"`
+	JoinedAt string `json:"joinedAt"`
+	Status   string `json:"status"`
+}
+
+type ListMembersData {
+	Items []MemberItem `json:"items"`
+}
+
+type ListMembersResp {
+	Code    int             `json:"code"`
+	Message string          `json:"message"`
+	Data    ListMembersData `json:"data"`
+}
+
+type MessageBody {
+	Type string `json:"type"`
+	Text string `json:"text"`
+}
+
+type MessageItem {
+	ServerMsgId    string      `json:"serverMsgId"`
+	ConversationId string      `json:"conversationId"`
+	FromUserId     string      `json:"fromUserId"`
+	Body           MessageBody `json:"body"`
+	ServerTime     string      `json:"serverTime"`
+}
+
+type ListMessagesReq {
+	Id         string `path:"id"`
+	FromUserId string `form:"fromUserId,optional"`
+	Start      string `form:"start,optional"`
+	End        string `form:"end,optional"`
+	Keyword    string `form:"keyword,optional"`
+	Page       int    `form:"page,optional"`
+	PageSize   int    `form:"pageSize,optional"`
+}
+
+type ListMessagesData {
+	Items    []MessageItem `json:"items"`
+	Page     int           `json:"page"`
+	PageSize int           `json:"pageSize"`
+	Total    int           `json:"total"`
+}
+
+type ListMessagesResp {
+	Code    int              `json:"code"`
+	Message string           `json:"message"`
+	Data    ListMessagesData `json:"data"`
+}
+
+type ConfigItem {
+	Key         string `json:"key"`
+	Value       string `json:"value"`
+	Description string `json:"description"`
+	UpdatedBy   string `json:"updatedBy"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+type ListConfigReq {
+	Namespace string `form:"namespace,optional"`
+}
+
+type ListConfigData {
+	Items []ConfigItem `json:"items"`
+}
+
+type ListConfigResp {
+	Code    int            `json:"code"`
+	Message string         `json:"message"`
+	Data    ListConfigData `json:"data"`
+}
+
+type PutConfigReq {
+	Key         string `path:"key"`
+	Value       string `json:"value"`
+	Description string `json:"description,optional"`
+}
+
+type HealthResp {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    string `json:"data,omitempty"`
+}
+
+@server (
+	name:   adminapi
+	group:  admin
+	prefix: /admin
+// 认证与权限在 main 中通过中间件注入，见 docs/API/admin-http-api.md
+)
+service admin-api {
+	// 健康检查，无需认证
+	@handler Health
+	get /healthz returns (HealthResp)
+
+	// ----- 用户管理 -----
+	@handler ListUsers
+	get /users (ListUsersReq) returns (ListUsersResp)
+
+	@handler GetUser
+	get /users/:id (GetUserReq) returns (GetUserResp)
+
+	@handler GetUserSessions
+	get /users/:id/sessions (GetUserReq) returns (GetUserSessionsResp)
+
+	@handler KickUser
+	post /users/:id/kick (KickReq) returns (AdminEmptyResp)
+
+	@handler BanUser
+	post /users/:id/ban (BanReq) returns (AdminEmptyResp)
+
+	@handler UnbanUser
+	post /users/:id/unban (UnbanReq) returns (AdminEmptyResp)
+
+	// ----- 会话与消息 -----
+	@handler ListConversations
+	get /conversations (ListConversationsReq) returns (ListConversationsResp)
+
+	@handler GetConversation
+	get /conversations/:id (GetConversationReq) returns (GetConversationResp)
+
+	@handler ListConversationMembers
+	get /conversations/:id/members (GetConversationReq) returns (ListMembersResp)
+
+	@handler ListConversationMessages
+	get /conversations/:id/messages (ListMessagesReq) returns (ListMessagesResp)
+
+	// ----- 配置 -----
+	@handler ListConfig
+	get /config (ListConfigReq) returns (ListConfigResp)
+
+	@handler PutConfig
+	put /config/:key (PutConfigReq) returns (AdminEmptyResp)
+
+	// ----- 运维占位 -----
+	@handler OpsQueues
+	get /ops/queues returns (AdminEmptyResp)
+
+	@handler OpsHealth
+	get /ops/health returns (AdminEmptyResp)
+
+	@handler OpsReplay
+	post /ops/replay returns (AdminEmptyResp)
+}
+

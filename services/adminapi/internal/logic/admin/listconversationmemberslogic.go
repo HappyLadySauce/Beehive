@@ -41,7 +41,7 @@ func (l *ListConversationMembersLogic) ListConversationMembers(req *types.GetCon
 			items = append(items, types.MemberItem{
 				UserId:   m.UserId,
 				Role:     m.Role,
-				JoinedAt: "",
+				JoinedAt: formatUnixTime(m.JoinedAt),
 				Status:   m.Status,
 			})
 		}

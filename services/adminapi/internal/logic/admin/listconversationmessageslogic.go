@@ -56,7 +56,7 @@ func (l *ListConversationMessagesLogic) ListConversationMessages(req *types.List
 				ConversationId:  m.ConversationId,
 				FromUserId:      m.FromUserId,
 				Body:            body,
-				ServerTime:      "",
+				ServerTime:      formatUnixTime(m.ServerTime),
 			})
 		}
 	}
@@ -64,6 +64,8 @@ func (l *ListConversationMessagesLogic) ListConversationMessages(req *types.List
 	if page <= 0 {
 		page = 1
 	}
+	// GetHistory RPC 未返回 total 总数，此处用本页条数；完整分页需 MessageService 提供 Count 或返回 Total
+	total := len(items)
 	return &types.ListMessagesResp{
 		Code:    0,
 		Message: "ok",
@@ -71,7 +73,7 @@ func (l *ListConversationMessagesLogic) ListConversationMessages(req *types.List
 			Items:    items,
 			Page:     page,
 			PageSize: int(limit),
-			Total:    len(items),
+			Total:    total,
 		},
 	}, nil
 }

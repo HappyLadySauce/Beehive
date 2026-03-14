@@ -1,5 +1,5 @@
 version: 1
-updated_at: 2026-03-12
+updated_at: 2026-03-14
 areas:
   - id: gateway
     name: 网关服务
@@ -80,10 +80,17 @@ areas:
     name: 管理后台服务
     items:
       - id: admin-service
-        title: 设计与实现 AdminService（经 Gateway 暴露 HTTP 接口）
-        status: pending
-        service: admin
+        title: 设计与实现 AdminAPIService（独立 HTTP 服务）
+        status: done
+        service: adminapi
         owner: ""
-        tags: [admin, gateway, http, auth, rbac]
-        notes: "AdminService 作为独立微服务，通过 Gateway 的 /admin/* HTTP 路由对外提供管理接口，内部依赖 User/Conversation/Message/Auth 等服务，并统一使用 AuthService 的 ValidateToken/CheckPermission 做认证与 RBAC（设计参考 docs/API/admin-http-api.md, docs/frontend/admin-app.md）"
+        tags: [admin, http, auth, rpc]
+        notes: "按 development-workflow 先定义 api/admin.api 再 goctl 生成 services/adminapi。已实现：认证中间件（Bearer + AuthService.ValidateToken）、用户详情/会话/踢下线、会话详情/成员/消息、配置与运维占位；ListUsers/封禁/配置等可后续对接 RPC 或 etcd；按路由 CheckPermission 可选（设计参考 docs/API/admin-http-api.md, docs/frontend/admin-app.md）"
+      - id: admin-permission-middleware
+        title: Admin 按路由权限校验（CheckPermission）
+        status: pending
+        service: adminapi
+        owner: ""
+        tags: [admin, rbac, middleware]
+        notes: "对敏感路由按 admin-http-api.md 要求调用 AuthService.CheckPermission（如 admin.user.read、admin.user.ban、admin.conversation.read、admin.message.read、admin.config.read/write、admin.ops.use）"
 

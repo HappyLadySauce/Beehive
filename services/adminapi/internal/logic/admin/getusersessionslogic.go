@@ -43,9 +43,9 @@ func (l *GetUserSessionsLogic) GetUserSessions(req *types.GetUserReq) (resp *typ
 				ConnId:     s.ConnId,
 				DeviceId:   s.DeviceId,
 				DeviceType: s.DeviceType,
-				Ip:         "",
-				LoginAt:    "",
-				LastPingAt: "",
+				Ip:         "", // SessionInfo 未包含 Ip，需 proto 扩展
+				LoginAt:    "", // SessionInfo 未包含 LoginAt，需 proto 扩展
+				LastPingAt: formatUnixTime(s.LastPingAt),
 			})
 		}
 	}

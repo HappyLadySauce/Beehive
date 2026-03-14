@@ -39,6 +39,11 @@ func (l *GetUserLogic) GetUser(req *types.GetUserReq) (resp *types.GetUserResp, 
 		return &types.GetUserResp{Code: 3001, Message: "用户不存在"}, nil
 	}
 	u := rpcResp.User
+	status := u.Status
+	if status == "" {
+		status = "active"
+	}
+	// Email, CreatedAt, LastLoginAt 当前不在 user.proto 的 User 中，需扩展 RPC 后再回填
 	return &types.GetUserResp{
 		Code:    0,
 		Message: "ok",
@@ -46,7 +51,7 @@ func (l *GetUserLogic) GetUser(req *types.GetUserReq) (resp *types.GetUserResp, 
 			Id:          u.Id,
 			Nickname:    u.Nickname,
 			Email:       "",
-			Status:      "active",
+			Status:      status,
 			CreatedAt:   "",
 			LastLoginAt: "",
 			Profile:     types.UserProfile{AvatarUrl: u.AvatarUrl, Bio: u.Bio},

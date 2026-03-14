@@ -47,8 +47,8 @@ func (l *GetConversationLogic) GetConversation(req *types.GetConversationReq) (r
 			Type:         c.Type,
 			Name:         c.Name,
 			MemberCount:  int(c.MemberCount),
-			CreatedAt:    "",
-			LastActiveAt: "",
+			CreatedAt:    formatUnixTime(c.CreatedAt),
+			LastActiveAt: formatUnixTime(c.LastActiveAt),
 		},
 	}, nil
 }

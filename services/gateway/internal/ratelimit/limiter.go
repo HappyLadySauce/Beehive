@@ -35,3 +35,11 @@ func (l *MessageSendLimiter) Allow(ctx context.Context, userID string) (bool, er
 	}
 	return incr.Val() <= int64(l.limit), nil
 }
+
+// Close 关闭限流器持有的 Redis 连接池，应在进程退出或不再使用限流时调用
+func (l *MessageSendLimiter) Close() error {
+	if l.rdb == nil {
+		return nil
+	}
+	return l.rdb.Close()
+}

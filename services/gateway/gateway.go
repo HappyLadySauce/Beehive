@@ -32,6 +32,9 @@ func main() {
 		go ctx.PushConsumer.Run(context.Background())
 		defer ctx.PushConsumer.Close()
 	}
+	if ctx.MessageSendLimit != nil {
+		defer ctx.MessageSendLimit.Close()
+	}
 	handler.RegisterHandlers(server, ctx)
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)

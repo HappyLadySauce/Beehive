@@ -49,16 +49,18 @@ func (l *CreateConversationLogic) CreateConversation(in *pb.CreateConversationRe
 				CreatedAt:    now,
 				LastActiveAt: now,
 			}
-			var members []*model.ConversationMember
-			firstMember := true
+			// 先收集非空 memberIds，再按顺序分配角色，保证恰好第一个为 owner
+			var validIDs []string
 			for _, uid := range in.GetMemberIds() {
-				if uid == "" {
-					continue
+				if uid != "" {
+					validIDs = append(validIDs, uid)
 				}
+			}
+			var members []*model.ConversationMember
+			for i, uid := range validIDs {
 				role := "member"
-				if firstMember {
+				if i == 0 {
 					role = "owner"
-					firstMember = false
 				}
 				members = append(members, &model.ConversationMember{
 					ID:             uuid.Must(uuid.NewUUID()).String(),
@@ -90,16 +92,18 @@ func (l *CreateConversationLogic) CreateConversation(in *pb.CreateConversationRe
 		CreatedAt:    now,
 		LastActiveAt: now,
 	}
-	var members []*model.ConversationMember
-	firstMember := true
+	// 先收集非空 memberIds，再按顺序分配角色，保证恰好第一个为 owner
+	var validIDs []string
 	for _, uid := range in.GetMemberIds() {
-		if uid == "" {
-			continue
+		if uid != "" {
+			validIDs = append(validIDs, uid)
 		}
+	}
+	var members []*model.ConversationMember
+	for i, uid := range validIDs {
 		role := "member"
-		if firstMember {
+		if i == 0 {
 			role = "owner"
-			firstMember = false
 		}
 		members = append(members, &model.ConversationMember{
 			ID:             uuid.Must(uuid.NewUUID()).String(),

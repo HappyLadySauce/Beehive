@@ -84,8 +84,13 @@ func loadAndTouchToken(ctx context.Context, rdb *redis.Client, token string, ext
 		return userID, roles, ttl, nil
 	}
 	key := tokenKey(token)
-	if err := rdb.Expire(ctx, key, extendTTL).Err(); err != nil {
+	cmd := rdb.Expire(ctx, key, extendTTL)
+	if err := cmd.Err(); err != nil {
 		return "", nil, 0, fmt.Errorf("token touch failed: %w", err)
+	}
+	if !cmd.Val() {
+		// Key no longer exists (e.g. deleted between loadToken and Expire); Redis Expire returns 0, not an error.
+		return "", nil, 0, errors.New("token key no longer exists")
 	}
 	return userID, roles, extendTTL, nil
 }

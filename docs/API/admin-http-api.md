@@ -148,6 +148,9 @@
 - **方法与路径**
   - `POST /admin/users/{id}/kick`
 
+- **所需权限**
+  - `admin.user.ban`（与封禁/解封同属用户管控）
+
 - **请求体**
 
 ```json

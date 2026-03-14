@@ -30,19 +30,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		}
 	}
 
-	// admin.user.read
+	// admin.user.read（仅读：列表、详情、会话列表）
 	server.AddRoutes(
 		rest.WithMiddlewares(authThenPerm("admin.user.read"), []rest.Route{
 			{Method: http.MethodGet, Path: "/users", Handler: admin.ListUsersHandler(serverCtx)},
 			{Method: http.MethodGet, Path: "/users/:id", Handler: admin.GetUserHandler(serverCtx)},
 			{Method: http.MethodGet, Path: "/users/:id/sessions", Handler: admin.GetUserSessionsHandler(serverCtx)},
-			{Method: http.MethodPost, Path: "/users/:id/kick", Handler: admin.KickUserHandler(serverCtx)},
 		}...),
 		rest.WithPrefix("/admin"),
 	)
-	// admin.user.ban
+	// admin.user.ban（用户管控：踢下线、封禁、解封）
 	server.AddRoutes(
 		rest.WithMiddlewares(authThenPerm("admin.user.ban"), []rest.Route{
+			{Method: http.MethodPost, Path: "/users/:id/kick", Handler: admin.KickUserHandler(serverCtx)},
 			{Method: http.MethodPost, Path: "/users/:id/ban", Handler: admin.BanUserHandler(serverCtx)},
 			{Method: http.MethodPost, Path: "/users/:id/unban", Handler: admin.UnbanUserHandler(serverCtx)},
 		}...),

@@ -56,7 +56,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		msgCli := zrpc.MustNewClient(c.MessageRpcConf)
 		ctx.MessageSvc = messageservice.NewMessageService(msgCli)
 	}
-	if c.PushConsumerConfigured() && ctx.ConversationSvc != nil && ctx.PresenceSvc != nil {
+	if c.PushConsumerConfigured() && c.ConversationRpcConfigured() && c.PresenceRpcConfigured() {
 		consumer, err := push.NewConsumer(c, ctx.Hub, ctx.ConversationSvc, ctx.PresenceSvc)
 		if err != nil {
 			panic("push consumer: " + err.Error())

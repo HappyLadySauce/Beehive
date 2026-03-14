@@ -41,11 +41,11 @@ areas:
         notes: "配置 ConversationRpcConf/MessageRpcConf（Etcd）；支持 conversation.list（聚合 ListUserConversations + GetLastMessages）、message.send、message.history；未配置时返回 unavailable"
       - id: message-delivery-push
         title: 消息实时投递（message.push）
-        status: pending
+        status: done
         service: gateway
         owner: ""
         tags: [gateway, message, mq, presence]
-        notes: "消费 RabbitMQ message.created，按会话成员查 Presence 得到在线连接，经 Gateway 向 WebSocket 推送 message.push；可独立 Delivery 服务或在 Gateway 内实现（设计参考 docs/backend/gateway-design.md 4.2）"
+        notes: "Gateway 内 internal/push/consumer.go 消费 message.created，ListMembers + GetOnlineSessions，仅向本实例 session 经 Hub 推送 message.push；配置 RabbitMQURL/Exchange/Queue/RouteKey，多实例各队列绑定同一 exchange（设计参考 docs/backend/gateway-design.md 4.2）"
       - id: conversation-ws-create-member
         title: Gateway 暴露 conversation.create / addMember / removeMember
         status: pending

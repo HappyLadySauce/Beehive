@@ -7,7 +7,7 @@
 ## 一、整体进展概览
 
 - **网关**：
-  - Gateway：`api/gateway.api` 已定义，`services/gateway` 由 goctl 生成；WebSocket 升级、Hub、读循环已实现；已集成 Auth、Presence、User、Conversation、Message（`auth.login`/`auth.tokenLogin`/`auth.logout`、`presence.ping`、`user.me`、`conversation.list`、`message.send`、`message.history`）。
+  - Gateway：`api/gateway.api` 已定义，`services/gateway` 由 goctl 生成；WebSocket 升级、Hub、读循环已实现；已集成 Auth、Presence、User、Conversation、Message（`auth.login`/`auth.tokenLogin`/`auth.logout`、`presence.ping`、`user.me`、`conversation.list`、`message.send`、`message.history`）；可选配置 RabbitMQ 消费后，向本实例在线连接推送 `message.push`。
 - **后端核心 RPC**：
   - AuthService：登录/登出/Token 校验/CheckPermission/GetUserRoles 已实现（见 `auth-service`）。
   - PresenceService：Redis Session 注册/刷新/注销、GetOnlineSessions/GetUserPresence 已实现（见 `presence-service`）。
@@ -31,6 +31,9 @@
   - `conversation.list`：调用 ConversationService.ListUserConversations + MessageService.GetLastMessages 聚合成会话列表（含 lastMessage）。
   - `message.send`：调用 MessageService.PostMessage（from_user_id 为当前连接用户），返回 `message.send.ok`。
   - `message.history`：调用 MessageService.GetHistory，返回 `message.history.ok`。
+- **消息实时投递 `message.push`**（`message-delivery-push`）
+  - Gateway 可选配置 RabbitMQ 消费（RabbitMQURL、Exchange、Queue、RouteKey）；`internal/push/consumer.go` 消费 `message.created`，按 ConversationService.ListMembers 取会话成员，按 PresenceService.GetOnlineSessions 取在线会话，仅向本实例（session.GatewayId == 本机）连接通过 Hub 推送 `message.push`；多实例时每实例独立队列绑定同一 exchange，各推各连接。
+  - 配置示例见 `etc/gateway-api.yaml` 注释；RUN_TEST.md 已补充启用说明。
 - **数据库迁移 004/005**
   - `004_create_conversations_and_members.sql`：`conversations`、`conversation_members` 表及索引。
   - `005_create_messages.sql`：`messages` 表及 `(conversation_id, server_time)` 索引。
@@ -59,39 +62,35 @@
 
 ### 核心 IM 能力（优先）
 
-1. **消息实时投递 `message.push`**（见 `TODO.yml` 中 `message-delivery-push`）  
-   - 现状：PostMessage 已写库并发布 RabbitMQ `message.created`，但对端收不到实时推送。  
-   - 待做：消费 `message.created`，按会话成员查 Presence 得到在线连接，经 Gateway 向对应 WebSocket 发 `message.push`。可独立 Delivery 服务或在 Gateway 内实现。
-
-2. **会话创建/成员管理的 WebSocket 暴露**（见 `conversation-ws-create-member`）  
+1. **会话创建/成员管理的 WebSocket 暴露**（见 `conversation-ws-create-member`）  
    - 现状：ConversationService 已有 CreateConversation、AddMember、RemoveMember，Gateway 未在 WS 中暴露。  
    - 待做：Gateway 增加 `conversation.create`、`conversation.addMember`、`conversation.removeMember` 的 type 分发与 RPC 调用，返回对应 `.ok`。
 
-3. **会话列表未读计数 `unreadCount`**  
+2. **会话列表未读计数 `unreadCount`**  
    - 现状：`conversation.list.ok` 的 items 中 `unreadCount` 固定为 0。  
    - 待做：未读数据模型（按用户+会话存储）、Message 或独立服务提供「未读查询/已读更新」能力，Gateway 聚合时填入 `unreadCount`。
 
-4. **已读回执 `message.read`**（见 `message-read-receipt`）  
+3. **已读回执 `message.read`**（见 `message-read-receipt`）  
    - 现状：API 已定义 `message.read` / `message.read.ok`，后端未实现。  
    - 待做：已读记录存储与 RPC（或扩展 MessageService），Gateway 处理 `message.read` 并调用；可选发布已读事件供对端/统计使用。
 
 ### 体验与稳定性（随后）
 
-5. **单聊会话解析**：`message.send` 在未传 `conversationId` 仅传 `toUserId` 时，按 toUserId 查找或创建单聊会话并写入消息（当前要求必填 conversationId）。
+4. **单聊会话解析**：`message.send` 在未传 `conversationId` 仅传 `toUserId` 时，按 toUserId 查找或创建单聊会话并写入消息（当前要求必填 conversationId）。
 
-6. **限流**：Gateway 对 `message.send` 等按 userId 做 Redis 限流，触发时返回 `rate_limited`（见 `docs/API/websocket-client-api.md`）。
+5. **限流**：Gateway 对 `message.send` 等按 userId 做 Redis 限流，触发时返回 `rate_limited`（见 `docs/API/websocket-client-api.md`）。
 
 ### Admin 相关（最后）
 
-7. **Admin 按路由权限校验**（见 `TODO.yml` 中 `admin-permission-middleware`）：CheckPermission 中间件、ListUsers/封禁/配置等对接 RPC 或 etcd。
+6. **Admin 按路由权限校验**（见 `TODO.yml` 中 `admin-permission-middleware`）：CheckPermission 中间件、ListUsers/封禁/配置等对接 RPC 或 etcd。
 
 ---
 
 ## 四、下一步计划
 
 - **优先顺序**：
-  1. ~~网关与五大 RPC 基础集成~~（已完成）。
-  2. **当前建议**：消息投递 `message.push` → 会话 WS 暴露（create/addMember/removeMember）→ 未读计数 → 已读回执 `message.read`。
+  1. ~~网关与五大 RPC 基础集成~~、~~消息投递 `message.push`~~（已完成）。
+  2. **当前建议**：会话 WS 暴露（conversation.create / addMember / removeMember）→ 未读计数 → 已读回执 `message.read`。
   3. 随后：单聊会话解析、限流、测试与部署文档。
   4. **最后**：Admin 权限中间件与占位接口对接。
 

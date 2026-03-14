@@ -123,9 +123,9 @@ areas:
         notes: "按 development-workflow 先定义 api/admin.api 再 goctl 生成 services/adminapi。已实现：认证中间件（Bearer + AuthService.ValidateToken）、用户详情/会话/踢下线、会话详情/成员/消息、配置与运维占位；ListUsers/封禁/配置等可后续对接 RPC 或 etcd（设计参考 docs/API/admin-http-api.md, docs/frontend/admin-app.md）"
       - id: admin-permission-middleware
         title: Admin 按路由权限校验（CheckPermission）
-        status: pending
+        status: done
         service: adminapi
         owner: ""
         tags: [admin, rbac, middleware]
-        notes: "【最后做】对敏感路由按 admin-http-api.md 调用 AuthService.CheckPermission（如 admin.user.read、admin.user.ban、admin.conversation.read、admin.message.read、admin.config.read/write、admin.ops.use）"
+        notes: "已实现 PermissionMiddleware(permission)，路由按权限分组注册；admin.user.read/ban、admin.conversation.read、admin.message.read、admin.config.read/write、admin.ops.use；无权限或 RPC 错误返回 code 1003（见 docs/API/admin-http-api.md）"
 

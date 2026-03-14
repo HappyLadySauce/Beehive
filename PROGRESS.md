@@ -81,7 +81,7 @@
 
 ### Admin 相关（最后）
 
-6. **Admin 按路由权限校验**（见 `TODO.yml` 中 `admin-permission-middleware`）：CheckPermission 中间件、ListUsers/封禁/配置等对接 RPC 或 etcd。
+6. **Admin 按路由权限校验**（见 `TODO.yml` 中 `admin-permission-middleware`）：**已完成**。CheckPermission 中间件已实现，路由按 admin.user.read/ban、admin.conversation.read、admin.message.read、admin.config.read/write、admin.ops.use 分组；ListUsers/封禁/配置等占位接口可后续对接 RPC 或 etcd。
 
 ---
 
@@ -91,7 +91,7 @@
   1. ~~网关与五大 RPC 基础集成~~、~~消息投递 `message.push`~~（已完成）。
   2. ~~会话 WS 暴露~~、~~未读计数~~、~~已读回执 `message.read`~~、~~单聊会话解析~~、~~限流~~（已完成）。
   3. 随后：测试与部署文档、可选已读事件发布。
-  4. **最后**：Admin 权限中间件与占位接口对接。
+  4. ~~Admin 权限中间件~~（已完成）；占位接口对接可后续迭代。
 
 - 实现前请对照：
   - Gateway：`docs/backend/gateway-design.md`、`docs/API/websocket-client-api.md`。

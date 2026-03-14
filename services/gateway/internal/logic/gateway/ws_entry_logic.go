@@ -94,6 +94,12 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 		l.handleMessageHistory(c, env)
 	case "message.read":
 		l.handleMessageRead(c, env)
+	case "contact.list":
+		l.handleContactList(c, env)
+	case "contact.add":
+		l.handleContactAdd(c, env)
+	case "contact.remove":
+		l.handleContactRemove(c, env)
 	default:
 		l.sendError(c, env.Tid, "bad_request", "unknown type: "+env.Type)
 	}
@@ -428,17 +434,47 @@ func (l *WsEntryLogic) handleConversationCreate(c *ws.Connection, env *ws.Envelo
 		return
 	}
 	var payload struct {
-		Type      string   `json:"type"`
-		Name      string   `json:"name"`
-		MemberIds []string `json:"memberIds"`
+		Type       string   `json:"type"`
+		Name       string   `json:"name"`
+		MemberIds  []string `json:"memberIds"`
+		ToUsername string   `json:"toUsername"`
+		ToAccount  string   `json:"toAccount"`
 	}
 	if !l.bindJSONPayload(c, env, &payload) {
 		return
 	}
+	memberIds := payload.MemberIds
+	if payload.Type == "single" && len(memberIds) == 0 && (payload.ToUsername != "" || payload.ToAccount != "") {
+		if l.svcCtx.UserSvc == nil {
+			l.sendError(c, env.Tid, "unavailable", "user service not configured for resolve")
+			return
+		}
+		var toUserId string
+		if payload.ToAccount != "" {
+			u, err := l.svcCtx.UserSvc.GetUser(l.ctx, &userservice.GetUserRequest{Id: payload.ToAccount})
+			if err != nil || u.GetUser() == nil {
+				l.sendError(c, env.Tid, "not_found", "user not found")
+				return
+			}
+			toUserId = u.User.Id
+		} else {
+			u, err := l.svcCtx.UserSvc.GetUserByUsername(l.ctx, &userservice.GetUserByUsernameRequest{Username: payload.ToUsername})
+			if err != nil || u.GetUser() == nil {
+				l.sendError(c, env.Tid, "not_found", "user not found")
+				return
+			}
+			toUserId = u.User.Id
+		}
+		if toUserId == c.UserID {
+			l.sendError(c, env.Tid, "bad_request", "cannot create chat with self")
+			return
+		}
+		memberIds = []string{c.UserID, toUserId}
+	}
 	resp, err := l.svcCtx.ConversationSvc.CreateConversation(l.ctx, &conversationservice.CreateConversationRequest{
 		Type:      payload.Type,
 		Name:      payload.Name,
-		MemberIds: payload.MemberIds,
+		MemberIds: memberIds,
 	})
 	if err != nil {
 		if s, ok := status.FromError(err); ok {
@@ -753,6 +789,118 @@ func (l *WsEntryLogic) handleMessageRead(c *ws.Connection, env *ws.Envelope) {
 	}
 	_ = c.WriteJSON(&ws.Envelope{
 		Type:    "message.read.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleContactList(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.UserSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "user service not configured")
+		return
+	}
+	resp, err := l.svcCtx.UserSvc.ListContacts(l.ctx, &userservice.ListContactsRequest{OwnerId: c.UserID})
+	if err != nil {
+		l.Errorf("list contacts failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "contact.list.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{"contactUserIds": resp.ContactUserIds},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleContactAdd(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.UserSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "user service not configured")
+		return
+	}
+	var payload struct {
+		ToUserId   string `json:"toUserId"`
+		ToUsername string `json:"toUsername"`
+		ToAccount  string `json:"toAccount"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	contactUserID := payload.ToUserId
+	if contactUserID == "" && payload.ToAccount != "" {
+		u, err := l.svcCtx.UserSvc.GetUser(l.ctx, &userservice.GetUserRequest{Id: payload.ToAccount})
+		if err != nil || u.GetUser() == nil {
+			l.sendError(c, env.Tid, "not_found", "user not found")
+			return
+		}
+		contactUserID = u.User.Id
+	}
+	if contactUserID == "" && payload.ToUsername != "" {
+		u, err := l.svcCtx.UserSvc.GetUserByUsername(l.ctx, &userservice.GetUserByUsernameRequest{Username: payload.ToUsername})
+		if err != nil || u.GetUser() == nil {
+			l.sendError(c, env.Tid, "not_found", "user not found")
+			return
+		}
+		contactUserID = u.User.Id
+	}
+	if contactUserID == "" {
+		l.sendError(c, env.Tid, "bad_request", "toUserId, toUsername or toAccount is required")
+		return
+	}
+	_, err := l.svcCtx.UserSvc.AddContact(l.ctx, &userservice.AddContactRequest{
+		OwnerId:       c.UserID,
+		ContactUserId: contactUserID,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.InvalidArgument:
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			case codes.NotFound:
+				l.sendError(c, env.Tid, "not_found", s.Message())
+				return
+			}
+		}
+		l.Errorf("add contact failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "contact.add.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleContactRemove(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.UserSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "user service not configured")
+		return
+	}
+	var payload struct {
+		ContactUserId string `json:"contactUserId"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ContactUserId == "" {
+		l.sendError(c, env.Tid, "bad_request", "contactUserId is required")
+		return
+	}
+	_, err := l.svcCtx.UserSvc.RemoveContact(l.ctx, &userservice.RemoveContactRequest{
+		OwnerId:       c.UserID,
+		ContactUserId: payload.ContactUserId,
+	})
+	if err != nil {
+		l.Errorf("remove contact failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "contact.remove.ok",
 		Tid:     env.Tid,
 		Payload: map[string]any{},
 		Error:   nil,

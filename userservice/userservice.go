@@ -14,26 +14,27 @@ import (
 )
 
 type (
-	AddContactRequest    = pb.AddContactRequest
-	AddContactResponse   = pb.AddContactResponse
-	BatchGetUsersRequest = pb.BatchGetUsersRequest
-	BatchGetUsersResponse = pb.BatchGetUsersResponse
-	GetUserRequest       = pb.GetUserRequest
-	GetUserResponse      = pb.GetUserResponse
-	GetUserByUsernameRequest  = pb.GetUserByUsernameRequest
-	ListContactsRequest  = pb.ListContactsRequest
-	ListContactsResponse = pb.ListContactsResponse
-	RemoveContactRequest = pb.RemoveContactRequest
-	RemoveContactResponse = pb.RemoveContactResponse
-	UpdateUserRequest    = pb.UpdateUserRequest
-	UpdateUserResponse   = pb.UpdateUserResponse
-	User                 = pb.User
+	AddContactRequest        = pb.AddContactRequest
+	AddContactResponse       = pb.AddContactResponse
+	BatchGetUsersRequest     = pb.BatchGetUsersRequest
+	BatchGetUsersResponse    = pb.BatchGetUsersResponse
+	GetUserByUsernameRequest = pb.GetUserByUsernameRequest
+	GetUserRequest           = pb.GetUserRequest
+	GetUserResponse          = pb.GetUserResponse
+	ListContactsRequest      = pb.ListContactsRequest
+	ListContactsResponse     = pb.ListContactsResponse
+	RemoveContactRequest     = pb.RemoveContactRequest
+	RemoveContactResponse    = pb.RemoveContactResponse
+	UpdateUserRequest        = pb.UpdateUserRequest
+	UpdateUserResponse       = pb.UpdateUserResponse
+	User                     = pb.User
 
 	UserService interface {
 		GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 		GetUserByUsername(ctx context.Context, in *GetUserByUsernameRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 		BatchGetUsers(ctx context.Context, in *BatchGetUsersRequest, opts ...grpc.CallOption) (*BatchGetUsersResponse, error)
 		UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
+		// 联系人
 		AddContact(ctx context.Context, in *AddContactRequest, opts ...grpc.CallOption) (*AddContactResponse, error)
 		ListContacts(ctx context.Context, in *ListContactsRequest, opts ...grpc.CallOption) (*ListContactsResponse, error)
 		RemoveContact(ctx context.Context, in *RemoveContactRequest, opts ...grpc.CallOption) (*RemoveContactResponse, error)
@@ -70,6 +71,7 @@ func (m *defaultUserService) UpdateUser(ctx context.Context, in *UpdateUserReque
 	return client.UpdateUser(ctx, in, opts...)
 }
 
+// 联系人
 func (m *defaultUserService) AddContact(ctx context.Context, in *AddContactRequest, opts ...grpc.CallOption) (*AddContactResponse, error) {
 	client := pb.NewUserServiceClient(m.cli.Conn())
 	return client.AddContact(ctx, in, opts...)

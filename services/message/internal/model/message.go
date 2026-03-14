@@ -6,15 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// Message 对应 messages 表
+// Message 对应 messages 表。conversation_id 单聊为 UUID 字符串、群聊为 11 位；user_id 为 10 位。
 type Message struct {
 	ID             string     `gorm:"column:id;type:uuid;primaryKey"`
 	ServerMsgID    string     `gorm:"column:server_msg_id;type:text;uniqueIndex;not null"`
 	ClientMsgID    string     `gorm:"column:client_msg_id;type:text;not null"`
-	ConversationID string     `gorm:"column:conversation_id;type:uuid;not null"`
-	FromUserID     string     `gorm:"column:from_user_id;type:uuid;not null"`
-	// ToUserID 可为空：群聊/广播消息时为 NULL，点对点消息时为 uuid
-	ToUserID   *string   `gorm:"column:to_user_id;type:uuid"`
+	ConversationID string     `gorm:"column:conversation_id;type:varchar(20);not null"`
+	FromUserID     string     `gorm:"column:from_user_id;type:char(10);not null"`
+	// ToUserID 可为空：群聊/广播消息时为 NULL，点对点消息时为 10 位用户 ID
+	ToUserID   *string   `gorm:"column:to_user_id;type:char(10)"`
 	BodyType   string    `gorm:"column:body_type;type:text;not null"`
 	BodyText   string    `gorm:"column:body_text;type:text;not null"`
 	ServerTime int64     `gorm:"column:server_time;not null"`

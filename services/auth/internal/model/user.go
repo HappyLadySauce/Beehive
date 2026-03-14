@@ -6,9 +6,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// User 对应 users 表，供 AuthService 进行账号密码校验使用。
+// User 对应 users 表，供 AuthService 进行账号密码校验使用。id 为 10 位数字字符串。
 type User struct {
-	ID           string    `gorm:"column:id;type:uuid;primaryKey"`
+	ID           string    `gorm:"column:id;type:char(10);primaryKey"`
 	Username     string    `gorm:"column:username;type:text;uniqueIndex;not null"`
 	PasswordHash string    `gorm:"column:password_hash;type:text;not null"`
 	Status       string    `gorm:"column:status;type:text;not null;default:'normal'"`

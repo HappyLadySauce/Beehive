@@ -6,8 +6,17 @@ option go_package = "./services/user/pb";
 
 service UserService {
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc GetUserByUsername(GetUserByUsernameRequest) returns (GetUserResponse);
   rpc BatchGetUsers(BatchGetUsersRequest) returns (BatchGetUsersResponse);
   rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  // 联系人
+  rpc AddContact(AddContactRequest) returns (AddContactResponse);
+  rpc ListContacts(ListContactsRequest) returns (ListContactsResponse);
+  rpc RemoveContact(RemoveContactRequest) returns (RemoveContactResponse);
+}
+
+message GetUserByUsernameRequest {
+  string username = 1;
 }
 
 message GetUserRequest {
@@ -44,4 +53,26 @@ message User {
   string bio = 4;
   string status = 5;
 }
+
+message AddContactRequest {
+  string owner_id = 1;
+  string contact_user_id = 2;
+}
+
+message AddContactResponse {}
+
+message ListContactsRequest {
+  string owner_id = 1;
+}
+
+message ListContactsResponse {
+  repeated string contact_user_ids = 1;
+}
+
+message RemoveContactRequest {
+  string owner_id = 1;
+  string contact_user_id = 2;
+}
+
+message RemoveContactResponse {}
 

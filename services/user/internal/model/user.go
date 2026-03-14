@@ -6,9 +6,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// User 对应 users 表，主要给 AuthService 等使用，这里只建最小字段。
+// User 对应 users 表，主要给 AuthService 等使用，这里只建最小字段。id 为 10 位数字字符串。
 type User struct {
-	ID           string    `gorm:"column:id;type:uuid;primaryKey"`
+	ID           string    `gorm:"column:id;type:char(10);primaryKey"`
 	Username     string    `gorm:"column:username;type:text;uniqueIndex;not null"`
 	PasswordHash string    `gorm:"column:password_hash;type:text;not null"`
 	Status       string    `gorm:"column:status;type:text;not null;default:'normal'"`
@@ -20,9 +20,33 @@ func (User) TableName() string {
 	return "users"
 }
 
+type UserModel struct {
+	db *gorm.DB
+}
+
+func NewUserModel(db *gorm.DB) *UserModel {
+	return &UserModel{db: db}
+}
+
+func (m *UserModel) FindByUsername(username string) (*User, error) {
+	var u User
+	if err := m.db.Where("username = ?", username).First(&u).Error; err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
+
+func (m *UserModel) FindByID(id string) (*User, error) {
+	var u User
+	if err := m.db.Where("id = ?", id).First(&u).Error; err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
+
 // UserProfile 对应 user_profiles 表，给 UserService 读写 profile 使用。
 type UserProfile struct {
-	UserID    string    `gorm:"column:user_id;type:uuid;primaryKey"`
+	UserID    string    `gorm:"column:user_id;type:char(10);primaryKey"`
 	Nickname  string    `gorm:"column:nickname;type:text;not null;default:''"`
 	AvatarURL string    `gorm:"column:avatar_url;type:text;not null;default:''"`
 	Bio       string    `gorm:"column:bio;type:text;not null;default:''"`

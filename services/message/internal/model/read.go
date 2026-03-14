@@ -7,10 +7,10 @@ import (
 )
 
 // ConversationRead 用户在某会话的已读位置（last_read_server_time）
-// 表名 conversation_read，唯一约束 (user_id, conversation_id)
+// 表名 conversation_read，唯一约束 (user_id, conversation_id)；user_id 为 10 位，conversation_id 为 varchar(20)
 type ConversationRead struct {
-	UserID              string    `gorm:"column:user_id;type:uuid;primaryKey"`
-	ConversationID      string    `gorm:"column:conversation_id;type:uuid;primaryKey"`
+	UserID              string    `gorm:"column:user_id;type:char(10);primaryKey"`
+	ConversationID      string    `gorm:"column:conversation_id;type:varchar(20);primaryKey"`
 	LastReadServerTime  int64     `gorm:"column:last_read_server_time;not null;default:0"`
 	UpdatedAt           time.Time `gorm:"column:updated_at;type:timestamptz;not null"`
 }

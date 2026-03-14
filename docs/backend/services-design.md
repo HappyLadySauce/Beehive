@@ -38,12 +38,14 @@
 **核心接口（示意）**
 
 - `rpc GetUser(GetUserRequest) returns (GetUserResponse)`
+- `rpc GetUserByUsername(GetUserByUsernameRequest) returns (GetUserResponse)` — 按用户名解析为 10 位用户 ID 并返回资料
 - `rpc BatchGetUsers(BatchGetUsersRequest) returns (BatchGetUsersResponse)`
 - `rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse)`
+- 联系人：`rpc AddContact` / `rpc ListContacts` / `rpc RemoveContact`（owner 与 contact 均为 10 位用户 ID）
 
 **数据存储**
 
-- PostgreSQL：`user_profiles` 等表。
+- PostgreSQL：`user_profiles`、`contacts` 等表。
 - Redis：用户资料缓存，减轻数据库压力。
 
 ---

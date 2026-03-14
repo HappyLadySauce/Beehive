@@ -6,9 +6,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// Conversation 对应 conversations 表
+// Conversation 对应 conversations 表。单聊 id 为 UUID 字符串，群聊 id 为 11 位数字字符串。
 type Conversation struct {
-	ID           string    `gorm:"column:id;type:uuid;primaryKey"`
+	ID           string    `gorm:"column:id;type:varchar(20);primaryKey"`
 	Type         string    `gorm:"column:type;type:text;not null;default:single"`
 	Name         string    `gorm:"column:name;type:text;not null;default:''"`
 	CreatedAt    time.Time `gorm:"column:created_at;type:timestamptz;not null"`
@@ -22,8 +22,8 @@ func (Conversation) TableName() string {
 // ConversationMember 对应 conversation_members 表
 type ConversationMember struct {
 	ID             string    `gorm:"column:id;type:uuid;primaryKey"`
-	ConversationID string    `gorm:"column:conversation_id;type:uuid;not null;uniqueIndex:uq_conv_member"`
-	UserID         string    `gorm:"column:user_id;type:uuid;not null;uniqueIndex:uq_conv_member"`
+	ConversationID string    `gorm:"column:conversation_id;type:varchar(20);not null;uniqueIndex:uq_conv_member"`
+	UserID         string    `gorm:"column:user_id;type:char(10);not null;uniqueIndex:uq_conv_member"`
 	Role           string    `gorm:"column:role;type:text;not null;default:member"`
 	Status         string    `gorm:"column:status;type:text;not null;default:active"`
 	JoinedAt       time.Time `gorm:"column:joined_at;type:timestamptz;not null"`

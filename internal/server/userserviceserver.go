@@ -7,8 +7,8 @@ package server
 import (
 	"context"
 
-	"github.com/HappyLadySauce/Beehive/services/user/internal/logic"
-	"github.com/HappyLadySauce/Beehive/services/user/internal/svc"
+	"github.com/HappyLadySauce/Beehive/internal/logic"
+	"github.com/HappyLadySauce/Beehive/internal/svc"
 	"github.com/HappyLadySauce/Beehive/services/user/pb"
 )
 
@@ -43,6 +43,7 @@ func (s *UserServiceServer) UpdateUser(ctx context.Context, in *pb.UpdateUserReq
 	return l.UpdateUser(in)
 }
 
+// 联系人
 func (s *UserServiceServer) AddContact(ctx context.Context, in *pb.AddContactRequest) (*pb.AddContactResponse, error) {
 	l := logic.NewAddContactLogic(ctx, s.svcCtx)
 	return l.AddContact(in)

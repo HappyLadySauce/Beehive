@@ -4,6 +4,11 @@
 
 设计遵循 `docs/backend/gateway-design.md` 中的约定，仅补充更具体的字段和消息类型。
 
+**ID 约定**：
+
+- **用户 ID**：10 位数字字符串（如 `"1234567890"`），用于登录返回、会话成员、消息 from/to 等。
+- **会话 ID（conversationId）**：单聊为 UUID 字符串；群聊为 11 位数字字符串（群号），用于创建群聊、加群、发消息等。
+
 ---
 
 ### 1. 顶层 Envelope 结构
@@ -448,7 +453,7 @@
   "type": "user.me.ok",
   "tid": "me-1",
   "payload": {
-    "id": "u_123",
+    "id": "1234567890",
     "nickname": "Alice",
     "avatarUrl": "https://...",
     "bio": "hello",
@@ -464,7 +469,7 @@
 
 - **创建会话：`conversation.create` / `conversation.create.ok`**
 
-请求：
+请求（单聊可传 `memberIds` 或 `toUsername`/`toAccount` 之一）：
 
 ```json
 {
@@ -473,23 +478,27 @@
   "payload": {
     "type": "single",
     "name": "",
-    "memberIds": ["u_123", "u_456"]
+    "memberIds": ["1234567890", "0987654321"],
+    "toUsername": "alice",
+    "toAccount": "1234567890"
   }
 }
 ```
 
 - `type`：会话类型，`single` | `group` | `channel`
-- `name`：可选，群名/频道名
-- `memberIds`：成员用户 ID 数组
+- `name`：可选，群名/频道名（群聊时使用）
+- `memberIds`：成员用户 ID（10 位）数组；单聊时可与 `toUsername`/`toAccount` 二选一
+- `toUsername`：单聊时按用户名解析对方，与 `toAccount`、`memberIds` 互斥
+- `toAccount`：单聊时按 10 位账号解析对方，与 `toUsername`、`memberIds` 互斥
 
-成功响应：
+成功响应：单聊返回 UUID 格式 `conversationId`，群聊返回 11 位群号。
 
 ```json
 {
   "type": "conversation.create.ok",
   "tid": "create-1",
   "payload": {
-    "conversationId": "conv_abc"
+    "conversationId": "conv_uuid_or_11_digit_group_id"
   },
   "error": null
 }
@@ -550,10 +559,54 @@
 }
 ```
 
-- 联系人/好友相关（预留）：
-  - `contact.list` / `.ok`
-  - `contact.request` / `.ok`
-  - `contact.accept` / `.ok`
+- **联系人：`contact.list` / `contact.add` / `contact.remove`**
+
+  - **请求：`contact.list`**
+
+    ```json
+    { "type": "contact.list", "tid": "cl-1", "payload": {} }
+    ```
+
+  - **成功响应：`contact.list.ok`**
+
+    ```json
+    {
+      "type": "contact.list.ok",
+      "tid": "cl-1",
+      "payload": { "contactUserIds": ["1234567890", "0987654321"] },
+      "error": null
+    }
+    ```
+
+  - **请求：`contact.add`**（传 `toUserId`、`toUsername`、`toAccount` 之一）
+
+    ```json
+    {
+      "type": "contact.add",
+      "tid": "ca-1",
+      "payload": {
+        "toUserId": "1234567890",
+        "toUsername": "alice",
+        "toAccount": "1234567890"
+      }
+    }
+    ```
+
+  - **成功响应：`contact.add.ok`**（payload 可为空）
+
+  - **请求：`contact.remove`**
+
+    ```json
+    {
+      "type": "contact.remove",
+      "tid": "cr-1",
+      "payload": { "contactUserId": "1234567890" }
+    }
+    ```
+
+  - **成功响应：`contact.remove.ok`**
+
+- 后续可扩展：`contact.request` / `contact.accept`（好友申请/通过流程）。
 
 ---
 

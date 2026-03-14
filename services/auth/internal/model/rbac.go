@@ -45,9 +45,9 @@ func (RolePermission) TableName() string {
 	return "role_permissions"
 }
 
-// UserRole 连接用户与角色，多对多关系。
+// UserRole 连接用户与角色，多对多关系。user_id 为 10 位数字字符串。
 type UserRole struct {
-	UserID    string    `gorm:"column:user_id;type:uuid;primaryKey"`
+	UserID    string    `gorm:"column:user_id;type:char(10);primaryKey"`
 	RoleID    string    `gorm:"column:role_id;type:uuid;primaryKey"`
 	CreatedAt time.Time `gorm:"column:created_at;type:timestamptz;not null;default:now()"`
 }

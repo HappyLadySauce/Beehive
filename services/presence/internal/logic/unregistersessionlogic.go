@@ -43,5 +43,10 @@ func (l *UnregisterSessionLogic) UnregisterSession(in *pb.UnregisterSessionReque
 		return nil, status.Errorf(codes.Internal, "unregister session failed: %v", err)
 	}
 
+	// 若该用户已无任何会话，删除空 set，避免残留 key
+	if card, e := l.svcCtx.Redis.SCard(l.ctx, userConnsKey).Result(); e == nil && card == 0 {
+		_ = l.svcCtx.Redis.Del(l.ctx, userConnsKey).Err()
+	}
+
 	return &pb.UnregisterSessionResponse{}, nil
 }

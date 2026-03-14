@@ -34,7 +34,9 @@ func (l *RefreshSessionLogic) RefreshSession(in *pb.RefreshSessionRequest) (*pb.
 	}
 
 	sessionKey := session.SessionKey(in.GetUserId(), in.GetConnId())
+	userConnsKey := session.UserConnsKey(in.GetUserId())
 	ttl := session.SessionTTL(l.svcCtx.Config.SessionTTLSeconds)
+	ttlDur := time.Duration(ttl) * time.Second
 
 	// 若 key 不存在（已过期）则视为幂等成功
 	exists, err := l.svcCtx.Redis.Exists(l.ctx, sessionKey).Result()
@@ -47,12 +49,12 @@ func (l *RefreshSessionLogic) RefreshSession(in *pb.RefreshSessionRequest) (*pb.
 	}
 
 	now := time.Now().Unix()
-	if err := l.svcCtx.Redis.HSet(l.ctx, sessionKey, session.HashLastPingAt, strconv.FormatInt(now, 10)).Err(); err != nil {
-		l.Errorf("refresh session hset error: %v", err)
-		return nil, status.Errorf(codes.Internal, "refresh session failed: %v", err)
-	}
-	if err := l.svcCtx.Redis.Expire(l.ctx, sessionKey, time.Duration(ttl)*time.Second).Err(); err != nil {
-		l.Errorf("refresh session expire error: %v", err)
+	pipe := l.svcCtx.Redis.Pipeline()
+	pipe.HSet(l.ctx, sessionKey, session.HashLastPingAt, strconv.FormatInt(now, 10))
+	pipe.Expire(l.ctx, sessionKey, ttlDur)
+	pipe.Expire(l.ctx, userConnsKey, ttlDur)
+	if _, err := pipe.Exec(l.ctx); err != nil {
+		l.Errorf("refresh session redis error: %v", err)
 		return nil, status.Errorf(codes.Internal, "refresh session failed: %v", err)
 	}
 

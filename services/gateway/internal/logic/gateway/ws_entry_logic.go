@@ -12,6 +12,7 @@ import (
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/svc"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/ws"
 	"github.com/HappyLadySauce/Beehive/services/presence/presenceservice"
+	"github.com/HappyLadySauce/Beehive/services/user/userservice"
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -71,6 +72,8 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 		l.handleAuth(c, env)
 	case "auth.logout":
 		l.handleAuthLogout(c, env)
+	case "user.me":
+		l.handleUserMe(c, env)
 	default:
 		l.sendError(c, env.Tid, "bad_request", "unknown type: "+env.Type)
 	}
@@ -91,6 +94,33 @@ func (l *WsEntryLogic) handlePresencePing(c *ws.Connection, env *ws.Envelope) {
 		Tid:     env.Tid,
 		Payload: map[string]int64{"serverTime": time.Now().Unix()},
 		Error:   nil,
+	})
+}
+
+// handleUserMe 获取当前登录用户资料，需已登录；调用 UserService.GetUser。
+func (l *WsEntryLogic) handleUserMe(c *ws.Connection, env *ws.Envelope) {
+	resp, err := l.svcCtx.UserSvc.GetUser(l.ctx, &userservice.GetUserRequest{Id: c.UserID})
+	if err != nil {
+		l.Errorf("get user me failed for %s: %v", c.UserID, err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	if resp.GetUser() == nil {
+		l.sendError(c, env.Tid, "not_found", "user not found")
+		return
+	}
+	u := resp.User
+	_ = c.WriteJSON(&ws.Envelope{
+		Type: env.Type + ".ok",
+		Tid:  env.Tid,
+		Payload: map[string]any{
+			"id":        u.GetId(),
+			"nickname":  u.GetNickname(),
+			"avatarUrl": u.GetAvatarUrl(),
+			"bio":       u.GetBio(),
+			"status":    u.GetStatus(),
+		},
+		Error: nil,
 	})
 }
 

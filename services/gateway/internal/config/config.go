@@ -19,4 +19,6 @@ type Config struct {
 	AuthRpcConf zrpc.RpcClientConf `json:",optional"`
 	// PresenceRpcConf 为 PresenceService 的 zrpc 客户端配置。
 	PresenceRpcConf zrpc.RpcClientConf `json:",optional"`
+	// UserRpcConf 为 UserService 的 zrpc 客户端配置（获取用户资料等）。
+	UserRpcConf zrpc.RpcClientConf `json:",optional"`
 }

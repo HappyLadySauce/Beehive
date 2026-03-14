@@ -394,7 +394,40 @@
 
 ---
 
-### 6. 会话与联系人管理（预留）
+### 6. 用户资料与会话、联系人
+
+#### 6.1 获取当前用户资料
+
+- **请求：`user.me`**（需已登录）
+
+```json
+{
+  "type": "user.me",
+  "tid": "me-1",
+  "payload": {}
+}
+```
+
+- **成功响应：`user.me.ok`**
+
+```json
+{
+  "type": "user.me.ok",
+  "tid": "me-1",
+  "payload": {
+    "id": "u_123",
+    "nickname": "Alice",
+    "avatarUrl": "https://...",
+    "bio": "hello",
+    "status": "normal"
+  },
+  "error": null
+}
+```
+
+> Gateway 根据连接上绑定的 `userId` 调用 **UserService.GetUser** 返回当前用户资料，供客户端展示昵称、头像等。
+
+#### 6.2 会话与联系人管理（预留）
 
 以下为未来可扩展的消息类型占位（具体字段可在实现前细化）：
 
@@ -432,12 +465,15 @@
 
 ---
 
+---
+
 ### 8. 与后端服务的对应关系（参考）
 
 > 本节仅说明协议与后端服务的责任划分，具体 gRPC 接口见 `rpc-auth-presence-message-conversation.md`。
 
 - `auth.*` 消息 → Gateway 调用 **AuthService**
 - `presence.*` 消息 → Gateway 调用 **PresenceService**
+- `user.me` → Gateway 调用 **UserService**
 - `message.send` / `message.history` / `message.read` → Gateway 调用 **MessageService**
 - `conversation.*` 消息 → Gateway 调用 **ConversationService**
 

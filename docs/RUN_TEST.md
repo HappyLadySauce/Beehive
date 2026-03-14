@@ -30,20 +30,21 @@
 | **数据与依赖** | ✅ | PostgreSQL（users + user_profiles）、Redis（profile 缓存）、GORM + go-redis |
 
 - **配置**：`etc/beehive.user.yaml`（ListenOn、Etcd 注册 Key: `beehive.user.rpc`、PostgresDSN、Redis、UserProfileTTLSeconds）。
-- **与 Gateway**：Gateway **当前未接入 UserService**；用户资料由 AdminAPI 等通过 etcd 发现 User 后调用。若需在 WS 侧拉取当前用户资料，可在 Gateway 中按需增加对 UserService 的调用。
+- **与 Gateway**：Gateway 通过 etcd 发现 User 后调用 `GetUser`；客户端发送 `user.me` 可获取当前用户资料（昵称、头像、简介等）。
 
 ### 3. Gateway 与 Auth/Presence 接入情况
 
 | 接入项 | 状态 | 说明 |
 |--------|------|------|
-| **AuthService** | ✅ | `ServiceContext` 注入 `AuthSvc`，配置 `AuthRpcConf`（Endpoints 直连或 Etcd） |
-| **PresenceService** | ✅ | 注入 `PresenceSvc`，配置 `PresenceRpcConf` |
-| **UserService** | ❌ 未接入 | Gateway 未注入 UserService，仅 Auth + Presence |
+| **AuthService** | ✅ | `ServiceContext` 注入 `AuthSvc`，配置 `AuthRpcConf`（Etcd 发现） |
+| **PresenceService** | ✅ | 注入 `PresenceSvc`，配置 `PresenceRpcConf`（Etcd 发现） |
+| **UserService** | ✅ | 注入 `UserSvc`，配置 `UserRpcConf`（Etcd 发现）；支持 `user.me` 获取当前用户资料 |
 | **WebSocket 消息** | ✅ | `auth.login` / `auth.tokenLogin` → Auth RPC → 成功后 `RegisterSession` → 返回 `auth.login.ok` / `auth.tokenLogin.ok` |
 | **auth.logout** | ✅ | 调 Auth.Logout、Presence.UnregisterSession，返回 `auth.logout.ok` |
 | **presence.ping** | ✅ | 调用 Presence.RefreshSession 续期会话后返回 `presence.ping.ok` |
+| **user.me** | ✅ | 调用 UserService.GetUser 返回当前用户资料（id、nickname、avatarUrl、bio、status） |
 
-- **配置**：`etc/gateway-api.yaml`（Host、Port、GatewayID、AuthRpcConf、PresenceRpcConf；**通过 etcd 发现** Auth/Presence）。
+- **配置**：`etc/gateway-api.yaml`（Host、Port、GatewayID、AuthRpcConf、PresenceRpcConf、UserRpcConf；**通过 etcd 发现** Auth/Presence/User）。
 - **文档**：`docs/backend/gateway-design.md`、`docs/API/websocket-client-api.md`。
 
 ### 4. Presence 服务（`services/presence`）
@@ -93,11 +94,11 @@ cd services/auth && go run . -f etc/beehive.auth.yaml
 # 2. Presence（依赖 Redis 存储会话，注册到 etcd Key: beehive.presence.rpc）
 cd services/presence && go run . -f etc/beehive.presence.yaml
 
-# 3. Gateway（通过 etcd 发现 Auth / Presence）
+# 3. Gateway（通过 etcd 发现 Auth / Presence / User）
 cd services/gateway && go run . -f etc/gateway-api.yaml
 ```
 
-如需同时验证 User 服务与 AdminAPI，可再起：
+若需使用 **user.me**（获取当前用户资料），须先启动 User 服务；如需同时验证 AdminAPI，可再起：
 
 ```bash
 # 4. User

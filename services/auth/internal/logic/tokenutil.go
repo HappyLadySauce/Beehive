@@ -74,7 +74,8 @@ func loadToken(ctx context.Context, rdb *redis.Client, token string) (string, []
 }
 
 // loadAndTouchToken 在 loadToken 基础上，若 extendTTL > 0 则对 key 执行 Expire 续期并返回 extendTTL 作为剩余 TTL。
-// 用于 TokenLogin 等「校验并保持会话活跃」场景；key 不存在或解析失败时行为与 loadToken 一致，不做续期。
+// key 不存在或解析失败时行为与 loadToken 一致（空结果、无 error）。若 loadToken 成功但 Expire 时 key 已被删除（竞态），
+// 返回 error 以便调用方将「无效 token」与「续期时的并发删除」区分开（前者 Unauthenticated，后者可为 Internal/可重试）。
 func loadAndTouchToken(ctx context.Context, rdb *redis.Client, token string, extendTTL time.Duration) (string, []string, time.Duration, error) {
 	userID, roles, ttl, err := loadToken(ctx, rdb, token)
 	if err != nil || userID == "" {
@@ -89,8 +90,8 @@ func loadAndTouchToken(ctx context.Context, rdb *redis.Client, token string, ext
 		return "", nil, 0, fmt.Errorf("token touch failed: %w", err)
 	}
 	if !cmd.Val() {
-		// Key no longer exists (e.g. deleted between loadToken and Expire); match loadToken semantics: return empty, no error.
-		return "", nil, 0, nil
+		// Key existed at loadToken but was deleted before Expire (race); return error so caller can treat as system-level / retryable.
+		return "", nil, 0, fmt.Errorf("token key no longer exists")
 	}
 	return userID, roles, extendTTL, nil
 }

@@ -21,11 +21,25 @@ type Config struct {
 	PresenceRpcConf zrpc.RpcClientConf `json:",optional"`
 	// UserRpcConf 为 UserService 的 zrpc 客户端配置（获取用户资料等）；可选，未配置时 user.me 不可用。
 	UserRpcConf zrpc.RpcClientConf `json:",optional"`
+	// ConversationRpcConf 为 ConversationService 的 zrpc 客户端配置；可选，未配置时 conversation.list 不可用。
+	ConversationRpcConf zrpc.RpcClientConf `json:",optional"`
+	// MessageRpcConf 为 MessageService 的 zrpc 客户端配置；可选，未配置时 message.send / message.history 不可用。
+	MessageRpcConf zrpc.RpcClientConf `json:",optional"`
 }
 
 // UserRpcConfigured 判断是否已配置 UserService（Etcd 或 Endpoints），未配置时 Gateway 可不依赖 User 服务启动。
 func (c *Config) UserRpcConfigured() bool {
 	return len(c.UserRpcConf.Endpoints) > 0 || c.UserRpcConf.Etcd.Key != ""
+}
+
+// ConversationRpcConfigured 判断是否已配置 ConversationService。
+func (c *Config) ConversationRpcConfigured() bool {
+	return len(c.ConversationRpcConf.Endpoints) > 0 || c.ConversationRpcConf.Etcd.Key != ""
+}
+
+// MessageRpcConfigured 判断是否已配置 MessageService。
+func (c *Config) MessageRpcConfigured() bool {
+	return len(c.MessageRpcConf.Endpoints) > 0 || c.MessageRpcConf.Etcd.Key != ""
 }
 
 func (c *Config) AuthRpcConfigured() bool {

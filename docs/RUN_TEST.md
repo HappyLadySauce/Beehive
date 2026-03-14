@@ -43,11 +43,44 @@
 | **auth.logout** | ✅ | 调 Auth.Logout、Presence.UnregisterSession，返回 `auth.logout.ok` |
 | **presence.ping** | ✅ | 调用 Presence.RefreshSession 续期会话后返回 `presence.ping.ok` |
 | **user.me** | ✅ | 调用 UserService.GetUser 返回当前用户资料（id、nickname、avatarUrl、bio、status） |
+| **ConversationService** | ✅ | 可选；配置 ConversationRpcConf 后支持 `conversation.list` |
+| **MessageService** | ✅ | 可选；配置 MessageRpcConf 后支持 `message.send`、`message.history` |
+| **conversation.list** | ✅ | 调用 ConversationService.ListUserConversations + MessageService.GetLastMessages 聚合返回 |
+| **message.send** | ✅ | 调用 MessageService.PostMessage（from_user_id 为当前连接用户） |
+| **message.history** | ✅ | 调用 MessageService.GetHistory 返回历史消息 |
 
-- **配置**：`etc/gateway-api.yaml`（Host、Port、GatewayID、AuthRpcConf、PresenceRpcConf、UserRpcConf；**通过 etcd 发现** Auth/Presence/User）。
+- **配置**：`etc/gateway-api.yaml`（Host、Port、GatewayID、AuthRpcConf、PresenceRpcConf、UserRpcConf、ConversationRpcConf、MessageRpcConf；**通过 etcd 发现** 各 RPC 服务）。
 - **文档**：`docs/backend/gateway-design.md`、`docs/API/websocket-client-api.md`。
 
-### 4. Presence 服务（`services/presence`）
+### 4. Conversation 服务（`services/conversation`）
+
+| 能力 | 状态 | 说明 |
+|------|------|------|
+| **Proto 与骨架** | ✅ | `proto/conversation.proto` 已定义，zrpc 已生成 |
+| **CreateConversation** | ✅ | 创建会话并写入 conversations + conversation_members |
+| **AddMember / RemoveMember** | ✅ | 维护会话成员（RemoveMember 置 status=left） |
+| **ListUserConversations** | ✅ | 按 user_id 分页返回会话列表（cursor/limit） |
+| **GetConversation** | ✅ | 按 id 返回会话信息与成员数 |
+| **ListMembers** | ✅ | 按 conversation_id 返回成员列表 |
+| **数据与依赖** | ✅ | PostgreSQL（conversations、conversation_members）、GORM |
+
+- **配置**：`etc/beehive.conversation.yaml`（ListenOn、Etcd Key: `beehive.conversation.rpc`、PostgresDSN）。
+- **与 Gateway**：Gateway 可选配置 ConversationRpcConf；支持 WebSocket `conversation.list`（聚合 MessageService.GetLastMessages 返回 lastMessage）。
+
+### 5. Message 服务（`services/message`）
+
+| 能力 | 状态 | 说明 |
+|------|------|------|
+| **Proto 与骨架** | ✅ | `proto/message.proto` 已定义，zrpc 已生成 |
+| **PostMessage** | ✅ | 写 messages 表，成功后可选发布 RabbitMQ `message.created` 事件 |
+| **GetHistory** | ✅ | 按 conversation_id、before_time、limit 分页拉取历史 |
+| **GetLastMessages** | ✅ | 按多 conversation_ids 返回各会话最后一条消息 |
+| **数据与依赖** | ✅ | PostgreSQL（messages）、可选 RabbitMQ（im.events） |
+
+- **配置**：`etc/beehive.message.yaml`（ListenOn、Etcd Key: `beehive.message.rpc`、PostgresDSN；可选 RabbitMQURL/Exchange/RouteKey）。
+- **与 Gateway**：Gateway 可选配置 MessageRpcConf；支持 `message.send`、`message.history`。
+
+### 6. Presence 服务（`services/presence`）
 
 | 能力 | 状态 | 说明 |
 |------|------|------|
@@ -71,11 +104,10 @@
    - `db/migrations/001_create_users_and_user_profiles.sql`
    - `db/migrations/002_create_rbac_tables.sql`
    - `db/migrations/003_seed_test_user.sql`（插入接口测试用用户 testuser / password123）
-   - 使用 Docker 时：`docker compose -f docker/docker-compose.yaml up -d postgres`，然后：
-     - `docker exec -i beehive-postgres psql -U beehive -d beehive < db/migrations/001_create_users_and_user_profiles.sql`
-     - `docker exec -i beehive-postgres psql -U beehive -d beehive < db/migrations/002_create_rbac_tables.sql`
-     - `docker exec -i beehive-postgres psql -U beehive -d beehive < db/migrations/003_seed_test_user.sql`
-   - 或本机 `psql -U beehive -d beehive -f db/migrations/001_...sql`、`002_...sql`、`003_...sql`。
+   - `db/migrations/004_create_conversations_and_members.sql`
+   - `db/migrations/005_create_messages.sql`
+   - 使用 Docker 时：`docker compose -f docker/docker-compose.yaml up -d postgres`，然后依次执行上述 SQL 文件（如 `docker exec -i beehive-postgres psql -U beehive -d beehive < db/migrations/001_create_users_and_user_profiles.sql` 等）。
+   - 或本机 `psql -U beehive -d beehive -f db/migrations/001_...sql` 等。
 2. **Redis**：本地 6379 可用（无密码）。Docker：`docker compose -f docker/docker-compose.yaml up -d redis`。
 3. **etcd**：用于服务发现。Docker：`docker compose -f docker/docker-compose.yaml up -d etcd`。各服务配置中已使用 `127.0.0.1:2379` 与 Key（如 `beehive.auth.rpc`、`beehive.presence.rpc`）。
 4. **可选**：至少插入一名测试用户与角色（见下方「测试用户与角色」）。
@@ -100,11 +132,21 @@ cd services/presence && go run . -f etc/beehive.presence.yaml
 cd services/gateway && go run . -f etc/gateway-api.yaml
 ```
 
-若需使用 **user.me**（获取当前用户资料），须先启动 User 服务；如需同时验证 AdminAPI，可再起：
+若需使用 **user.me**（获取当前用户资料），须先启动 User 服务：
 
 ```bash
 # 4. User
 cd services/user && go run . -f etc/beehive.user.yaml
+```
+
+若需使用 **conversation.list**、**message.send**、**message.history**，须先启动 Conversation 与 Message 服务（并已执行 004、005 迁移）：
+
+```bash
+# 5. Conversation（依赖 PostgreSQL，注册到 etcd Key: beehive.conversation.rpc）
+cd services/conversation && go run . -f etc/beehive.conversation.yaml
+
+# 6. Message（依赖 PostgreSQL，可选 RabbitMQ；注册到 etcd Key: beehive.message.rpc）
+cd services/message && go run . -f etc/beehive.message.yaml
 ```
 
 ### 测试用户与角色（可选）
@@ -132,12 +174,34 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 3. 若用户存在且密码正确，应收到 `type: "auth.login.ok"`，payload 含 `userId`、`accessToken`、`refreshToken`、`expiresIn`。
 4. 再发 `auth.tokenLogin` 或 `presence.ping` 可验证后续流程。
 
+### 会话与消息 WebSocket 验证（需已启动 Conversation、Message 并已登录）
+
+1. **拉取会话列表** `conversation.list`：
+   ```json
+   { "type": "conversation.list", "tid": "conv-1", "payload": { "cursor": "", "limit": 50 } }
+   ```
+   成功响应：`type: "conversation.list.ok"`，payload 含 `items`（id、name、type、lastMessage、lastActiveAt 等）、`nextCursor`。
+
+2. **发送消息** `message.send`（需先通过 Conversation 服务或直接插入获得有效 conversationId）：
+   ```json
+   { "type": "message.send", "tid": "msg-1", "payload": { "clientMsgId": "local-1", "conversationId": "<会话UUID>", "toUserId": "", "body": { "type": "text", "text": "hello" } } }
+   ```
+   成功响应：`type: "message.send.ok"`，payload 含 `serverMsgId`、`serverTime`、`conversationId`。
+
+3. **拉取历史消息** `message.history`：
+   ```json
+   { "type": "message.history", "tid": "hist-1", "payload": { "conversationId": "<会话UUID>", "before": 0, "limit": 50 } }
+   ```
+   成功响应：`type: "message.history.ok"`，payload 含 `items`、`hasMore`。
+
 ---
 
 ## 三、小结
 
 - **Auth**：登录/登出/Token 校验/RBAC 已实现，与 Gateway 通过 zrpc 对接完成。
-- **User**：GetUser/BatchGetUsers/UpdateUser 已实现，Gateway 未接入；AdminAPI 等已用 UserService。
-- **Gateway**：已接入 Auth + Presence；登录流程（auth.login / auth.tokenLogin → RegisterSession → auth.xxx.ok）可跑通；Presence 的 Redis Session 实现仍在进行中，当前 RegisterSession/RefreshSession 为占位。
+- **User**：GetUser/BatchGetUsers/UpdateUser 已实现，Gateway 支持 `user.me`。
+- **Conversation**：CreateConversation、AddMember、RemoveMember、ListUserConversations、GetConversation、ListMembers 已实现；Gateway 支持 `conversation.list`（聚合最后一条消息）。
+- **Message**：PostMessage（写库 + 可选 RabbitMQ 事件）、GetHistory、GetLastMessages 已实现；Gateway 支持 `message.send`、`message.history`。
+- **Gateway**：已接入 Auth、Presence、User、Conversation、Message；按配置通过 etcd 发现各 RPC；未配置的 Conversation/Message 时对应 WebSocket 类型返回 unavailable。
 
-按上述顺序启动 Auth → Presence → Gateway，并准备好 DB/Redis 与测试用户，即可进行敏捷运行测试。
+按上述顺序启动各服务，并执行全部 DB 迁移与测试用户，即可进行敏捷运行测试（含登录、会话列表、发消息、历史消息）。

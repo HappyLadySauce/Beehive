@@ -9,12 +9,16 @@ import (
 	"time"
 
 	"github.com/HappyLadySauce/Beehive/services/auth/authservice"
+	"github.com/HappyLadySauce/Beehive/services/conversation/conversationservice"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/svc"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/ws"
+	"github.com/HappyLadySauce/Beehive/services/message/messageservice"
 	"github.com/HappyLadySauce/Beehive/services/presence/presenceservice"
 	"github.com/HappyLadySauce/Beehive/services/user/userservice"
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type WsEntryLogic struct {
@@ -74,6 +78,12 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 		l.handleAuthLogout(c, env)
 	case "user.me":
 		l.handleUserMe(c, env)
+	case "conversation.list":
+		l.handleConversationList(c, env)
+	case "message.send":
+		l.handleMessageSend(c, env)
+	case "message.history":
+		l.handleMessageHistory(c, env)
 	default:
 		l.sendError(c, env.Tid, "bad_request", "unknown type: "+env.Type)
 	}
@@ -268,4 +278,204 @@ func (l *WsEntryLogic) bindJSONPayload(c *ws.Connection, env *ws.Envelope, v int
 		return false
 	}
 	return true
+}
+
+func (l *WsEntryLogic) handleConversationList(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.ConversationSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "conversation service not configured")
+		return
+	}
+	var payload struct {
+		Cursor string `json:"cursor"`
+		Limit  int32  `json:"limit"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.Limit <= 0 {
+		payload.Limit = 50
+	}
+	if payload.Limit > 100 {
+		payload.Limit = 100
+	}
+	resp, err := l.svcCtx.ConversationSvc.ListUserConversations(l.ctx, &conversationservice.ListUserConversationsRequest{
+		UserId: c.UserID,
+		Cursor: payload.Cursor,
+		Limit:  payload.Limit,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok && s.Code() == codes.InvalidArgument {
+			l.sendError(c, env.Tid, "bad_request", s.Message())
+			return
+		}
+		l.Errorf("list user conversations failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	convIDs := make([]string, 0, len(resp.Items))
+	for _, item := range resp.Items {
+		convIDs = append(convIDs, item.Id)
+	}
+	var lastMessages map[string]*messageservice.MessageRecord
+	if l.svcCtx.MessageSvc != nil && len(convIDs) > 0 {
+		lastResp, _ := l.svcCtx.MessageSvc.GetLastMessages(l.ctx, &messageservice.GetLastMessagesRequest{ConversationIds: convIDs})
+		if lastResp != nil {
+			lastMessages = lastResp.LastMessages
+		}
+	}
+	items := make([]map[string]any, 0, len(resp.Items))
+	for _, item := range resp.Items {
+		entry := map[string]any{
+			"id":            item.Id,
+			"name":          item.Name,
+			"avatar":        "",
+			"type":          item.Type,
+			"unreadCount":   0,
+			"lastActiveAt":  item.LastActiveAt,
+		}
+		if lastMessages != nil {
+			if lm, ok := lastMessages[item.Id]; ok && lm != nil {
+				preview := ""
+				if lm.Body != nil {
+					preview = lm.Body.Text
+				}
+				entry["lastMessage"] = map[string]any{
+					"serverMsgId": lm.ServerMsgId,
+					"preview":     preview,
+					"serverTime":  lm.ServerTime,
+				}
+			}
+		}
+		items = append(items, entry)
+	}
+	var nextCursor interface{}
+	if resp.NextCursor != "" {
+		nextCursor = resp.NextCursor
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "conversation.list.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{"items": items, "nextCursor": nextCursor},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleMessageSend(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.MessageSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "message service not configured")
+		return
+	}
+	var payload struct {
+		ClientMsgId     string `json:"clientMsgId"`
+		ConversationId string `json:"conversationId"`
+		ToUserId        string `json:"toUserId"`
+		Body            struct {
+			Type string `json:"type"`
+			Text string `json:"text"`
+		} `json:"body"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ConversationId == "" {
+		l.sendError(c, env.Tid, "bad_request", "conversationId is required")
+		return
+	}
+	if payload.Body.Type == "" {
+		payload.Body.Type = "text"
+	}
+	resp, err := l.svcCtx.MessageSvc.PostMessage(l.ctx, &messageservice.PostMessageRequest{
+		ClientMsgId:     payload.ClientMsgId,
+		ConversationId:  payload.ConversationId,
+		FromUserId:     c.UserID,
+		ToUserId:       payload.ToUserId,
+		Body:           &messageservice.MessageBody{Type: payload.Body.Type, Text: payload.Body.Text},
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.InvalidArgument:
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			case codes.NotFound:
+				l.sendError(c, env.Tid, "not_found", s.Message())
+				return
+			}
+		}
+		l.Errorf("post message failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "message.send.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{
+			"serverMsgId":    resp.ServerMsgId,
+			"serverTime":     resp.ServerTime,
+			"conversationId": resp.ConversationId,
+		},
+		Error: nil,
+	})
+}
+
+func (l *WsEntryLogic) handleMessageHistory(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.MessageSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "message service not configured")
+		return
+	}
+	var payload struct {
+		ConversationId string `json:"conversationId"`
+		Before         int64  `json:"before"`
+		Limit          int32  `json:"limit"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ConversationId == "" {
+		l.sendError(c, env.Tid, "bad_request", "conversationId is required")
+		return
+	}
+	if payload.Limit <= 0 {
+		payload.Limit = 50
+	}
+	if payload.Limit > 100 {
+		payload.Limit = 100
+	}
+	resp, err := l.svcCtx.MessageSvc.GetHistory(l.ctx, &messageservice.GetHistoryRequest{
+		ConversationId: payload.ConversationId,
+		BeforeTime:    payload.Before,
+		Limit:         payload.Limit,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok && s.Code() == codes.InvalidArgument {
+			l.sendError(c, env.Tid, "bad_request", s.Message())
+			return
+		}
+		l.Errorf("get history failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	items := make([]map[string]any, 0, len(resp.Items))
+	for _, m := range resp.Items {
+		body := map[string]any{"type": "text"}
+		if m.Body != nil {
+			body["type"] = m.Body.Type
+			body["text"] = m.Body.Text
+		}
+		items = append(items, map[string]any{
+			"serverMsgId":    m.ServerMsgId,
+			"clientMsgId":    nil,
+			"conversationId": m.ConversationId,
+			"fromUserId":     m.FromUserId,
+			"toUserId":       m.ToUserId,
+			"body":           body,
+			"serverTime":     m.ServerTime,
+		})
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "message.history.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{"items": items, "hasMore": resp.HasMore},
+		Error:   nil,
+	})
 }

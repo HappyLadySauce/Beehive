@@ -5,8 +5,10 @@ package svc
 
 import (
 	"github.com/HappyLadySauce/Beehive/services/auth/authservice"
+	"github.com/HappyLadySauce/Beehive/services/conversation/conversationservice"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/config"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/ws"
+	"github.com/HappyLadySauce/Beehive/services/message/messageservice"
 	"github.com/HappyLadySauce/Beehive/services/presence/presenceservice"
 	"github.com/HappyLadySauce/Beehive/services/user/userservice"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -16,9 +18,11 @@ type ServiceContext struct {
 	Config config.Config
 	Hub    *ws.Hub
 
-	AuthSvc     authservice.AuthService
-	PresenceSvc presenceservice.PresenceService
-	UserSvc     userservice.UserService
+	AuthSvc         authservice.AuthService
+	PresenceSvc      presenceservice.PresenceService
+	UserSvc          userservice.UserService
+	ConversationSvc  conversationservice.ConversationService  // 可选，未配置时为 nil
+	MessageSvc       messageservice.MessageService             // 可选，未配置时为 nil
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -26,11 +30,29 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	presenceCli := zrpc.MustNewClient(c.PresenceRpcConf)
 	userCli := zrpc.MustNewClient(c.UserRpcConf)
 
-	return &ServiceContext{
+	ctx := &ServiceContext{
 		Config:      c,
 		Hub:         ws.NewHub(c.GatewayID),
 		AuthSvc:     authservice.NewAuthService(authCli),
 		PresenceSvc: presenceservice.NewPresenceService(presenceCli),
 		UserSvc:     userservice.NewUserService(userCli),
 	}
+	if c.AuthRpcConfigured() {
+		ctx.AuthSvc = authservice.NewAuthService(authCli)
+	}
+	if c.PresenceRpcConfigured() {
+		ctx.PresenceSvc = presenceservice.NewPresenceService(presenceCli)
+	}
+	if c.UserRpcConfigured() {
+		ctx.UserSvc = userservice.NewUserService(userCli)
+	}
+	if c.ConversationRpcConfigured() {
+		convCli := zrpc.MustNewClient(c.ConversationRpcConf)
+		ctx.ConversationSvc = conversationservice.NewConversationService(convCli)
+	}
+	if c.MessageRpcConfigured() {
+		msgCli := zrpc.MustNewClient(c.MessageRpcConf)
+		ctx.MessageSvc = messageservice.NewMessageService(msgCli)
+	}
+	return ctx
 }

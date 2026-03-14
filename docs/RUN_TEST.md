@@ -149,6 +149,8 @@ cd services/conversation && go run . -f etc/beehive.conversation.yaml
 cd services/message && go run . -f etc/beehive.message.yaml
 ```
 
+若需**消息实时推送 `message.push`**（对端/多端收消息）：Message 服务须配置 RabbitMQ 并发布 `message.created`；Gateway 须在 `etc/gateway-api.yaml` 中配置相同 RabbitMQ（RabbitMQURL、RabbitMQExchange: im.events、RabbitMQQueue、RabbitMQRouteKey: message.created），并已启动 Conversation、Presence，否则推送消费者不启动。
+
 ### 测试用户与角色（可选）
 
 Auth 的 Login 依赖 `users` 表中有用户，且 `GetUserRoles` 会查 RBAC 表（无角色时返回空列表，不影响登录）。若要完整验证 RBAC，可执行：
@@ -194,6 +196,8 @@ INSERT INTO user_roles (user_id, role_id) VALUES
    ```
    成功响应：`type: "message.history.ok"`，payload 含 `items`、`hasMore`。
 
+4. **实时推送 `message.push`**（需 Gateway 与 Message 均配置 RabbitMQ）：当会话内其他用户（或发件人其他端）在线时，发送 `message.send` 后其连接会收到 `type: "message.push"`，payload 与 4.2 节一致（serverMsgId、conversationId、fromUserId、body、serverTime 等）。
+
 ---
 
 ## 三、小结
@@ -202,6 +206,6 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 - **User**：GetUser/BatchGetUsers/UpdateUser 已实现，Gateway 支持 `user.me`。
 - **Conversation**：CreateConversation、AddMember、RemoveMember、ListUserConversations、GetConversation、ListMembers 已实现；Gateway 支持 `conversation.list`（聚合最后一条消息）。
 - **Message**：PostMessage（写库 + 可选 RabbitMQ 事件）、GetHistory、GetLastMessages 已实现；Gateway 支持 `message.send`、`message.history`。
-- **Gateway**：已接入 Auth、Presence、User、Conversation、Message；按配置通过 etcd 发现各 RPC；未配置的 Conversation/Message 时对应 WebSocket 类型返回 unavailable。
+- **Gateway**：已接入 Auth、Presence、User、Conversation、Message；按配置通过 etcd 发现各 RPC；未配置的 Conversation/Message 时对应 WebSocket 类型返回 unavailable。可选配置 RabbitMQ 消费后，会消费 `message.created` 并向本实例在线连接推送 `message.push`。
 
-按上述顺序启动各服务，并执行全部 DB 迁移与测试用户，即可进行敏捷运行测试（含登录、会话列表、发消息、历史消息）。
+按上述顺序启动各服务，并执行全部 DB 迁移与测试用户，即可进行敏捷运行测试（含登录、会话列表、发消息、历史消息）。启用 message.push 时须在 Gateway 与 Message 中配置同一 RabbitMQ（im.events / message.created）。

@@ -7,6 +7,7 @@ import (
 	"github.com/HappyLadySauce/Beehive/services/auth/authservice"
 	"github.com/HappyLadySauce/Beehive/services/conversation/conversationservice"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/config"
+	"github.com/HappyLadySauce/Beehive/services/gateway/internal/push"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/ws"
 	"github.com/HappyLadySauce/Beehive/services/message/messageservice"
 	"github.com/HappyLadySauce/Beehive/services/presence/presenceservice"
@@ -23,6 +24,7 @@ type ServiceContext struct {
 	UserSvc          userservice.UserService
 	ConversationSvc  conversationservice.ConversationService  // 可选，未配置时为 nil
 	MessageSvc       messageservice.MessageService             // 可选，未配置时为 nil
+	PushConsumer     *push.Consumer                             // 可选，未配置 RabbitMQ 时为 nil
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -53,6 +55,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	if c.MessageRpcConfigured() {
 		msgCli := zrpc.MustNewClient(c.MessageRpcConf)
 		ctx.MessageSvc = messageservice.NewMessageService(msgCli)
+	}
+	if c.PushConsumerConfigured() && ctx.ConversationSvc != nil && ctx.PresenceSvc != nil {
+		consumer, err := push.NewConsumer(c, ctx.Hub, ctx.ConversationSvc, ctx.PresenceSvc)
+		if err != nil {
+			panic("push consumer: " + err.Error())
+		}
+		ctx.PushConsumer = consumer
 	}
 	return ctx
 }

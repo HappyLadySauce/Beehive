@@ -25,6 +25,12 @@ type Config struct {
 	ConversationRpcConf zrpc.RpcClientConf `json:",optional"`
 	// MessageRpcConf 为 MessageService 的 zrpc 客户端配置；可选，未配置时 message.send / message.history 不可用。
 	MessageRpcConf zrpc.RpcClientConf `json:",optional"`
+
+	// RabbitMQ 消费配置（用于 message.push）；可选，未配置时不消费 message.created，无实时推送。
+	RabbitMQURL      string `json:",optional"` // amqp://guest:guest@127.0.0.1:5672/
+	RabbitMQExchange string `json:",optional"` // im.events，与 Message 服务发布端一致
+	RabbitMQQueue    string `json:",optional"` // 每实例独立队列，如 gateway.push.gw-1
+	RabbitMQRouteKey string `json:",optional"` // message.created
 }
 
 // UserRpcConfigured 判断是否已配置 UserService（Etcd 或 Endpoints），未配置时 Gateway 可不依赖 User 服务启动。
@@ -48,4 +54,9 @@ func (c *Config) AuthRpcConfigured() bool {
 
 func (c *Config) PresenceRpcConfigured() bool {
 	return len(c.PresenceRpcConf.Endpoints) > 0 || c.PresenceRpcConf.Etcd.Key != ""
+}
+
+// PushConsumerConfigured 判断是否已配置 RabbitMQ 消费（用于 message.push）。
+func (c *Config) PushConsumerConfigured() bool {
+	return c.RabbitMQURL != ""
 }

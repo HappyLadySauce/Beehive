@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
@@ -27,6 +28,10 @@ func main() {
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
+	if ctx.PushConsumer != nil {
+		go ctx.PushConsumer.Run(context.Background())
+		defer ctx.PushConsumer.Close()
+	}
 	handler.RegisterHandlers(server, ctx)
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)

@@ -10,11 +10,13 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// tokenPayload 为 Redis 中 token 对应的 JSON 结构，用于存储 user_id 与 roles。
 type tokenPayload struct {
 	UserID string   `json:"user_id"`
 	Roles  []string `json:"roles"`
 }
 
+// tokenTTLSeconds 用于 access/refresh token 的 TTL 取值：配置值 ≤0 时使用默认值 def，否则使用配置值。
 func tokenTTLSeconds(v int, def int) int {
 	if v <= 0 {
 		return def
@@ -22,10 +24,12 @@ func tokenTTLSeconds(v int, def int) int {
 	return v
 }
 
+// tokenKey 返回统一的 Redis key 前缀 "auth:token:" + token。
 func tokenKey(token string) string {
 	return "auth:token:" + token
 }
 
+// storeToken 将 userID、roles 序列化为 JSON 写入 Redis，并设置 ttl；rdb 为 nil 时返回错误。
 func storeToken(ctx context.Context, rdb *redis.Client, token string, userID string, roles []string, ttl time.Duration) error {
 	if rdb == nil {
 		return errors.New("redis client is nil")
@@ -41,7 +45,9 @@ func storeToken(ctx context.Context, rdb *redis.Client, token string, userID str
 	return rdb.Set(ctx, tokenKey(token), b, ttl).Err()
 }
 
-func loadAndTouchToken(ctx context.Context, rdb *redis.Client, token string) (string, []string, time.Duration, error) {
+// loadToken 从 Redis 读取 token 并解析出 userID、roles，同时返回剩余 TTL。
+// key 不存在或为 redis.Nil 时返回空 userID、nil roles、0、nil error；不做续期。
+func loadToken(ctx context.Context, rdb *redis.Client, token string) (string, []string, time.Duration, error) {
 	if rdb == nil {
 		return "", nil, 0, errors.New("redis client is nil")
 	}

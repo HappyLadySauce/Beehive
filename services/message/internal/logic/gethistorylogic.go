@@ -46,11 +46,15 @@ func (l *GetHistoryLogic) GetHistory(in *pb.GetHistoryRequest) (*pb.GetHistoryRe
 	}
 	items := make([]*pb.MessageRecord, 0, len(list))
 	for _, m := range list {
+		toUserID := ""
+		if m.ToUserID != nil {
+			toUserID = *m.ToUserID
+		}
 		items = append(items, &pb.MessageRecord{
 			ServerMsgId:    m.ServerMsgID,
 			ConversationId: m.ConversationID,
 			FromUserId:     m.FromUserID,
-			ToUserId:       m.ToUserID,
+			ToUserId:       toUserID,
 			Body:           &pb.MessageBody{Type: m.BodyType, Text: m.BodyText},
 			ServerTime:     m.ServerTime,
 		})

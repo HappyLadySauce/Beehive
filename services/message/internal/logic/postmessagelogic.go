@@ -44,13 +44,19 @@ func (l *PostMessageLogic) PostMessage(in *pb.PostMessageRequest) (*pb.PostMessa
 	}
 	serverMsgID := uuid.Must(uuid.NewUUID()).String()
 	serverTime := time.Now().Unix()
+	// toUserId 仅在点对点消息时使用；群聊/广播时应为 NULL，而不是空串，避免 uuid 列解析错误
+	var toUserIDPtr *string
+	if in.GetToUserId() != "" {
+		v := in.GetToUserId()
+		toUserIDPtr = &v
+	}
 	msg := &model.Message{
 		ID:             uuid.Must(uuid.NewUUID()).String(),
 		ServerMsgID:    serverMsgID,
-		ClientMsgID:   in.GetClientMsgId(),
+		ClientMsgID:    in.GetClientMsgId(),
 		ConversationID: in.GetConversationId(),
 		FromUserID:     in.GetFromUserId(),
-		ToUserID:       in.GetToUserId(),
+		ToUserID:       toUserIDPtr,
 		BodyType:       bodyType,
 		BodyText:       body.GetText(),
 		ServerTime:     serverTime,
@@ -64,7 +70,7 @@ func (l *PostMessageLogic) PostMessage(in *pb.PostMessageRequest) (*pb.PostMessa
 		"clientMsgId":   in.GetClientMsgId(),
 		"conversationId": in.GetConversationId(),
 		"fromUserId":    in.GetFromUserId(),
-		"toUserId":       in.GetToUserId(),
+		"toUserId":      in.GetToUserId(),
 		"body":           map[string]string{"type": bodyType, "text": body.GetText()},
 		"serverTime":     serverTime,
 	}

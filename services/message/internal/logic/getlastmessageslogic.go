@@ -36,11 +36,15 @@ func (l *GetLastMessagesLogic) GetLastMessages(in *pb.GetLastMessagesRequest) (*
 	}
 	lastMessages := make(map[string]*pb.MessageRecord)
 	for k, msg := range m {
+		toUserID := ""
+		if msg.ToUserID != nil {
+			toUserID = *msg.ToUserID
+		}
 		lastMessages[k] = &pb.MessageRecord{
 			ServerMsgId:    msg.ServerMsgID,
 			ConversationId: msg.ConversationID,
 			FromUserId:     msg.FromUserID,
-			ToUserId:       msg.ToUserID,
+			ToUserId:       toUserID,
 			Body:           &pb.MessageBody{Type: msg.BodyType, Text: msg.BodyText},
 			ServerTime:     msg.ServerTime,
 		}

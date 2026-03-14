@@ -8,16 +8,17 @@ import (
 
 // Message 对应 messages 表
 type Message struct {
-	ID              string    `gorm:"column:id;type:uuid;primaryKey"`
-	ServerMsgID     string    `gorm:"column:server_msg_id;type:text;uniqueIndex;not null"`
-	ClientMsgID     string    `gorm:"column:client_msg_id;type:text;not null"`
-	ConversationID  string    `gorm:"column:conversation_id;type:uuid;not null"`
-	FromUserID      string    `gorm:"column:from_user_id;type:uuid;not null"`
-	ToUserID        string    `gorm:"column:to_user_id;type:uuid"`
-	BodyType        string    `gorm:"column:body_type;type:text;not null"`
-	BodyText        string    `gorm:"column:body_text;type:text;not null"`
-	ServerTime      int64     `gorm:"column:server_time;not null"`
-	CreatedAt       time.Time `gorm:"column:created_at;type:timestamptz;not null"`
+	ID             string     `gorm:"column:id;type:uuid;primaryKey"`
+	ServerMsgID    string     `gorm:"column:server_msg_id;type:text;uniqueIndex;not null"`
+	ClientMsgID    string     `gorm:"column:client_msg_id;type:text;not null"`
+	ConversationID string     `gorm:"column:conversation_id;type:uuid;not null"`
+	FromUserID     string     `gorm:"column:from_user_id;type:uuid;not null"`
+	// ToUserID 可为空：群聊/广播消息时为 NULL，点对点消息时为 uuid
+	ToUserID   *string   `gorm:"column:to_user_id;type:uuid"`
+	BodyType   string    `gorm:"column:body_type;type:text;not null"`
+	BodyText   string    `gorm:"column:body_text;type:text;not null"`
+	ServerTime int64     `gorm:"column:server_time;not null"`
+	CreatedAt  time.Time `gorm:"column:created_at;type:timestamptz;not null"`
 }
 
 func (Message) TableName() string {
@@ -50,7 +51,7 @@ func (m *MessageModel) GetByServerMsgID(conversationID, serverMsgID string) (*Me
 func (m *MessageModel) CountUnread(conversationID, userID string, lastReadTime int64) (int64, error) {
 	var n int64
 	err := m.db.Model(&Message{}).Where(
-		"conversation_id = ? AND server_time > ? AND (to_user_id = ? OR ((to_user_id = '' OR to_user_id IS NULL) AND from_user_id != ?))",
+		"conversation_id = ? AND server_time > ? AND (to_user_id = ? OR (to_user_id IS NULL AND from_user_id != ?))",
 		conversationID, lastReadTime, userID, userID,
 	).Count(&n).Error
 	return n, err

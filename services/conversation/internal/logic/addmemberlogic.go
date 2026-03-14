@@ -42,6 +42,16 @@ func (l *AddMemberLogic) AddMember(in *pb.AddMemberRequest) (*pb.AddMemberRespon
 		l.Errorf("find conversation failed: %v", err)
 		return nil, status.Errorf(codes.Internal, "find conversation failed: %v", err)
 	}
+	// 检查用户是否存在，避免依赖外键约束返回 internal_error（GORM Scan 无行时 err 为 nil，故用 Count 判断）
+	var count int64
+	if err := l.svcCtx.DB.Table("users").Where("id = ?", in.GetUserId()).Count(&count).Error; err != nil {
+		l.Errorf("check user exists failed: %v", err)
+		return nil, status.Errorf(codes.Internal, "check user exists failed: %v", err)
+	}
+	if count == 0 {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+
 	role := in.GetRole()
 	if role == "" {
 		role = "member"

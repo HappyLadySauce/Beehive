@@ -13,6 +13,7 @@ const { on } = useWebSocket()
 
 const errorTypes = [
   'auth.login.error',
+  'auth.register.error',
   'auth.tokenLogin.error',
   'message.send.error',
   'conversation.create.error',

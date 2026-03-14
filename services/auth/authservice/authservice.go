@@ -24,12 +24,14 @@ type (
 	LoginResponse           = pb.LoginResponse
 	LogoutRequest           = pb.LogoutRequest
 	LogoutResponse          = pb.LogoutResponse
+	RegisterRequest         = pb.RegisterRequest
 	TokenLoginRequest       = pb.TokenLoginRequest
 	ValidateTokenRequest    = pb.ValidateTokenRequest
 	ValidateTokenResponse   = pb.ValidateTokenResponse
 
 	AuthService interface {
 		Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+		Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 		TokenLogin(ctx context.Context, in *TokenLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 		ValidateToken(ctx context.Context, in *ValidateTokenRequest, opts ...grpc.CallOption) (*ValidateTokenResponse, error)
 		Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
@@ -55,6 +57,11 @@ func NewAuthService(cli zrpc.Client) AuthService {
 func (m *defaultAuthService) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	client := pb.NewAuthServiceClient(m.cli.Conn())
 	return client.Login(ctx, in, opts...)
+}
+
+func (m *defaultAuthService) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	client := pb.NewAuthServiceClient(m.cli.Conn())
+	return client.Register(ctx, in, opts...)
 }
 
 func (m *defaultAuthService) TokenLogin(ctx context.Context, in *TokenLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {

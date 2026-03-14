@@ -28,6 +28,11 @@ func (s *AuthServiceServer) Login(ctx context.Context, in *pb.LoginRequest) (*pb
 	return l.Login(in)
 }
 
+func (s *AuthServiceServer) Register(ctx context.Context, in *pb.RegisterRequest) (*pb.LoginResponse, error) {
+	l := logic.NewRegisterLogic(ctx, s.svcCtx)
+	return l.Register(in)
+}
+
 func (s *AuthServiceServer) TokenLogin(ctx context.Context, in *pb.TokenLoginRequest) (*pb.LoginResponse, error) {
 	l := logic.NewTokenLoginLogic(ctx, s.svcCtx)
 	return l.TokenLogin(in)

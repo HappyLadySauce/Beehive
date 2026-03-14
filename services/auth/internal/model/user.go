@@ -36,3 +36,8 @@ func (m *UserModel) FindByUsername(username string) (*User, error) {
 	return &u, nil
 }
 
+// Create 创建用户，用于注册。调用方需保证 ID、Username、PasswordHash、Status 已填。
+func (m *UserModel) Create(user *User) error {
+	return m.db.Create(user).Error
+}
+

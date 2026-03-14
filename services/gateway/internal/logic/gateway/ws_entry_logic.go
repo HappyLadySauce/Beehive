@@ -62,7 +62,7 @@ func (l *WsEntryLogic) ServeConn(c *ws.Connection) error {
 
 func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 	// 除 auth.* 之外的消息都要求连接已登录，包括 presence.ping 在内。
-	if env.Type != "auth.login" && env.Type != "auth.tokenLogin" && env.Type != "auth.logout" {
+	if env.Type != "auth.login" && env.Type != "auth.tokenLogin" && env.Type != "auth.logout" && env.Type != "auth.register" {
 		if c.UserID == "" {
 			l.sendError(c, env.Tid, "unauthorized", "user not logged in")
 			return
@@ -74,6 +74,8 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 		l.handlePresencePing(c, env)
 	case "auth.login", "auth.tokenLogin":
 		l.handleAuth(c, env)
+	case "auth.register":
+		l.handleAuthRegister(c, env)
 	case "auth.logout":
 		l.handleAuthLogout(c, env)
 	case "user.me":
@@ -155,6 +157,41 @@ func (l *WsEntryLogic) sendError(c *ws.Connection, tid, code, message string) {
 		Payload: nil,
 		Error:   &ws.ErrBody{Code: code, Message: message},
 	})
+}
+
+// handleAuthRegister 处理 auth.register，调用 AuthService.Register，成功后与登录一致绑定并返回 token。
+func (l *WsEntryLogic) handleAuthRegister(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.AuthSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "auth service not configured")
+		return
+	}
+	var payload struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	l.Infow("rpc call", logx.Field("method", "auth.Register"), logx.Field("username", payload.Username))
+	resp, err := l.svcCtx.AuthSvc.Register(l.ctx, &authservice.RegisterRequest{
+		Username: payload.Username,
+		Password: payload.Password,
+	})
+	if err != nil {
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.AlreadyExists:
+				l.sendError(c, env.Tid, "bad_request", st.Message())
+				return
+			case codes.InvalidArgument:
+				l.sendError(c, env.Tid, "bad_request", st.Message())
+				return
+			}
+		}
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	l.afterAuthSuccess(c, env, resp, "")
 }
 
 // handleAuth 处理 auth.login / auth.tokenLogin。

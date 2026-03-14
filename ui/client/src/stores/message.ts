@@ -22,7 +22,9 @@ export const useMessageStore = defineStore('message', () => {
       messagesByConversation.value[conversationId] = []
     }
     const list = messagesByConversation.value[conversationId]
-    if (list.some((m) => m.serverMsgId === message.serverMsgId)) return
+    // 去重：服务端消息按 serverMsgId，本地 pending 消息按 clientMsgId（pending 时 serverMsgId 为空，多条会误判为重复）
+    if (message.serverMsgId && list.some((m) => m.serverMsgId === message.serverMsgId)) return
+    if (message.clientMsgId && list.some((m) => (m as MessageWithStatus).clientMsgId === message.clientMsgId)) return
     list.push(message)
   }
 

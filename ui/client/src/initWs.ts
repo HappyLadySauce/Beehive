@@ -24,10 +24,9 @@ export function initWs() {
       accessToken: authStore.accessToken,
       deviceId: `web-${typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 32) : 'unknown'}`,
     }, (env) => {
-      if (env.type === 'auth.tokenLogin.ok' && env.payload) {
-        const p = env.payload as { userId: string }
-        authStore.setFromTokenLogin({ userId: p.userId, accessToken: authStore.accessToken!, refreshToken: authStore.refreshToken ?? undefined })
-      }
+      if (env.type !== 'auth.tokenLogin.ok' || !env.payload) return
+      const p = env.payload as { userId: string }
+      authStore.setFromTokenLogin({ userId: p.userId, accessToken: authStore.accessToken!, refreshToken: authStore.refreshToken ?? undefined })
       send('user.me', {}, (meEnv) => {
         if (meEnv.type === 'user.me.ok' && meEnv.payload) {
           const u = meEnv.payload as { id: string; nickname: string; avatarUrl: string }
@@ -64,6 +63,11 @@ export function initWs() {
   })
 
   on('auth.login.ok', (env: WsEnvelope) => {
+    const p = env.payload as { userId: string; accessToken?: string; refreshToken?: string } | undefined
+    if (p) authStore.setFromTokenLogin({ userId: p.userId, accessToken: p.accessToken, refreshToken: p.refreshToken })
+  })
+
+  on('auth.register.ok', (env: WsEnvelope) => {
     const p = env.payload as { userId: string; accessToken?: string; refreshToken?: string } | undefined
     if (p) authStore.setFromTokenLogin({ userId: p.userId, accessToken: p.accessToken, refreshToken: p.refreshToken })
   })

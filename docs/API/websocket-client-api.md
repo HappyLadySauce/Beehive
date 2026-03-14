@@ -133,7 +133,40 @@
 
 > 说明：实际实现中，可以选择「HTTP 登录 + WebSocket tokenLogin」的模式，或两者兼容。文档这里给出协议定义，不强制具体部署方式。
 
-#### 2.3 登出
+#### 2.3 注册
+
+- **请求：`auth.register`**
+
+```json
+{
+  "type": "auth.register",
+  "tid": "reg-1",
+  "payload": {
+    "username": "alice",
+    "password": "password123"
+  }
+}
+```
+
+- **成功响应：`auth.register.ok`**（与登录一致，返回 token，注册即登录）
+
+```json
+{
+  "type": "auth.register.ok",
+  "tid": "reg-1",
+  "payload": {
+    "userId": "u_123",
+    "accessToken": "jwt-token",
+    "refreshToken": "refresh-token",
+    "expiresIn": 3600
+  },
+  "error": null
+}
+```
+
+- **失败响应**：如用户名已存在，返回 `auth.register.error`，`error.code` 为 `bad_request`，`error.message` 如 "username already exists"。
+
+#### 2.4 登出
 
 - **请求：`auth.logout`**
 

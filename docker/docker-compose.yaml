@@ -47,7 +47,8 @@ services:
       ETCD_NAME: beehive-etcd
       ETCD_DATA_DIR: /etcd-data
       ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
-      ETCD_ADVERTISE_CLIENT_URLS: http://beehive-etcd:2379
+      # 宿主机用 127.0.0.1:2379 连接时，advertise 也设为 127.0.0.1，避免 Auto sync 拿到 beehive-etcd 导致 "no such host"
+      ETCD_ADVERTISE_CLIENT_URLS: http://127.0.0.1:2379
       ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
       ETCD_INITIAL_ADVERTISE_PEER_URLS: http://beehive-etcd:2380
       ETCD_INITIAL_CLUSTER: beehive-etcd=http://beehive-etcd:2380

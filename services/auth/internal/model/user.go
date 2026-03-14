@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strconv"
 	"time"
 
 	"gorm.io/gorm"
@@ -39,5 +40,15 @@ func (m *UserModel) FindByUsername(username string) (*User, error) {
 // Create 创建用户，用于注册。调用方需保证 ID、Username、PasswordHash、Status 已填。
 func (m *UserModel) Create(user *User) error {
 	return m.db.Create(user).Error
+}
+
+// GetNextUserID 从序列 user_id_seq 取下一个 10 位用户 ID（顺序递增）
+func (m *UserModel) GetNextUserID() (string, error) {
+	var n int64
+	err := m.db.Raw("SELECT nextval('user_id_seq')").Scan(&n).Error
+	if err != nil {
+		return "", err
+	}
+	return strconv.FormatInt(n, 10), nil
 }
 

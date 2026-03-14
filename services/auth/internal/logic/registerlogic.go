@@ -2,16 +2,12 @@ package logic
 
 import (
 	"context"
-	"errors"
-	"math/rand"
-	"strconv"
 	"time"
 
 	"github.com/HappyLadySauce/Beehive/services/auth/internal/model"
 	"github.com/HappyLadySauce/Beehive/services/auth/internal/svc"
 	"github.com/HappyLadySauce/Beehive/services/auth/pb"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 	"github.com/zeromicro/go-zero/core/logx"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
@@ -52,31 +48,19 @@ func (l *RegisterLogic) Register(in *pb.RegisterRequest) (*pb.LoginResponse, err
 		return nil, status.Errorf(codes.Internal, "hash password failed: %v", err)
 	}
 
-	// 10 位数字用户 ID（1000000000–9999999999），冲突则重试
-	userID := generateTenDigitUserID()
+	// 10 位数字用户 ID 顺序递增（从序列 user_id_seq 分配）
+	userID, err := l.svcCtx.UserMod.GetNextUserID()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "allocate user id failed: %v", err)
+	}
 	user := &model.User{
 		ID:           userID,
 		Username:     in.GetUsername(),
 		PasswordHash: string(hash),
 		Status:       "normal",
 	}
-	const maxRetries = 10
-	created := false
-	for i := 0; i < maxRetries; i++ {
-		if err := l.svcCtx.UserMod.Create(user); err != nil {
-			var pqErr *pq.Error
-			if errors.As(err, &pqErr) && pqErr.Code == "23505" {
-				userID = generateTenDigitUserID()
-				user.ID = userID
-				continue
-			}
-			return nil, status.Errorf(codes.Internal, "create user failed: %v", err)
-		}
-		created = true
-		break
-	}
-	if !created {
-		return nil, status.Errorf(codes.Internal, "create user failed: too many id conflicts, please retry")
+	if err := l.svcCtx.UserMod.Create(user); err != nil {
+		return nil, status.Errorf(codes.Internal, "create user failed: %v", err)
 	}
 
 	roles, err := l.svcCtx.RBACMod.GetUserRoles(userID)
@@ -100,10 +84,4 @@ func (l *RegisterLogic) Register(in *pb.RegisterRequest) (*pb.LoginResponse, err
 		RefreshToken: refreshToken,
 		ExpiresIn:    int64(accessTTL),
 	}, nil
-}
-
-// generateTenDigitUserID 生成 1000000000–9999999999 范围内的随机 10 位数字字符串
-func generateTenDigitUserID() string {
-	n := 1000000000 + rand.Int63n(9000000000)
-	return strconv.FormatInt(n, 10)
 }

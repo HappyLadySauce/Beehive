@@ -1,7 +1,13 @@
--- Beehive 当前版本建表脚本（用户 ID 10 位、会话 ID varchar(20)、联系人表）
--- 依赖顺序：users → user_profiles, user_roles → conversations → conversation_members, messages, conversation_read, contacts
+-- Beehive 当前版本建表脚本（用户 ID 10 位顺序递增、会话 ID varchar(20)、联系人表）
+-- 依赖顺序：user_id_seq → users → user_profiles, user_roles → ...
 
--- users: 账号与认证，id 为 10 位数字字符串
+-- 用户 ID 顺序递增（10 位：1000000000–9999999999）
+CREATE SEQUENCE IF NOT EXISTS user_id_seq
+    MINVALUE 1000000000
+    MAXVALUE 9999999999
+    START 1000000000;
+
+-- users: 账号与认证，id 为 10 位数字字符串（由 user_id_seq 分配）
 CREATE TABLE IF NOT EXISTS users (
     id            VARCHAR(10) PRIMARY KEY,
     username      TEXT NOT NULL UNIQUE,

@@ -29,3 +29,6 @@ VALUES (
     'normal'
 )
 ON CONFLICT (user_id) DO NOTHING;
+
+-- 序列推进到 seed 之后，避免新注册与 testuser(1000000001) 冲突
+SELECT setval('user_id_seq', 1000000002);

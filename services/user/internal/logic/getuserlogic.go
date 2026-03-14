@@ -62,18 +62,30 @@ func (l *GetUserLogic) GetUser(in *pb.GetUserRequest) (*pb.GetUserResponse, erro
 		l.Errorf("redis GET %s error: %v", key, err)
 	}
 
-	// 2. 缓存未命中或读取失败时，从 PostgreSQL 读取用户资料：
-	//    - 若记录不存在，返回 NotFound；
-	//    - 其他错误（例如数据库异常）统一包装为 Internal 错误。
+	// 2. 从 PostgreSQL 读取：优先 user_profiles；若无 profile 但 users 表有该用户（如新注册），返回默认资料
 	profile, err := l.svcCtx.UserProfileMod.FindByID(id)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, status.Error(codes.NotFound, "user not found")
+		if err != gorm.ErrRecordNotFound {
+			return nil, status.Errorf(codes.Internal, "query user profile failed: %v", err)
 		}
-		return nil, status.Errorf(codes.Internal, "query user profile failed: %v", err)
+		// profile 不存在时，检查 users 表是否有该用户（新注册用户可能尚未有 profile）
+		usr, errUser := l.svcCtx.UserMod.FindByID(id)
+		if errUser != nil {
+			if errUser == gorm.ErrRecordNotFound {
+				return nil, status.Error(codes.NotFound, "user not found")
+			}
+			return nil, status.Errorf(codes.Internal, "query user failed: %v", errUser)
+		}
+		u := &pb.User{
+			Id:        usr.ID,
+			Nickname:  "",
+			AvatarUrl: "",
+			Bio:       "",
+			Status:    usr.Status,
+		}
+		return &pb.GetUserResponse{User: u}, nil
 	}
 
-	// 将数据库模型转换为对外返回的 protobuf User 结构体。
 	u := toProtoUser(profile)
 
 	// 3. 回写缓存（错误只记日志，不影响主流程）：

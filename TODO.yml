@@ -27,11 +27,18 @@ areas:
         notes: "解析 auth.login/auth.tokenLogin 消息并调用 AuthService RPC，登录成功后绑定 userId"
       - id: gateway-presence-integration
         title: Gateway 与 PresenceService 集成
-        status: in_progress
+        status: done
         service: gateway
         owner: ""
         tags: [gateway, presence, rpc]
         notes: "登录后调用 RegisterSession，心跳刷新 RefreshSession，断线调用 UnregisterSession"
+      - id: gateway-conversation-message-integration
+        title: Gateway 与 Conversation/Message 服务集成
+        status: done
+        service: gateway
+        owner: ""
+        tags: [gateway, conversation, message, rpc]
+        notes: "配置 ConversationRpcConf/MessageRpcConf（Etcd）；支持 conversation.list（聚合 ListUserConversations + GetLastMessages）、message.send、message.history；未配置时返回 unavailable"
   - id: backend-core
     name: 后端核心服务
     items:
@@ -45,28 +52,28 @@ areas:
         notes: "登录/登出/Token 校验的最小可用实现（设计参考 docs/backend/services-design.md, docs/API/rpc-auth-presence-message-conversation.md）"
       - id: presence-service
         title: 实现 PresenceService 在线状态管理
-        status: in_progress
+        status: done
         service: presence
         proto: proto/presence.proto
         owner: ""
         tags: [presence, redis, rpc]
-        notes: "基于 Redis 管理在线 Session（设计参考 docs/backend/services-design.md, docs/API/rpc-auth-presence-message-conversation.md）"
+        notes: "基于 Redis 管理在线 Session：RegisterSession/UnregisterSession/RefreshSession、GetOnlineSessions/GetUserPresence（设计参考 docs/backend/services-design.md）"
       - id: message-service
         title: 实现 MessageService 消息写入与历史查询
-        status: pending
+        status: done
         service: message
         proto: proto/message.proto
         owner: ""
         tags: [message, db, mq, rpc]
-        notes: "PostgreSQL 持久化 + RabbitMQ 发布 message.created 事件（设计参考 docs/backend/services-design.md, docs/API/rpc-auth-presence-message-conversation.md）"
+        notes: "PostgreSQL 持久化 messages 表；PostMessage（写库 + 可选 RabbitMQ message.created）、GetHistory、GetLastMessages；配置见 etc/beehive.message.yaml（设计参考 docs/backend/services-design.md, storage-and-mq.md）"
       - id: conversation-service
         title: 实现 ConversationService 会话与成员管理
-        status: pending
+        status: done
         service: conversation
         proto: proto/conversation.proto
         owner: ""
         tags: [conversation, db, rpc]
-        notes: "会话元数据与成员关系管理，提供会话列表等能力（设计参考 docs/backend/services-design.md, docs/API/rpc-auth-presence-message-conversation.md）"
+        notes: "conversations/conversation_members 表；CreateConversation、AddMember、RemoveMember、ListUserConversations、GetConversation、ListMembers；配置见 etc/beehive.conversation.yaml（设计参考 docs/backend/services-design.md）"
       - id: user-service
         title: 实现 UserService 用户 Profile 读写
         status: done

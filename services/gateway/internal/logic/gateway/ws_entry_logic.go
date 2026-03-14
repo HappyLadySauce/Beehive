@@ -90,7 +90,7 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 }
 
 func (l *WsEntryLogic) handlePresencePing(c *ws.Connection, env *ws.Envelope) {
-	if c.UserID != "" {
+	if c.UserID != "" && l.svcCtx.PresenceSvc != nil {
 		l.Infow("rpc call", logx.Field("method", "presence.RefreshSession"), logx.Field("userId", c.UserID), logx.Field("connId", c.ConnID))
 		_, err := l.svcCtx.PresenceSvc.RefreshSession(l.ctx, &presenceservice.RefreshSessionRequest{
 			UserId: c.UserID,
@@ -151,6 +151,10 @@ func (l *WsEntryLogic) sendError(c *ws.Connection, tid, code, message string) {
 
 // handleAuth 处理 auth.login / auth.tokenLogin。
 func (l *WsEntryLogic) handleAuth(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.AuthSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "auth service not configured")
+		return
+	}
 	switch env.Type {
 	case "auth.login":
 		var payload struct {
@@ -203,18 +207,20 @@ func (l *WsEntryLogic) handleAuthLogout(c *ws.Connection, env *ws.Envelope) {
 	if !l.bindJSONPayload(c, env, &payload) {
 		return
 	}
-	if payload.AccessToken != "" {
+	if l.svcCtx.AuthSvc != nil && payload.AccessToken != "" {
 		l.Infow("rpc call", logx.Field("method", "auth.Logout"))
 		_, _ = l.svcCtx.AuthSvc.Logout(l.ctx, &authservice.LogoutRequest{
 			AccessToken: payload.AccessToken,
 		})
 	}
-	if c.UserID != "" {
+	if l.svcCtx.PresenceSvc != nil && c.UserID != "" {
 		l.Infow("rpc call", logx.Field("method", "presence.UnregisterSession"), logx.Field("userId", c.UserID), logx.Field("connId", c.ConnID))
 		_, _ = l.svcCtx.PresenceSvc.UnregisterSession(l.ctx, &presenceservice.UnregisterSessionRequest{
 			UserId: c.UserID,
 			ConnId: c.ConnID,
 		})
+	}
+	if c.UserID != "" {
 		c.BindUser("")
 	}
 	_ = c.WriteJSON(&ws.Envelope{
@@ -231,21 +237,21 @@ func (l *WsEntryLogic) afterAuthSuccess(c *ws.Connection, env *ws.Envelope, resp
 		l.sendError(c, env.Tid, "internal_error", "empty auth response")
 		return
 	}
-	// 先向 Presence 注册会话，确保在线状态成功记录；失败则不认为登录成功。
-	l.Infow("rpc call", logx.Field("method", "presence.RegisterSession"), logx.Field("userId", resp.UserId), logx.Field("connId", c.ConnID))
-	if _, err := l.svcCtx.PresenceSvc.RegisterSession(l.ctx, &presenceservice.RegisterSessionRequest{
-		UserId:     resp.UserId,
-		GatewayId:  l.svcCtx.Config.GatewayID,
-		ConnId:     c.ConnID,
-		DeviceId:   deviceID,
-		DeviceType: "", // 可根据实际需求从 Query 或 payload 补充
-		Ip:         "",
-	}); err != nil {
-		l.Errorf("register session failed for user %s conn %s: %v", resp.UserId, c.ConnID, err)
-		l.sendError(c, env.Tid, "internal_error", "failed to register session")
-		return
+	if l.svcCtx.PresenceSvc != nil {
+		l.Infow("rpc call", logx.Field("method", "presence.RegisterSession"), logx.Field("userId", resp.UserId), logx.Field("connId", c.ConnID))
+		if _, err := l.svcCtx.PresenceSvc.RegisterSession(l.ctx, &presenceservice.RegisterSessionRequest{
+			UserId:     resp.UserId,
+			GatewayId:  l.svcCtx.Config.GatewayID,
+			ConnId:     c.ConnID,
+			DeviceId:   deviceID,
+			DeviceType: "",
+			Ip:         "",
+		}); err != nil {
+			l.Errorf("register session failed for user %s conn %s: %v", resp.UserId, c.ConnID, err)
+			l.sendError(c, env.Tid, "internal_error", "failed to register session")
+			return
+		}
 	}
-	// Presence 注册成功后再在本地绑定用户，并返回登录成功响应。
 	c.BindUser(resp.UserId)
 	// 返回 auth.login.ok 或 auth.tokenLogin.ok
 	okType := env.Type + ".ok"

@@ -7,12 +7,12 @@
 ## 一、整体进展概览
 
 - **网关**：
-  - Gateway：`api/gateway.api` 已定义，`services/gateway` 由 goctl 生成；WebSocket 升级、Hub、读循环与 `auth.login`/`auth.tokenLogin`/`presence.ping` 已实现；Presence 集成（RegisterSession/RefreshSession/UnregisterSession）进行中（见 `TODO.yml` 中 `gateway-presence-integration`）。
+  - Gateway：`api/gateway.api` 已定义，`services/gateway` 由 goctl 生成；WebSocket 升级、Hub、读循环已实现；已集成 Auth、Presence、User、Conversation、Message（`auth.login`/`auth.tokenLogin`/`auth.logout`、`presence.ping`、`user.me`、`conversation.list`、`message.send`、`message.history`）。
 - **后端核心 RPC**：
   - AuthService：登录/登出/Token 校验/CheckPermission/GetUserRoles 已实现（见 `auth-service`）。
-  - PresenceService：zrpc 骨架已生成，在线 Session 与 Redis 接入进行中（见 `presence-service`）。
-  - MessageService：zrpc 骨架已生成，消息持久化与 MQ 发布待实现（见 `message-service`）。
-  - ConversationService：zrpc 骨架已生成，会话/成员管理待实现（见 `conversation-service`）。
+  - PresenceService：Redis Session 注册/刷新/注销、GetOnlineSessions/GetUserPresence 已实现（见 `presence-service`）。
+  - MessageService：PostMessage（写库 + 可选 RabbitMQ 事件）、GetHistory、GetLastMessages 已实现（见 `message-service`）。
+  - ConversationService：CreateConversation、AddMember、RemoveMember、ListUserConversations、GetConversation、ListMembers 已实现（见 `conversation-service`）。
   - UserService：用户 Profile 读写已实现（GetUser/BatchGetUsers/UpdateUser，见 `user-service`）。
 - **管理后台 API**：
   - AdminAPIService：独立 HTTP 服务 `services/adminapi`，已按 `docs/backend/development-workflow.md` 先定义 `api/admin.api` 再 goctl 生成并完善；认证中间件（Bearer Token + AuthService.ValidateToken）、用户/会话/消息/配置/运维接口骨架已实现（见 `TODO.yml` 中 `admin-service`）。
@@ -25,11 +25,27 @@
 - **Gateway WebSocket 升级与连接管理**（`gateway-ws-upgrade`）
   - `internal/ws`：`Envelope`/`ErrBody` 协议结构体，`Connection`（ConnID、UserID、DeviceID、GatewayID）与 `Hub` 连接管理（注册/注销/按 ConnID 查询）。
   - WsEntry Handler：使用 `gorilla/websocket` 完成 HTTP→WebSocket 升级，从 Hub 注册连接并 defer 注销与关闭，将连接交给 Logic 处理。
-  - WsEntry Logic：`ServeConn` 读循环解析 JSON Envelope，按 `type` 分发；已实现 `presence.ping` → `presence.ping.ok`，`auth.login`/`auth.tokenLogin`/`auth.logout` 及未知 type 返回错误占位，为后续 auth/presence 集成预留。
+  - WsEntry Logic：`ServeConn` 读循环解析 JSON Envelope，按 `type` 分发；已实现 `presence.ping`、`auth.login`/`auth.tokenLogin`/`auth.logout`、`user.me`、`conversation.list`、`message.send`、`message.history` 及错误占位。
+- **Gateway 与 Conversation/Message 集成**
+  - 配置：`ConversationRpcConf`、`MessageRpcConf`（Etcd 发现），未配置时对应 WebSocket 类型返回 unavailable。
+  - `conversation.list`：调用 ConversationService.ListUserConversations + MessageService.GetLastMessages 聚合成会话列表（含 lastMessage）。
+  - `message.send`：调用 MessageService.PostMessage（from_user_id 为当前连接用户），返回 `message.send.ok`。
+  - `message.history`：调用 MessageService.GetHistory，返回 `message.history.ok`。
+- **数据库迁移 004/005**
+  - `004_create_conversations_and_members.sql`：`conversations`、`conversation_members` 表及索引。
+  - `005_create_messages.sql`：`messages` 表及 `(conversation_id, server_time)` 索引。
+- **ConversationService 完整实现**（`conversation-service`）
+  - 配置：PostgresDSN；ServiceContext 注入 GORM + ConversationModel。
+  - 逻辑：CreateConversation（事务写会话与成员）、AddMember/RemoveMember、ListUserConversations（cursor/limit）、GetConversation、ListMembers；错误使用 gRPC status 返回。
+  - 配置示例：`etc/beehive.conversation.yaml`。
+- **MessageService 完整实现**（`message-service`）
+  - 配置：PostgresDSN、可选 RabbitMQ（URL/Exchange/RouteKey）；ServiceContext 注入 GORM + MessageModel + 可选 MQ Publisher。
+  - 逻辑：PostMessage（写库 + 可选发布 `message.created`）、GetHistory（before_time/limit）、GetLastMessages（多会话最后一条）；错误使用 gRPC status 返回。
+  - 配置示例：`etc/beehive.message.yaml`。
 - **Proto 与 zrpc 骨架**
   - `proto/auth.proto`, `proto/presence.proto`, `proto/message.proto`, `proto/conversation.proto`, `proto/user.proto` 已与 `docs/API/rpc-auth-presence-message-conversation.md` 对齐。
   - 使用 goctl 为以上服务生成了 zrpc 代码骨架：`services/auth`、`services/presence`、`services/message`、`services/conversation`、`services/user`。
- - **UserService 用户 Profile 读写**（`user-service`）
+- **UserService 用户 Profile 读写**（`user-service`）
   - 数据层：在 `db/migrations/001_create_users_and_user_profiles.sql` 中创建 `users` / `user_profiles` 表；在 `internal/model` 中通过 GORM 定义 `User` / `UserProfile` 与 `UserProfileModel`（FindByID/FindByIDs/UpdateProfile）。
   - 配置与依赖：`etc/user.yaml` / `etc/beehive.user.yaml` 配置 `PostgresDSN`、`RedisAddr`、`UserProfileTTLSeconds`；`ServiceContext` 初始化 GORM 与 go-redis 客户端，并注入 `UserProfileMod`。
   - 逻辑层：`GetUser` 先读 Redis 缓存，miss 时查 PostgreSQL 并回写缓存；`BatchGetUsers` 使用 Redis MGet + PostgreSQL 批查 + Pipeline 回填缓存；`UpdateUser` 更新 `user_profiles` 并刷新对应缓存。
@@ -41,20 +57,17 @@
 
 ## 三、正在进行 / 阻塞项
 
-- **Gateway**（见 `TODO.yml`）：
-  - `gateway-presence-integration`：登录后 RegisterSession、心跳 RefreshSession、断线 UnregisterSession（依赖 PresenceService 最小可用）。
-- **后端核心 RPC**：
-  - `presence-service`：基于 Redis 的 Session 注册/刷新/注销与 GetOnlineSessions 实现（进行中）。
-  - `message-service`、`conversation-service`：待实现。
-- **Admin 后续可选**：
-  - 按路由注入 CheckPermission 中间件（如 `admin.user.read`、`admin.user.ban`）；ListUsers/封禁/配置等对接具体 RPC 或 etcd。
+- **Admin 后续可选**（见 `TODO.yml`）：
+  - `admin-permission-middleware`：按路由注入 CheckPermission 中间件（如 `admin.user.read`、`admin.conversation.read`）；ListUsers/封禁/配置等对接具体 RPC 或 etcd。
+- **可选后续**：
+  - 消息投递与 `message.push`：消费 RabbitMQ `message.created`，查 Presence 得到在线连接，经 Gateway 向 WebSocket 推送 `message.push`（可独立 Delivery 服务或 Gateway 内实现）。
 
 ## 四、下一步计划
 
 - **优先顺序**：
-  1. ~~`gateway-ws-upgrade`~~、~~`gateway-auth-integration`~~、~~`auth-service`~~、~~`user-service`~~、~~`admin-service` 骨架与核心接口~~（已完成）。
-  2. **当前重点**：完成 `gateway-presence-integration`（依赖 presence-service 最小可用）；并行推进 `presence-service`（Redis Session 管理）。
-  3. 随后：`message-service`（持久化 + MQ）、`conversation-service`（会话/成员），再视需求完善 Admin 权限中间件与占位接口。
+  1. ~~`gateway-ws-upgrade`~~、~~`gateway-auth-integration`~~、~~`gateway-presence-integration`~~、~~`auth-service`~~、~~`user-service`~~、~~`presence-service`~~、~~`message-service`~~、~~`conversation-service`~~、~~`gateway-conversation-message-integration`~~、~~`admin-service` 骨架与核心接口~~（已完成）。
+  2. **当前可选**：Admin 按路由 CheckPermission 中间件；消息投递与 `message.push`（Delivery 或 Gateway 内消费 MQ 并推送）。
+  3. 随后：未读计数、已读回执等按产品需求推进。
 
 - 实现前请对照：
   - Gateway：`docs/backend/gateway-design.md`、`docs/API/websocket-client-api.md`。

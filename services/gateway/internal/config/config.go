@@ -31,6 +31,13 @@ type Config struct {
 	RabbitMQExchange string `json:",optional"` // im.events，与 Message 服务发布端一致
 	RabbitMQQueue    string `json:",optional"` // 每实例独立队列，如 gateway.push.gw-1
 	RabbitMQRouteKey string `json:",optional"` // message.created
+
+	// Redis 用于限流（如 message.send 按 userId 限流）；可选，未配置或限流阈值为 0 时不限流。
+	RedisAddr     string `json:",optional"` // 127.0.0.1:6379
+	RedisPassword string `json:",optional"`
+	RedisDB       int    `json:",optional"`
+	// RateLimitMessageSendPerMinute 每用户每分钟最多发送消息条数，0 表示不限制
+	RateLimitMessageSendPerMinute int `json:",optional"`
 }
 
 // UserRpcConfigured 判断是否已配置 UserService（Etcd 或 Endpoints），未配置时 Gateway 可不依赖 User 服务启动。
@@ -59,4 +66,9 @@ func (c *Config) PresenceRpcConfigured() bool {
 // PushConsumerConfigured 判断是否已配置 RabbitMQ 消费（用于 message.push）。
 func (c *Config) PushConsumerConfigured() bool {
 	return c.RabbitMQURL != ""
+}
+
+// RateLimitConfigured 判断是否启用 message.send 限流（Redis 已配置且阈值 > 0）。
+func (c *Config) RateLimitConfigured() bool {
+	return c.RedisAddr != "" && c.RateLimitMessageSendPerMinute > 0
 }

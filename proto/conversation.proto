@@ -11,6 +11,8 @@ service ConversationService {
   rpc ListUserConversations(ListUserConversationsRequest) returns (ListUserConversationsResponse);
   rpc GetConversation(GetConversationRequest) returns (GetConversationResponse);
   rpc ListMembers(ListMembersRequest) returns (ListMembersResponse);
+  // FindOrCreateSingleConversation 查找或创建两人单聊会话，返回 conversation_id
+  rpc FindOrCreateSingleConversation(FindOrCreateSingleConversationRequest) returns (FindOrCreateSingleConversationResponse);
 }
 
 message CreateConversationRequest {
@@ -79,5 +81,14 @@ message MemberInfo {
 
 message ListMembersResponse {
   repeated MemberInfo items = 1;
+}
+
+message FindOrCreateSingleConversationRequest {
+  string user_id_1 = 1;
+  string user_id_2 = 2;
+}
+
+message FindOrCreateSingleConversationResponse {
+  string conversation_id = 1;
 }
 

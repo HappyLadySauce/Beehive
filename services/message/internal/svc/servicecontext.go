@@ -15,6 +15,7 @@ type ServiceContext struct {
 	Config  config.Config
 	DB      *gorm.DB
 	Msg     *model.MessageModel
+	Read    *model.ReadModel
 	MQ      *mq.Publisher
 }
 
@@ -32,6 +33,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	if err == nil {
 		sqlDB.SetConnMaxLifetime(time.Hour)
 	}
+	if err := db.AutoMigrate(&model.ConversationRead{}); err != nil {
+		panic("auto migrate conversation_read: " + err.Error())
+	}
 	var pub *mq.Publisher
 	if c.RabbitMQURL != "" {
 		pub, err = mq.NewPublisher(c.RabbitMQURL, c.RabbitMQExchange, c.RabbitMQRouteKey)
@@ -43,6 +47,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config: c,
 		DB:     db,
 		Msg:    model.NewMessageModel(db),
+		Read:   model.NewReadModel(db),
 		MQ:     pub,
 	}
 }

@@ -8,6 +8,8 @@ service MessageService {
   rpc PostMessage(PostMessageRequest) returns (PostMessageResponse);
   rpc GetHistory(GetHistoryRequest) returns (GetHistoryResponse);
   rpc GetLastMessages(GetLastMessagesRequest) returns (GetLastMessagesResponse);
+  rpc MarkRead(MarkReadRequest) returns (MarkReadResponse);
+  rpc GetUnreadCounts(GetUnreadCountsRequest) returns (GetUnreadCountsResponse);
 }
 
 message MessageBody {
@@ -56,5 +58,22 @@ message GetLastMessagesRequest {
 
 message GetLastMessagesResponse {
   map<string, MessageRecord> last_messages = 1;
+}
+
+message MarkReadRequest {
+  string user_id = 1;
+  string conversation_id = 2;
+  string server_msg_id = 3;
+}
+
+message MarkReadResponse {}
+
+message GetUnreadCountsRequest {
+  string user_id = 1;
+  repeated string conversation_ids = 2;
+}
+
+message GetUnreadCountsResponse {
+  map<string, int32> counts = 1;
 }
 

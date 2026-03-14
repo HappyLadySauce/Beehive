@@ -14,19 +14,25 @@ import (
 )
 
 type (
-	GetHistoryRequest       = pb.GetHistoryRequest
-	GetHistoryResponse      = pb.GetHistoryResponse
-	GetLastMessagesRequest  = pb.GetLastMessagesRequest
-	GetLastMessagesResponse = pb.GetLastMessagesResponse
-	MessageBody             = pb.MessageBody
-	MessageRecord           = pb.MessageRecord
-	PostMessageRequest      = pb.PostMessageRequest
-	PostMessageResponse     = pb.PostMessageResponse
+	GetHistoryRequest         = pb.GetHistoryRequest
+	GetHistoryResponse        = pb.GetHistoryResponse
+	GetLastMessagesRequest    = pb.GetLastMessagesRequest
+	GetLastMessagesResponse   = pb.GetLastMessagesResponse
+	GetUnreadCountsRequest    = pb.GetUnreadCountsRequest
+	GetUnreadCountsResponse   = pb.GetUnreadCountsResponse
+	MarkReadRequest           = pb.MarkReadRequest
+	MarkReadResponse          = pb.MarkReadResponse
+	MessageBody               = pb.MessageBody
+	MessageRecord             = pb.MessageRecord
+	PostMessageRequest        = pb.PostMessageRequest
+	PostMessageResponse       = pb.PostMessageResponse
 
 	MessageService interface {
 		PostMessage(ctx context.Context, in *PostMessageRequest, opts ...grpc.CallOption) (*PostMessageResponse, error)
 		GetHistory(ctx context.Context, in *GetHistoryRequest, opts ...grpc.CallOption) (*GetHistoryResponse, error)
 		GetLastMessages(ctx context.Context, in *GetLastMessagesRequest, opts ...grpc.CallOption) (*GetLastMessagesResponse, error)
+		MarkRead(ctx context.Context, in *MarkReadRequest, opts ...grpc.CallOption) (*MarkReadResponse, error)
+		GetUnreadCounts(ctx context.Context, in *GetUnreadCountsRequest, opts ...grpc.CallOption) (*GetUnreadCountsResponse, error)
 	}
 
 	defaultMessageService struct {
@@ -53,4 +59,14 @@ func (m *defaultMessageService) GetHistory(ctx context.Context, in *GetHistoryRe
 func (m *defaultMessageService) GetLastMessages(ctx context.Context, in *GetLastMessagesRequest, opts ...grpc.CallOption) (*GetLastMessagesResponse, error) {
 	client := pb.NewMessageServiceClient(m.cli.Conn())
 	return client.GetLastMessages(ctx, in, opts...)
+}
+
+func (m *defaultMessageService) MarkRead(ctx context.Context, in *MarkReadRequest, opts ...grpc.CallOption) (*MarkReadResponse, error) {
+	client := pb.NewMessageServiceClient(m.cli.Conn())
+	return client.MarkRead(ctx, in, opts...)
+}
+
+func (m *defaultMessageService) GetUnreadCounts(ctx context.Context, in *GetUnreadCountsRequest, opts ...grpc.CallOption) (*GetUnreadCountsResponse, error) {
+	client := pb.NewMessageServiceClient(m.cli.Conn())
+	return client.GetUnreadCounts(ctx, in, opts...)
 }

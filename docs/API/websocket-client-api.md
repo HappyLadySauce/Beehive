@@ -427,16 +427,97 @@
 
 > Gateway 根据连接上绑定的 `userId` 调用 **UserService.GetUser** 返回当前用户资料，供客户端展示昵称、头像等。
 
-#### 6.2 会话与联系人管理（预留）
+#### 6.2 会话与联系人管理
 
-以下为未来可扩展的消息类型占位（具体字段可在实现前细化）：
+- **创建会话：`conversation.create` / `conversation.create.ok`**
 
-- 创建单聊/群聊：
-  - `conversation.create` / `conversation.create.ok`
-- 管理会话成员：
-  - `conversation.addMember` / `.ok`
-  - `conversation.removeMember` / `.ok`
-- 联系人/好友相关：
+请求：
+
+```json
+{
+  "type": "conversation.create",
+  "tid": "create-1",
+  "payload": {
+    "type": "single",
+    "name": "",
+    "memberIds": ["u_123", "u_456"]
+  }
+}
+```
+
+- `type`：会话类型，`single` | `group` | `channel`
+- `name`：可选，群名/频道名
+- `memberIds`：成员用户 ID 数组
+
+成功响应：
+
+```json
+{
+  "type": "conversation.create.ok",
+  "tid": "create-1",
+  "payload": {
+    "conversationId": "conv_abc"
+  },
+  "error": null
+}
+```
+
+- **添加成员：`conversation.addMember` / `conversation.addMember.ok`**
+
+请求：
+
+```json
+{
+  "type": "conversation.addMember",
+  "tid": "add-1",
+  "payload": {
+    "conversationId": "conv_abc",
+    "userId": "u_789",
+    "role": "member"
+  }
+}
+```
+
+- `role`：可选，默认 `member`，可为 `owner` | `admin` | `member`
+
+成功响应：
+
+```json
+{
+  "type": "conversation.addMember.ok",
+  "tid": "add-1",
+  "payload": {},
+  "error": null
+}
+```
+
+- **移除成员：`conversation.removeMember` / `conversation.removeMember.ok`**
+
+请求：
+
+```json
+{
+  "type": "conversation.removeMember",
+  "tid": "rm-1",
+  "payload": {
+    "conversationId": "conv_abc",
+    "userId": "u_789"
+  }
+}
+```
+
+成功响应：
+
+```json
+{
+  "type": "conversation.removeMember.ok",
+  "tid": "rm-1",
+  "payload": {},
+  "error": null
+}
+```
+
+- 联系人/好友相关（预留）：
   - `contact.list` / `.ok`
   - `contact.request` / `.ok`
   - `contact.accept` / `.ok`

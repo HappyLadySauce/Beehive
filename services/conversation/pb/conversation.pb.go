@@ -749,6 +749,102 @@ func (x *ListMembersResponse) GetItems() []*MemberInfo {
 	return nil
 }
 
+type FindOrCreateSingleConversationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId_1      string                 `protobuf:"bytes,1,opt,name=user_id_1,json=userId1,proto3" json:"user_id_1,omitempty"`
+	UserId_2      string                 `protobuf:"bytes,2,opt,name=user_id_2,json=userId2,proto3" json:"user_id_2,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FindOrCreateSingleConversationRequest) Reset() {
+	*x = FindOrCreateSingleConversationRequest{}
+	mi := &file_proto_conversation_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FindOrCreateSingleConversationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FindOrCreateSingleConversationRequest) ProtoMessage() {}
+
+func (x *FindOrCreateSingleConversationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FindOrCreateSingleConversationRequest.ProtoReflect.Descriptor instead.
+func (*FindOrCreateSingleConversationRequest) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *FindOrCreateSingleConversationRequest) GetUserId_1() string {
+	if x != nil {
+		return x.UserId_1
+	}
+	return ""
+}
+
+func (x *FindOrCreateSingleConversationRequest) GetUserId_2() string {
+	if x != nil {
+		return x.UserId_2
+	}
+	return ""
+}
+
+type FindOrCreateSingleConversationResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConversationId string                 `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *FindOrCreateSingleConversationResponse) Reset() {
+	*x = FindOrCreateSingleConversationResponse{}
+	mi := &file_proto_conversation_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FindOrCreateSingleConversationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FindOrCreateSingleConversationResponse) ProtoMessage() {}
+
+func (x *FindOrCreateSingleConversationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_conversation_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FindOrCreateSingleConversationResponse.ProtoReflect.Descriptor instead.
+func (*FindOrCreateSingleConversationResponse) Descriptor() ([]byte, []int) {
+	return file_proto_conversation_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *FindOrCreateSingleConversationResponse) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
 var File_proto_conversation_proto protoreflect.FileDescriptor
 
 const file_proto_conversation_proto_rawDesc = "" +
@@ -799,14 +895,20 @@ const file_proto_conversation_proto_rawDesc = "" +
 	"\tjoined_at\x18\x03 \x01(\x03R\bjoinedAt\x12\x16\n" +
 	"\x06status\x18\x04 \x01(\tR\x06status\"M\n" +
 	"\x13ListMembersResponse\x126\n" +
-	"\x05items\x18\x01 \x03(\v2 .beehive.conversation.MemberInfoR\x05items2\xaa\x05\n" +
+	"\x05items\x18\x01 \x03(\v2 .beehive.conversation.MemberInfoR\x05items\"_\n" +
+	"%FindOrCreateSingleConversationRequest\x12\x1a\n" +
+	"\tuser_id_1\x18\x01 \x01(\tR\auserId1\x12\x1a\n" +
+	"\tuser_id_2\x18\x02 \x01(\tR\auserId2\"Q\n" +
+	"&FindOrCreateSingleConversationResponse\x12'\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId2\xc8\x06\n" +
 	"\x13ConversationService\x12w\n" +
 	"\x12CreateConversation\x12/.beehive.conversation.CreateConversationRequest\x1a0.beehive.conversation.CreateConversationResponse\x12\\\n" +
 	"\tAddMember\x12&.beehive.conversation.AddMemberRequest\x1a'.beehive.conversation.AddMemberResponse\x12e\n" +
 	"\fRemoveMember\x12).beehive.conversation.RemoveMemberRequest\x1a*.beehive.conversation.RemoveMemberResponse\x12\x80\x01\n" +
 	"\x15ListUserConversations\x122.beehive.conversation.ListUserConversationsRequest\x1a3.beehive.conversation.ListUserConversationsResponse\x12n\n" +
 	"\x0fGetConversation\x12,.beehive.conversation.GetConversationRequest\x1a-.beehive.conversation.GetConversationResponse\x12b\n" +
-	"\vListMembers\x12(.beehive.conversation.ListMembersRequest\x1a).beehive.conversation.ListMembersResponseB\x1cZ\x1a./services/conversation/pbb\x06proto3"
+	"\vListMembers\x12(.beehive.conversation.ListMembersRequest\x1a).beehive.conversation.ListMembersResponse\x12\x9b\x01\n" +
+	"\x1eFindOrCreateSingleConversation\x12;.beehive.conversation.FindOrCreateSingleConversationRequest\x1a<.beehive.conversation.FindOrCreateSingleConversationResponseB<Z:github.com/HappyLadySauce/Beehive/services/conversation/pbb\x06proto3"
 
 var (
 	file_proto_conversation_proto_rawDescOnce sync.Once
@@ -820,22 +922,24 @@ func file_proto_conversation_proto_rawDescGZIP() []byte {
 	return file_proto_conversation_proto_rawDescData
 }
 
-var file_proto_conversation_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_proto_conversation_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_proto_conversation_proto_goTypes = []any{
-	(*CreateConversationRequest)(nil),     // 0: beehive.conversation.CreateConversationRequest
-	(*CreateConversationResponse)(nil),    // 1: beehive.conversation.CreateConversationResponse
-	(*AddMemberRequest)(nil),              // 2: beehive.conversation.AddMemberRequest
-	(*AddMemberResponse)(nil),             // 3: beehive.conversation.AddMemberResponse
-	(*RemoveMemberRequest)(nil),           // 4: beehive.conversation.RemoveMemberRequest
-	(*RemoveMemberResponse)(nil),          // 5: beehive.conversation.RemoveMemberResponse
-	(*ConversationInfo)(nil),              // 6: beehive.conversation.ConversationInfo
-	(*ListUserConversationsRequest)(nil),  // 7: beehive.conversation.ListUserConversationsRequest
-	(*ListUserConversationsResponse)(nil), // 8: beehive.conversation.ListUserConversationsResponse
-	(*GetConversationRequest)(nil),        // 9: beehive.conversation.GetConversationRequest
-	(*GetConversationResponse)(nil),       // 10: beehive.conversation.GetConversationResponse
-	(*ListMembersRequest)(nil),            // 11: beehive.conversation.ListMembersRequest
-	(*MemberInfo)(nil),                    // 12: beehive.conversation.MemberInfo
-	(*ListMembersResponse)(nil),           // 13: beehive.conversation.ListMembersResponse
+	(*CreateConversationRequest)(nil),              // 0: beehive.conversation.CreateConversationRequest
+	(*CreateConversationResponse)(nil),             // 1: beehive.conversation.CreateConversationResponse
+	(*AddMemberRequest)(nil),                       // 2: beehive.conversation.AddMemberRequest
+	(*AddMemberResponse)(nil),                      // 3: beehive.conversation.AddMemberResponse
+	(*RemoveMemberRequest)(nil),                    // 4: beehive.conversation.RemoveMemberRequest
+	(*RemoveMemberResponse)(nil),                   // 5: beehive.conversation.RemoveMemberResponse
+	(*ConversationInfo)(nil),                       // 6: beehive.conversation.ConversationInfo
+	(*ListUserConversationsRequest)(nil),           // 7: beehive.conversation.ListUserConversationsRequest
+	(*ListUserConversationsResponse)(nil),          // 8: beehive.conversation.ListUserConversationsResponse
+	(*GetConversationRequest)(nil),                 // 9: beehive.conversation.GetConversationRequest
+	(*GetConversationResponse)(nil),                // 10: beehive.conversation.GetConversationResponse
+	(*ListMembersRequest)(nil),                     // 11: beehive.conversation.ListMembersRequest
+	(*MemberInfo)(nil),                             // 12: beehive.conversation.MemberInfo
+	(*ListMembersResponse)(nil),                    // 13: beehive.conversation.ListMembersResponse
+	(*FindOrCreateSingleConversationRequest)(nil),  // 14: beehive.conversation.FindOrCreateSingleConversationRequest
+	(*FindOrCreateSingleConversationResponse)(nil), // 15: beehive.conversation.FindOrCreateSingleConversationResponse
 }
 var file_proto_conversation_proto_depIdxs = []int32{
 	6,  // 0: beehive.conversation.ListUserConversationsResponse.items:type_name -> beehive.conversation.ConversationInfo
@@ -847,14 +951,16 @@ var file_proto_conversation_proto_depIdxs = []int32{
 	7,  // 6: beehive.conversation.ConversationService.ListUserConversations:input_type -> beehive.conversation.ListUserConversationsRequest
 	9,  // 7: beehive.conversation.ConversationService.GetConversation:input_type -> beehive.conversation.GetConversationRequest
 	11, // 8: beehive.conversation.ConversationService.ListMembers:input_type -> beehive.conversation.ListMembersRequest
-	1,  // 9: beehive.conversation.ConversationService.CreateConversation:output_type -> beehive.conversation.CreateConversationResponse
-	3,  // 10: beehive.conversation.ConversationService.AddMember:output_type -> beehive.conversation.AddMemberResponse
-	5,  // 11: beehive.conversation.ConversationService.RemoveMember:output_type -> beehive.conversation.RemoveMemberResponse
-	8,  // 12: beehive.conversation.ConversationService.ListUserConversations:output_type -> beehive.conversation.ListUserConversationsResponse
-	10, // 13: beehive.conversation.ConversationService.GetConversation:output_type -> beehive.conversation.GetConversationResponse
-	13, // 14: beehive.conversation.ConversationService.ListMembers:output_type -> beehive.conversation.ListMembersResponse
-	9,  // [9:15] is the sub-list for method output_type
-	3,  // [3:9] is the sub-list for method input_type
+	14, // 9: beehive.conversation.ConversationService.FindOrCreateSingleConversation:input_type -> beehive.conversation.FindOrCreateSingleConversationRequest
+	1,  // 10: beehive.conversation.ConversationService.CreateConversation:output_type -> beehive.conversation.CreateConversationResponse
+	3,  // 11: beehive.conversation.ConversationService.AddMember:output_type -> beehive.conversation.AddMemberResponse
+	5,  // 12: beehive.conversation.ConversationService.RemoveMember:output_type -> beehive.conversation.RemoveMemberResponse
+	8,  // 13: beehive.conversation.ConversationService.ListUserConversations:output_type -> beehive.conversation.ListUserConversationsResponse
+	10, // 14: beehive.conversation.ConversationService.GetConversation:output_type -> beehive.conversation.GetConversationResponse
+	13, // 15: beehive.conversation.ConversationService.ListMembers:output_type -> beehive.conversation.ListMembersResponse
+	15, // 16: beehive.conversation.ConversationService.FindOrCreateSingleConversation:output_type -> beehive.conversation.FindOrCreateSingleConversationResponse
+	10, // [10:17] is the sub-list for method output_type
+	3,  // [3:10] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name
@@ -871,7 +977,7 @@ func file_proto_conversation_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_conversation_proto_rawDesc), len(file_proto_conversation_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

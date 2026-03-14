@@ -48,7 +48,7 @@ areas:
         notes: "Gateway 内 internal/push/consumer.go 消费 message.created，ListMembers + GetOnlineSessions，仅向本实例 session 经 Hub 推送 message.push；配置 RabbitMQURL/Exchange/Queue/RouteKey，多实例各队列绑定同一 exchange（设计参考 docs/backend/gateway-design.md 4.2）"
       - id: conversation-ws-create-member
         title: Gateway 暴露 conversation.create / addMember / removeMember
-        status: pending
+        status: done
         service: gateway
         owner: ""
         tags: [gateway, conversation, rpc]
@@ -98,18 +98,18 @@ areas:
         notes: "基于 PostgreSQL（GORM）+ Redis（go-redis）实现 user_profiles 读写与缓存，提供 GetUser/BatchGetUsers/UpdateUser 能力（设计参考 docs/backend/services-design.md, docs/backend/storage-and-mq.md）"
       - id: unread-count
         title: 会话未读计数（unreadCount）
-        status: pending
+        status: done
         service: message
         owner: ""
         tags: [message, conversation, db, redis]
-        notes: "未读数据模型与存储（按用户+会话）；提供查询/已读更新能力；Gateway 在 conversation.list 聚合时填入 unreadCount（当前固定为 0）"
+        notes: "未读数据模型 conversation_read 与 MarkRead/GetUnreadCounts RPC；Gateway 在 conversation.list 聚合时填入 unreadCount"
       - id: message-read-receipt
         title: 已读回执（message.read）
-        status: pending
+        status: done
         service: message
         owner: ""
         tags: [message, gateway, rpc]
-        notes: "API 已定义 message.read / message.read.ok；后端存储已读记录并暴露 RPC 或扩展 MessageService；Gateway 处理 message.read 并返回 .ok；可选发布已读事件（见 docs/API/websocket-client-api.md 4.3）"
+        notes: "Gateway 处理 message.read 并调用 MessageService.MarkRead，返回 message.read.ok；与未读计数共用 conversation_read（见 docs/API/websocket-client-api.md 4.3）"
 
   - id: admin
     name: 管理后台服务（优先级放最后）

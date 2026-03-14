@@ -22,6 +22,8 @@ const (
 	MessageService_PostMessage_FullMethodName     = "/beehive.message.MessageService/PostMessage"
 	MessageService_GetHistory_FullMethodName      = "/beehive.message.MessageService/GetHistory"
 	MessageService_GetLastMessages_FullMethodName = "/beehive.message.MessageService/GetLastMessages"
+	MessageService_MarkRead_FullMethodName        = "/beehive.message.MessageService/MarkRead"
+	MessageService_GetUnreadCounts_FullMethodName = "/beehive.message.MessageService/GetUnreadCounts"
 )
 
 // MessageServiceClient is the client API for MessageService service.
@@ -31,6 +33,8 @@ type MessageServiceClient interface {
 	PostMessage(ctx context.Context, in *PostMessageRequest, opts ...grpc.CallOption) (*PostMessageResponse, error)
 	GetHistory(ctx context.Context, in *GetHistoryRequest, opts ...grpc.CallOption) (*GetHistoryResponse, error)
 	GetLastMessages(ctx context.Context, in *GetLastMessagesRequest, opts ...grpc.CallOption) (*GetLastMessagesResponse, error)
+	MarkRead(ctx context.Context, in *MarkReadRequest, opts ...grpc.CallOption) (*MarkReadResponse, error)
+	GetUnreadCounts(ctx context.Context, in *GetUnreadCountsRequest, opts ...grpc.CallOption) (*GetUnreadCountsResponse, error)
 }
 
 type messageServiceClient struct {
@@ -71,6 +75,26 @@ func (c *messageServiceClient) GetLastMessages(ctx context.Context, in *GetLastM
 	return out, nil
 }
 
+func (c *messageServiceClient) MarkRead(ctx context.Context, in *MarkReadRequest, opts ...grpc.CallOption) (*MarkReadResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MarkReadResponse)
+	err := c.cc.Invoke(ctx, MessageService_MarkRead_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *messageServiceClient) GetUnreadCounts(ctx context.Context, in *GetUnreadCountsRequest, opts ...grpc.CallOption) (*GetUnreadCountsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUnreadCountsResponse)
+	err := c.cc.Invoke(ctx, MessageService_GetUnreadCounts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MessageServiceServer is the server API for MessageService service.
 // All implementations must embed UnimplementedMessageServiceServer
 // for forward compatibility.
@@ -78,6 +102,8 @@ type MessageServiceServer interface {
 	PostMessage(context.Context, *PostMessageRequest) (*PostMessageResponse, error)
 	GetHistory(context.Context, *GetHistoryRequest) (*GetHistoryResponse, error)
 	GetLastMessages(context.Context, *GetLastMessagesRequest) (*GetLastMessagesResponse, error)
+	MarkRead(context.Context, *MarkReadRequest) (*MarkReadResponse, error)
+	GetUnreadCounts(context.Context, *GetUnreadCountsRequest) (*GetUnreadCountsResponse, error)
 	mustEmbedUnimplementedMessageServiceServer()
 }
 
@@ -96,6 +122,12 @@ func (UnimplementedMessageServiceServer) GetHistory(context.Context, *GetHistory
 }
 func (UnimplementedMessageServiceServer) GetLastMessages(context.Context, *GetLastMessagesRequest) (*GetLastMessagesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetLastMessages not implemented")
+}
+func (UnimplementedMessageServiceServer) MarkRead(context.Context, *MarkReadRequest) (*MarkReadResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method MarkRead not implemented")
+}
+func (UnimplementedMessageServiceServer) GetUnreadCounts(context.Context, *GetUnreadCountsRequest) (*GetUnreadCountsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUnreadCounts not implemented")
 }
 func (UnimplementedMessageServiceServer) mustEmbedUnimplementedMessageServiceServer() {}
 func (UnimplementedMessageServiceServer) testEmbeddedByValue()                        {}
@@ -172,6 +204,42 @@ func _MessageService_GetLastMessages_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MessageService_MarkRead_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MarkReadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessageServiceServer).MarkRead(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MessageService_MarkRead_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessageServiceServer).MarkRead(ctx, req.(*MarkReadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MessageService_GetUnreadCounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUnreadCountsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessageServiceServer).GetUnreadCounts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MessageService_GetUnreadCounts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessageServiceServer).GetUnreadCounts(ctx, req.(*GetUnreadCountsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MessageService_ServiceDesc is the grpc.ServiceDesc for MessageService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +258,14 @@ var MessageService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetLastMessages",
 			Handler:    _MessageService_GetLastMessages_Handler,
+		},
+		{
+			MethodName: "MarkRead",
+			Handler:    _MessageService_MarkRead_Handler,
+		},
+		{
+			MethodName: "GetUnreadCounts",
+			Handler:    _MessageService_GetUnreadCounts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

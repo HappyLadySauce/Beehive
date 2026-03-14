@@ -36,6 +36,26 @@ func (m *MessageModel) Create(msg *Message) error {
 	return m.db.Create(msg).Error
 }
 
+// GetByServerMsgID 根据会话与 server_msg_id 查一条消息（用于已读回执解析 server_time）
+func (m *MessageModel) GetByServerMsgID(conversationID, serverMsgID string) (*Message, error) {
+	var msg Message
+	err := m.db.Where("conversation_id = ? AND server_msg_id = ?", conversationID, serverMsgID).First(&msg).Error
+	if err != nil {
+		return nil, err
+	}
+	return &msg, nil
+}
+
+// CountUnread 统计某会话中对某用户未读的消息数：server_time > lastReadTime 且 (to_user_id = userID 或 (to_user_id 为空且 from_user_id != userID))
+func (m *MessageModel) CountUnread(conversationID, userID string, lastReadTime int64) (int64, error) {
+	var n int64
+	err := m.db.Model(&Message{}).Where(
+		"conversation_id = ? AND server_time > ? AND (to_user_id = ? OR ((to_user_id = '' OR to_user_id IS NULL) AND from_user_id != ?))",
+		conversationID, lastReadTime, userID, userID,
+	).Count(&n).Error
+	return n, err
+}
+
 func (m *MessageModel) GetHistory(conversationID string, beforeTime int64, limit int) ([]*Message, error) {
 	q := m.db.Where("conversation_id = ?", conversationID).Order("server_time DESC")
 	if beforeTime > 0 {

@@ -113,3 +113,24 @@ func (m *ConversationModel) ListMembers(conversationID string) ([]*ConversationM
 	err := m.db.Where("conversation_id = ?", conversationID).Order("joined_at ASC").Find(&list).Error
 	return list, err
 }
+
+// FindSingleByTwoUsers 查找 type=single 且仅含 userID1、userID2 两名 active 成员的会话，若不存在返回 nil
+func (m *ConversationModel) FindSingleByTwoUsers(userID1, userID2 string) (*Conversation, error) {
+	var c Conversation
+	err := m.db.Table("conversations").
+		Joins("INNER JOIN conversation_members m1 ON m1.conversation_id = conversations.id AND m1.user_id = ? AND m1.status = ?", userID1, "active").
+		Joins("INNER JOIN conversation_members m2 ON m2.conversation_id = conversations.id AND m2.user_id = ? AND m2.status = ?", userID2, "active").
+		Where("conversations.type = ?", "single").
+		First(&c).Error
+	if err != nil {
+		return nil, err
+	}
+	n, err := m.CountMembers(c.ID)
+	if err != nil {
+		return nil, err
+	}
+	if n != 2 {
+		return nil, gorm.ErrRecordNotFound
+	}
+	return &c, nil
+}

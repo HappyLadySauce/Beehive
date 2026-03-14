@@ -80,10 +80,18 @@ func (l *WsEntryLogic) dispatch(c *ws.Connection, env *ws.Envelope) {
 		l.handleUserMe(c, env)
 	case "conversation.list":
 		l.handleConversationList(c, env)
+	case "conversation.create":
+		l.handleConversationCreate(c, env)
+	case "conversation.addMember":
+		l.handleConversationAddMember(c, env)
+	case "conversation.removeMember":
+		l.handleConversationRemoveMember(c, env)
 	case "message.send":
 		l.handleMessageSend(c, env)
 	case "message.history":
 		l.handleMessageHistory(c, env)
+	case "message.read":
+		l.handleMessageRead(c, env)
 	default:
 		l.sendError(c, env.Tid, "bad_request", "unknown type: "+env.Type)
 	}
@@ -323,20 +331,31 @@ func (l *WsEntryLogic) handleConversationList(c *ws.Connection, env *ws.Envelope
 		convIDs = append(convIDs, item.Id)
 	}
 	var lastMessages map[string]*messageservice.MessageRecord
+	var unreadCounts map[string]int32
 	if l.svcCtx.MessageSvc != nil && len(convIDs) > 0 {
 		lastResp, _ := l.svcCtx.MessageSvc.GetLastMessages(l.ctx, &messageservice.GetLastMessagesRequest{ConversationIds: convIDs})
 		if lastResp != nil {
 			lastMessages = lastResp.LastMessages
 		}
+		unreadResp, _ := l.svcCtx.MessageSvc.GetUnreadCounts(l.ctx, &messageservice.GetUnreadCountsRequest{UserId: c.UserID, ConversationIds: convIDs})
+		if unreadResp != nil && unreadResp.Counts != nil {
+			unreadCounts = unreadResp.Counts
+		}
 	}
 	items := make([]map[string]any, 0, len(resp.Items))
 	for _, item := range resp.Items {
+		unread := int(0)
+		if unreadCounts != nil {
+			if n, ok := unreadCounts[item.Id]; ok {
+				unread = int(n)
+			}
+		}
 		entry := map[string]any{
 			"id":            item.Id,
 			"name":          item.Name,
 			"avatar":        "",
 			"type":          item.Type,
-			"unreadCount":   0,
+			"unreadCount":   unread,
 			"lastActiveAt":  item.LastActiveAt,
 		}
 		if lastMessages != nil {
@@ -366,10 +385,162 @@ func (l *WsEntryLogic) handleConversationList(c *ws.Connection, env *ws.Envelope
 	})
 }
 
+func (l *WsEntryLogic) handleConversationCreate(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.ConversationSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "conversation service not configured")
+		return
+	}
+	var payload struct {
+		Type      string   `json:"type"`
+		Name      string   `json:"name"`
+		MemberIds []string `json:"memberIds"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	resp, err := l.svcCtx.ConversationSvc.CreateConversation(l.ctx, &conversationservice.CreateConversationRequest{
+		Type:      payload.Type,
+		Name:      payload.Name,
+		MemberIds: payload.MemberIds,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.InvalidArgument:
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			case codes.AlreadyExists:
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			}
+		}
+		l.Errorf("create conversation failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "conversation.create.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{"conversationId": resp.ConversationId},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleConversationAddMember(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.ConversationSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "conversation service not configured")
+		return
+	}
+	var payload struct {
+		ConversationId string `json:"conversationId"`
+		UserId         string `json:"userId"`
+		Role           string `json:"role"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ConversationId == "" || payload.UserId == "" {
+		l.sendError(c, env.Tid, "bad_request", "conversationId and userId are required")
+		return
+	}
+	if payload.Role == "" {
+		payload.Role = "member"
+	}
+	_, err := l.svcCtx.ConversationSvc.AddMember(l.ctx, &conversationservice.AddMemberRequest{
+		ConversationId: payload.ConversationId,
+		UserId:         payload.UserId,
+		Role:           payload.Role,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.InvalidArgument:
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			case codes.NotFound:
+				l.sendError(c, env.Tid, "not_found", s.Message())
+				return
+			case codes.AlreadyExists:
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			}
+		}
+		l.Errorf("add member failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "conversation.addMember.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleConversationRemoveMember(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.ConversationSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "conversation service not configured")
+		return
+	}
+	var payload struct {
+		ConversationId string `json:"conversationId"`
+		UserId         string `json:"userId"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ConversationId == "" || payload.UserId == "" {
+		l.sendError(c, env.Tid, "bad_request", "conversationId and userId are required")
+		return
+	}
+	_, err := l.svcCtx.ConversationSvc.RemoveMember(l.ctx, &conversationservice.RemoveMemberRequest{
+		ConversationId: payload.ConversationId,
+		UserId:         payload.UserId,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.InvalidArgument:
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			case codes.NotFound:
+				l.sendError(c, env.Tid, "not_found", s.Message())
+				return
+			}
+		}
+		l.Errorf("remove member failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "conversation.removeMember.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{},
+		Error:   nil,
+	})
+}
+
 func (l *WsEntryLogic) handleMessageSend(c *ws.Connection, env *ws.Envelope) {
 	if l.svcCtx.MessageSvc == nil {
 		l.sendError(c, env.Tid, "unavailable", "message service not configured")
 		return
+	}
+	if l.svcCtx.MessageSendLimit != nil {
+		allow, err := l.svcCtx.MessageSendLimit.Allow(l.ctx, c.UserID)
+		if err != nil {
+			l.Errorf("rate limit check failed: %v", err)
+			l.sendError(c, env.Tid, "internal_error", "rate limit check failed")
+			return
+		}
+		if !allow {
+			_ = c.WriteJSON(&ws.Envelope{
+				Type:    "message.send.error",
+				Tid:     env.Tid,
+				Payload: nil,
+				Error:   &ws.ErrBody{Code: "rate_limited", Message: "too many requests"},
+			})
+			return
+		}
 	}
 	var payload struct {
 		ClientMsgId     string `json:"clientMsgId"`
@@ -383,16 +554,37 @@ func (l *WsEntryLogic) handleMessageSend(c *ws.Connection, env *ws.Envelope) {
 	if !l.bindJSONPayload(c, env, &payload) {
 		return
 	}
-	if payload.ConversationId == "" {
-		l.sendError(c, env.Tid, "bad_request", "conversationId is required")
-		return
+	conversationId := payload.ConversationId
+	if conversationId == "" {
+		if payload.ToUserId == "" {
+			l.sendError(c, env.Tid, "bad_request", "conversationId or toUserId is required")
+			return
+		}
+		if l.svcCtx.ConversationSvc == nil {
+			l.sendError(c, env.Tid, "unavailable", "conversation service not configured for single chat")
+			return
+		}
+		findResp, err := l.svcCtx.ConversationSvc.FindOrCreateSingleConversation(l.ctx, &conversationservice.FindOrCreateSingleConversationRequest{
+			UserId_1: c.UserID,
+			UserId_2: payload.ToUserId,
+		})
+		if err != nil {
+			if s, ok := status.FromError(err); ok && s.Code() == codes.InvalidArgument {
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			}
+			l.Errorf("find or create single conversation failed: %v", err)
+			l.sendError(c, env.Tid, "internal_error", err.Error())
+			return
+		}
+		conversationId = findResp.ConversationId
 	}
 	if payload.Body.Type == "" {
 		payload.Body.Type = "text"
 	}
 	resp, err := l.svcCtx.MessageSvc.PostMessage(l.ctx, &messageservice.PostMessageRequest{
 		ClientMsgId:     payload.ClientMsgId,
-		ConversationId:  payload.ConversationId,
+		ConversationId:  conversationId,
 		FromUserId:     c.UserID,
 		ToUserId:       payload.ToUserId,
 		Body:           &messageservice.MessageBody{Type: payload.Body.Type, Text: payload.Body.Text},
@@ -482,6 +674,50 @@ func (l *WsEntryLogic) handleMessageHistory(c *ws.Connection, env *ws.Envelope) 
 		Type:    "message.history.ok",
 		Tid:     env.Tid,
 		Payload: map[string]any{"items": items, "hasMore": resp.HasMore},
+		Error:   nil,
+	})
+}
+
+func (l *WsEntryLogic) handleMessageRead(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.MessageSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "message service not configured")
+		return
+	}
+	var payload struct {
+		ConversationId string `json:"conversationId"`
+		ServerMsgId    string `json:"serverMsgId"`
+	}
+	if !l.bindJSONPayload(c, env, &payload) {
+		return
+	}
+	if payload.ConversationId == "" || payload.ServerMsgId == "" {
+		l.sendError(c, env.Tid, "bad_request", "conversationId and serverMsgId are required")
+		return
+	}
+	_, err := l.svcCtx.MessageSvc.MarkRead(l.ctx, &messageservice.MarkReadRequest{
+		UserId:         c.UserID,
+		ConversationId:  payload.ConversationId,
+		ServerMsgId:     payload.ServerMsgId,
+	})
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.InvalidArgument:
+				l.sendError(c, env.Tid, "bad_request", s.Message())
+				return
+			case codes.NotFound:
+				l.sendError(c, env.Tid, "not_found", s.Message())
+				return
+			}
+		}
+		l.Errorf("mark read failed: %v", err)
+		l.sendError(c, env.Tid, "internal_error", err.Error())
+		return
+	}
+	_ = c.WriteJSON(&ws.Envelope{
+		Type:    "message.read.ok",
+		Tid:     env.Tid,
+		Payload: map[string]any{},
 		Error:   nil,
 	})
 }

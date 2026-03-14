@@ -493,6 +493,198 @@ func (x *GetLastMessagesResponse) GetLastMessages() map[string]*MessageRecord {
 	return nil
 }
 
+type MarkReadRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	UserId         string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ConversationId string                 `protobuf:"bytes,2,opt,name=conversation_id,json=conversationId,proto3" json:"conversation_id,omitempty"`
+	ServerMsgId    string                 `protobuf:"bytes,3,opt,name=server_msg_id,json=serverMsgId,proto3" json:"server_msg_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *MarkReadRequest) Reset() {
+	*x = MarkReadRequest{}
+	mi := &file_proto_message_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkReadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkReadRequest) ProtoMessage() {}
+
+func (x *MarkReadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_message_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkReadRequest.ProtoReflect.Descriptor instead.
+func (*MarkReadRequest) Descriptor() ([]byte, []int) {
+	return file_proto_message_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *MarkReadRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *MarkReadRequest) GetConversationId() string {
+	if x != nil {
+		return x.ConversationId
+	}
+	return ""
+}
+
+func (x *MarkReadRequest) GetServerMsgId() string {
+	if x != nil {
+		return x.ServerMsgId
+	}
+	return ""
+}
+
+type MarkReadResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MarkReadResponse) Reset() {
+	*x = MarkReadResponse{}
+	mi := &file_proto_message_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkReadResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkReadResponse) ProtoMessage() {}
+
+func (x *MarkReadResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_message_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkReadResponse.ProtoReflect.Descriptor instead.
+func (*MarkReadResponse) Descriptor() ([]byte, []int) {
+	return file_proto_message_proto_rawDescGZIP(), []int{9}
+}
+
+type GetUnreadCountsRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	UserId          string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ConversationIds []string               `protobuf:"bytes,2,rep,name=conversation_ids,json=conversationIds,proto3" json:"conversation_ids,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GetUnreadCountsRequest) Reset() {
+	*x = GetUnreadCountsRequest{}
+	mi := &file_proto_message_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUnreadCountsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUnreadCountsRequest) ProtoMessage() {}
+
+func (x *GetUnreadCountsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_message_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUnreadCountsRequest.ProtoReflect.Descriptor instead.
+func (*GetUnreadCountsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_message_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetUnreadCountsRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetUnreadCountsRequest) GetConversationIds() []string {
+	if x != nil {
+		return x.ConversationIds
+	}
+	return nil
+}
+
+type GetUnreadCountsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Counts        map[string]int32       `protobuf:"bytes,1,rep,name=counts,proto3" json:"counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUnreadCountsResponse) Reset() {
+	*x = GetUnreadCountsResponse{}
+	mi := &file_proto_message_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUnreadCountsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUnreadCountsResponse) ProtoMessage() {}
+
+func (x *GetUnreadCountsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_message_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUnreadCountsResponse.ProtoReflect.Descriptor instead.
+func (*GetUnreadCountsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_message_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetUnreadCountsResponse) GetCounts() map[string]int32 {
+	if x != nil {
+		return x.Counts
+	}
+	return nil
+}
+
 var File_proto_message_proto protoreflect.FileDescriptor
 
 const file_proto_message_proto_rawDesc = "" +
@@ -538,12 +730,27 @@ const file_proto_message_proto_rawDesc = "" +
 	"\rlast_messages\x18\x01 \x03(\v2:.beehive.message.GetLastMessagesResponse.LastMessagesEntryR\flastMessages\x1a_\n" +
 	"\x11LastMessagesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x124\n" +
-	"\x05value\x18\x02 \x01(\v2\x1e.beehive.message.MessageRecordR\x05value:\x028\x012\xa7\x02\n" +
+	"\x05value\x18\x02 \x01(\v2\x1e.beehive.message.MessageRecordR\x05value:\x028\x01\"w\n" +
+	"\x0fMarkReadRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12'\n" +
+	"\x0fconversation_id\x18\x02 \x01(\tR\x0econversationId\x12\"\n" +
+	"\rserver_msg_id\x18\x03 \x01(\tR\vserverMsgId\"\x12\n" +
+	"\x10MarkReadResponse\"\\\n" +
+	"\x16GetUnreadCountsRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12)\n" +
+	"\x10conversation_ids\x18\x02 \x03(\tR\x0fconversationIds\"\xa2\x01\n" +
+	"\x17GetUnreadCountsResponse\x12L\n" +
+	"\x06counts\x18\x01 \x03(\v24.beehive.message.GetUnreadCountsResponse.CountsEntryR\x06counts\x1a9\n" +
+	"\vCountsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x012\xde\x03\n" +
 	"\x0eMessageService\x12X\n" +
 	"\vPostMessage\x12#.beehive.message.PostMessageRequest\x1a$.beehive.message.PostMessageResponse\x12U\n" +
 	"\n" +
 	"GetHistory\x12\".beehive.message.GetHistoryRequest\x1a#.beehive.message.GetHistoryResponse\x12d\n" +
-	"\x0fGetLastMessages\x12'.beehive.message.GetLastMessagesRequest\x1a(.beehive.message.GetLastMessagesResponseB\x17Z\x15./services/message/pbb\x06proto3"
+	"\x0fGetLastMessages\x12'.beehive.message.GetLastMessagesRequest\x1a(.beehive.message.GetLastMessagesResponse\x12O\n" +
+	"\bMarkRead\x12 .beehive.message.MarkReadRequest\x1a!.beehive.message.MarkReadResponse\x12d\n" +
+	"\x0fGetUnreadCounts\x12'.beehive.message.GetUnreadCountsRequest\x1a(.beehive.message.GetUnreadCountsResponseB7Z5github.com/HappyLadySauce/Beehive/services/message/pbb\x06proto3"
 
 var (
 	file_proto_message_proto_rawDescOnce sync.Once
@@ -557,7 +764,7 @@ func file_proto_message_proto_rawDescGZIP() []byte {
 	return file_proto_message_proto_rawDescData
 }
 
-var file_proto_message_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_proto_message_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_proto_message_proto_goTypes = []any{
 	(*MessageBody)(nil),             // 0: beehive.message.MessageBody
 	(*PostMessageRequest)(nil),      // 1: beehive.message.PostMessageRequest
@@ -567,25 +774,35 @@ var file_proto_message_proto_goTypes = []any{
 	(*GetHistoryResponse)(nil),      // 5: beehive.message.GetHistoryResponse
 	(*GetLastMessagesRequest)(nil),  // 6: beehive.message.GetLastMessagesRequest
 	(*GetLastMessagesResponse)(nil), // 7: beehive.message.GetLastMessagesResponse
-	nil,                             // 8: beehive.message.GetLastMessagesResponse.LastMessagesEntry
+	(*MarkReadRequest)(nil),         // 8: beehive.message.MarkReadRequest
+	(*MarkReadResponse)(nil),        // 9: beehive.message.MarkReadResponse
+	(*GetUnreadCountsRequest)(nil),  // 10: beehive.message.GetUnreadCountsRequest
+	(*GetUnreadCountsResponse)(nil), // 11: beehive.message.GetUnreadCountsResponse
+	nil,                             // 12: beehive.message.GetLastMessagesResponse.LastMessagesEntry
+	nil,                             // 13: beehive.message.GetUnreadCountsResponse.CountsEntry
 }
 var file_proto_message_proto_depIdxs = []int32{
-	0, // 0: beehive.message.PostMessageRequest.body:type_name -> beehive.message.MessageBody
-	0, // 1: beehive.message.MessageRecord.body:type_name -> beehive.message.MessageBody
-	4, // 2: beehive.message.GetHistoryResponse.items:type_name -> beehive.message.MessageRecord
-	8, // 3: beehive.message.GetLastMessagesResponse.last_messages:type_name -> beehive.message.GetLastMessagesResponse.LastMessagesEntry
-	4, // 4: beehive.message.GetLastMessagesResponse.LastMessagesEntry.value:type_name -> beehive.message.MessageRecord
-	1, // 5: beehive.message.MessageService.PostMessage:input_type -> beehive.message.PostMessageRequest
-	3, // 6: beehive.message.MessageService.GetHistory:input_type -> beehive.message.GetHistoryRequest
-	6, // 7: beehive.message.MessageService.GetLastMessages:input_type -> beehive.message.GetLastMessagesRequest
-	2, // 8: beehive.message.MessageService.PostMessage:output_type -> beehive.message.PostMessageResponse
-	5, // 9: beehive.message.MessageService.GetHistory:output_type -> beehive.message.GetHistoryResponse
-	7, // 10: beehive.message.MessageService.GetLastMessages:output_type -> beehive.message.GetLastMessagesResponse
-	8, // [8:11] is the sub-list for method output_type
-	5, // [5:8] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	0,  // 0: beehive.message.PostMessageRequest.body:type_name -> beehive.message.MessageBody
+	0,  // 1: beehive.message.MessageRecord.body:type_name -> beehive.message.MessageBody
+	4,  // 2: beehive.message.GetHistoryResponse.items:type_name -> beehive.message.MessageRecord
+	12, // 3: beehive.message.GetLastMessagesResponse.last_messages:type_name -> beehive.message.GetLastMessagesResponse.LastMessagesEntry
+	13, // 4: beehive.message.GetUnreadCountsResponse.counts:type_name -> beehive.message.GetUnreadCountsResponse.CountsEntry
+	4,  // 5: beehive.message.GetLastMessagesResponse.LastMessagesEntry.value:type_name -> beehive.message.MessageRecord
+	1,  // 6: beehive.message.MessageService.PostMessage:input_type -> beehive.message.PostMessageRequest
+	3,  // 7: beehive.message.MessageService.GetHistory:input_type -> beehive.message.GetHistoryRequest
+	6,  // 8: beehive.message.MessageService.GetLastMessages:input_type -> beehive.message.GetLastMessagesRequest
+	8,  // 9: beehive.message.MessageService.MarkRead:input_type -> beehive.message.MarkReadRequest
+	10, // 10: beehive.message.MessageService.GetUnreadCounts:input_type -> beehive.message.GetUnreadCountsRequest
+	2,  // 11: beehive.message.MessageService.PostMessage:output_type -> beehive.message.PostMessageResponse
+	5,  // 12: beehive.message.MessageService.GetHistory:output_type -> beehive.message.GetHistoryResponse
+	7,  // 13: beehive.message.MessageService.GetLastMessages:output_type -> beehive.message.GetLastMessagesResponse
+	9,  // 14: beehive.message.MessageService.MarkRead:output_type -> beehive.message.MarkReadResponse
+	11, // 15: beehive.message.MessageService.GetUnreadCounts:output_type -> beehive.message.GetUnreadCountsResponse
+	11, // [11:16] is the sub-list for method output_type
+	6,  // [6:11] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_proto_message_proto_init() }
@@ -599,7 +816,7 @@ func file_proto_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_message_proto_rawDesc), len(file_proto_message_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

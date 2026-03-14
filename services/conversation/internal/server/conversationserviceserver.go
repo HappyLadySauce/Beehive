@@ -52,3 +52,8 @@ func (s *ConversationServiceServer) ListMembers(ctx context.Context, in *pb.List
 	l := logic.NewListMembersLogic(ctx, s.svcCtx)
 	return l.ListMembers(in)
 }
+
+func (s *ConversationServiceServer) FindOrCreateSingleConversation(ctx context.Context, in *pb.FindOrCreateSingleConversationRequest) (*pb.FindOrCreateSingleConversationResponse, error) {
+	l := logic.NewFindOrCreateSingleConversationLogic(ctx, s.svcCtx)
+	return l.FindOrCreateSingleConversation(in)
+}

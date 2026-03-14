@@ -8,10 +8,12 @@ import (
 	"github.com/HappyLadySauce/Beehive/services/conversation/conversationservice"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/config"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/push"
+	"github.com/HappyLadySauce/Beehive/services/gateway/internal/ratelimit"
 	"github.com/HappyLadySauce/Beehive/services/gateway/internal/ws"
 	"github.com/HappyLadySauce/Beehive/services/message/messageservice"
 	"github.com/HappyLadySauce/Beehive/services/presence/presenceservice"
 	"github.com/HappyLadySauce/Beehive/services/user/userservice"
+	"github.com/redis/go-redis/v9"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
@@ -25,6 +27,7 @@ type ServiceContext struct {
 	ConversationSvc  conversationservice.ConversationService  // 可选，未配置时为 nil
 	MessageSvc       messageservice.MessageService             // 可选，未配置时为 nil
 	PushConsumer     *push.Consumer                             // 可选，未配置 RabbitMQ 时为 nil
+	MessageSendLimit *ratelimit.MessageSendLimiter              // 可选，未配置 Redis/限流时为 nil
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -62,6 +65,14 @@ func NewServiceContext(c config.Config) *ServiceContext {
 			panic("push consumer: " + err.Error())
 		}
 		ctx.PushConsumer = consumer
+	}
+	if c.RateLimitConfigured() {
+		rdb := redis.NewClient(&redis.Options{
+			Addr:     c.RedisAddr,
+			Password: c.RedisPassword,
+			DB:       c.RedisDB,
+		})
+		ctx.MessageSendLimit = ratelimit.NewMessageSendLimiter(rdb, c.RateLimitMessageSendPerMinute)
 	}
 	return ctx
 }

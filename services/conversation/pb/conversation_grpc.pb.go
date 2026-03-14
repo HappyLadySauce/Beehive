@@ -19,12 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ConversationService_CreateConversation_FullMethodName    = "/beehive.conversation.ConversationService/CreateConversation"
-	ConversationService_AddMember_FullMethodName             = "/beehive.conversation.ConversationService/AddMember"
-	ConversationService_RemoveMember_FullMethodName          = "/beehive.conversation.ConversationService/RemoveMember"
-	ConversationService_ListUserConversations_FullMethodName = "/beehive.conversation.ConversationService/ListUserConversations"
-	ConversationService_GetConversation_FullMethodName       = "/beehive.conversation.ConversationService/GetConversation"
-	ConversationService_ListMembers_FullMethodName           = "/beehive.conversation.ConversationService/ListMembers"
+	ConversationService_CreateConversation_FullMethodName             = "/beehive.conversation.ConversationService/CreateConversation"
+	ConversationService_AddMember_FullMethodName                      = "/beehive.conversation.ConversationService/AddMember"
+	ConversationService_RemoveMember_FullMethodName                   = "/beehive.conversation.ConversationService/RemoveMember"
+	ConversationService_ListUserConversations_FullMethodName          = "/beehive.conversation.ConversationService/ListUserConversations"
+	ConversationService_GetConversation_FullMethodName                = "/beehive.conversation.ConversationService/GetConversation"
+	ConversationService_ListMembers_FullMethodName                    = "/beehive.conversation.ConversationService/ListMembers"
+	ConversationService_FindOrCreateSingleConversation_FullMethodName = "/beehive.conversation.ConversationService/FindOrCreateSingleConversation"
 )
 
 // ConversationServiceClient is the client API for ConversationService service.
@@ -37,6 +38,8 @@ type ConversationServiceClient interface {
 	ListUserConversations(ctx context.Context, in *ListUserConversationsRequest, opts ...grpc.CallOption) (*ListUserConversationsResponse, error)
 	GetConversation(ctx context.Context, in *GetConversationRequest, opts ...grpc.CallOption) (*GetConversationResponse, error)
 	ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersResponse, error)
+	// FindOrCreateSingleConversation 查找或创建两人单聊会话，返回 conversation_id
+	FindOrCreateSingleConversation(ctx context.Context, in *FindOrCreateSingleConversationRequest, opts ...grpc.CallOption) (*FindOrCreateSingleConversationResponse, error)
 }
 
 type conversationServiceClient struct {
@@ -107,6 +110,16 @@ func (c *conversationServiceClient) ListMembers(ctx context.Context, in *ListMem
 	return out, nil
 }
 
+func (c *conversationServiceClient) FindOrCreateSingleConversation(ctx context.Context, in *FindOrCreateSingleConversationRequest, opts ...grpc.CallOption) (*FindOrCreateSingleConversationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FindOrCreateSingleConversationResponse)
+	err := c.cc.Invoke(ctx, ConversationService_FindOrCreateSingleConversation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ConversationServiceServer is the server API for ConversationService service.
 // All implementations must embed UnimplementedConversationServiceServer
 // for forward compatibility.
@@ -117,6 +130,8 @@ type ConversationServiceServer interface {
 	ListUserConversations(context.Context, *ListUserConversationsRequest) (*ListUserConversationsResponse, error)
 	GetConversation(context.Context, *GetConversationRequest) (*GetConversationResponse, error)
 	ListMembers(context.Context, *ListMembersRequest) (*ListMembersResponse, error)
+	// FindOrCreateSingleConversation 查找或创建两人单聊会话，返回 conversation_id
+	FindOrCreateSingleConversation(context.Context, *FindOrCreateSingleConversationRequest) (*FindOrCreateSingleConversationResponse, error)
 	mustEmbedUnimplementedConversationServiceServer()
 }
 
@@ -144,6 +159,9 @@ func (UnimplementedConversationServiceServer) GetConversation(context.Context, *
 }
 func (UnimplementedConversationServiceServer) ListMembers(context.Context, *ListMembersRequest) (*ListMembersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListMembers not implemented")
+}
+func (UnimplementedConversationServiceServer) FindOrCreateSingleConversation(context.Context, *FindOrCreateSingleConversationRequest) (*FindOrCreateSingleConversationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FindOrCreateSingleConversation not implemented")
 }
 func (UnimplementedConversationServiceServer) mustEmbedUnimplementedConversationServiceServer() {}
 func (UnimplementedConversationServiceServer) testEmbeddedByValue()                             {}
@@ -274,6 +292,24 @@ func _ConversationService_ListMembers_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ConversationService_FindOrCreateSingleConversation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindOrCreateSingleConversationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServiceServer).FindOrCreateSingleConversation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ConversationService_FindOrCreateSingleConversation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServiceServer).FindOrCreateSingleConversation(ctx, req.(*FindOrCreateSingleConversationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ConversationService_ServiceDesc is the grpc.ServiceDesc for ConversationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +340,10 @@ var ConversationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListMembers",
 			Handler:    _ConversationService_ListMembers_Handler,
+		},
+		{
+			MethodName: "FindOrCreateSingleConversation",
+			Handler:    _ConversationService_FindOrCreateSingleConversation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -17,17 +17,19 @@ type (
 	AddMemberRequest              = pb.AddMemberRequest
 	AddMemberResponse             = pb.AddMemberResponse
 	ConversationInfo              = pb.ConversationInfo
-	CreateConversationRequest     = pb.CreateConversationRequest
-	CreateConversationResponse    = pb.CreateConversationResponse
-	GetConversationRequest        = pb.GetConversationRequest
-	GetConversationResponse       = pb.GetConversationResponse
-	ListMembersRequest            = pb.ListMembersRequest
-	ListMembersResponse           = pb.ListMembersResponse
-	ListUserConversationsRequest  = pb.ListUserConversationsRequest
-	ListUserConversationsResponse = pb.ListUserConversationsResponse
-	MemberInfo                    = pb.MemberInfo
-	RemoveMemberRequest           = pb.RemoveMemberRequest
-	RemoveMemberResponse          = pb.RemoveMemberResponse
+	CreateConversationRequest              = pb.CreateConversationRequest
+	CreateConversationResponse             = pb.CreateConversationResponse
+	FindOrCreateSingleConversationRequest  = pb.FindOrCreateSingleConversationRequest
+	FindOrCreateSingleConversationResponse = pb.FindOrCreateSingleConversationResponse
+	GetConversationRequest                 = pb.GetConversationRequest
+	GetConversationResponse                = pb.GetConversationResponse
+	ListMembersRequest                     = pb.ListMembersRequest
+	ListMembersResponse                    = pb.ListMembersResponse
+	ListUserConversationsRequest           = pb.ListUserConversationsRequest
+	ListUserConversationsResponse          = pb.ListUserConversationsResponse
+	MemberInfo                             = pb.MemberInfo
+	RemoveMemberRequest                    = pb.RemoveMemberRequest
+	RemoveMemberResponse                   = pb.RemoveMemberResponse
 
 	ConversationService interface {
 		CreateConversation(ctx context.Context, in *CreateConversationRequest, opts ...grpc.CallOption) (*CreateConversationResponse, error)
@@ -36,6 +38,7 @@ type (
 		ListUserConversations(ctx context.Context, in *ListUserConversationsRequest, opts ...grpc.CallOption) (*ListUserConversationsResponse, error)
 		GetConversation(ctx context.Context, in *GetConversationRequest, opts ...grpc.CallOption) (*GetConversationResponse, error)
 		ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersResponse, error)
+		FindOrCreateSingleConversation(ctx context.Context, in *FindOrCreateSingleConversationRequest, opts ...grpc.CallOption) (*FindOrCreateSingleConversationResponse, error)
 	}
 
 	defaultConversationService struct {
@@ -77,4 +80,9 @@ func (m *defaultConversationService) GetConversation(ctx context.Context, in *Ge
 func (m *defaultConversationService) ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersResponse, error) {
 	client := pb.NewConversationServiceClient(m.cli.Conn())
 	return client.ListMembers(ctx, in, opts...)
+}
+
+func (m *defaultConversationService) FindOrCreateSingleConversation(ctx context.Context, in *FindOrCreateSingleConversationRequest, opts ...grpc.CallOption) (*FindOrCreateSingleConversationResponse, error) {
+	client := pb.NewConversationServiceClient(m.cli.Conn())
+	return client.FindOrCreateSingleConversation(ctx, in, opts...)
 }

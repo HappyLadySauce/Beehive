@@ -37,3 +37,13 @@ func (s *MessageServiceServer) GetLastMessages(ctx context.Context, in *pb.GetLa
 	l := logic.NewGetLastMessagesLogic(ctx, s.svcCtx)
 	return l.GetLastMessages(in)
 }
+
+func (s *MessageServiceServer) MarkRead(ctx context.Context, in *pb.MarkReadRequest) (*pb.MarkReadResponse, error) {
+	l := logic.NewMarkReadLogic(ctx, s.svcCtx)
+	return l.MarkRead(in)
+}
+
+func (s *MessageServiceServer) GetUnreadCounts(ctx context.Context, in *pb.GetUnreadCountsRequest) (*pb.GetUnreadCountsResponse, error) {
+	l := logic.NewGetUnreadCountsLogic(ctx, s.svcCtx)
+	return l.GetUnreadCounts(in)
+}

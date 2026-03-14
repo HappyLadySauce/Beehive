@@ -63,22 +63,21 @@
 ### 核心 IM 能力（优先）
 
 1. **会话创建/成员管理的 WebSocket 暴露**（见 `conversation-ws-create-member`）  
-   - 现状：ConversationService 已有 CreateConversation、AddMember、RemoveMember，Gateway 未在 WS 中暴露。  
-   - 待做：Gateway 增加 `conversation.create`、`conversation.addMember`、`conversation.removeMember` 的 type 分发与 RPC 调用，返回对应 `.ok`。
+   - **已完成**：Gateway 已增加 `conversation.create`、`conversation.addMember`、`conversation.removeMember` 的 type 分发与 RPC 调用，协议 6.2 已补充请求/响应 JSON。
 
 2. **会话列表未读计数 `unreadCount`**  
-   - 现状：`conversation.list.ok` 的 items 中 `unreadCount` 固定为 0。  
-   - 待做：未读数据模型（按用户+会话存储）、Message 或独立服务提供「未读查询/已读更新」能力，Gateway 聚合时填入 `unreadCount`。
+   - **已完成**：Message 服务新增 `conversation_read` 表与 MarkRead/GetUnreadCounts RPC；Gateway 在 `conversation.list` 聚合时调用 GetUnreadCounts 填入各 item 的 `unreadCount`。
 
 3. **已读回执 `message.read`**（见 `message-read-receipt`）  
-   - 现状：API 已定义 `message.read` / `message.read.ok`，后端未实现。  
-   - 待做：已读记录存储与 RPC（或扩展 MessageService），Gateway 处理 `message.read` 并调用；可选发布已读事件供对端/统计使用。
+   - **已完成**：Gateway 处理 `message.read` 并调用 MessageService.MarkRead，返回 `message.read.ok`；与未读计数共用 `conversation_read` 存储。
 
 ### 体验与稳定性（随后）
 
-4. **单聊会话解析**：`message.send` 在未传 `conversationId` 仅传 `toUserId` 时，按 toUserId 查找或创建单聊会话并写入消息（当前要求必填 conversationId）。
+4. **单聊会话解析**  
+   - **已完成**：ConversationService 新增 FindOrCreateSingleConversation RPC；`message.send` 在仅传 `toUserId` 时先查/建单聊再 PostMessage。
 
-5. **限流**：Gateway 对 `message.send` 等按 userId 做 Redis 限流，触发时返回 `rate_limited`（见 `docs/API/websocket-client-api.md`）。
+5. **限流**  
+   - **已完成**：Gateway 配置 Redis 与 RateLimitMessageSendPerMinute，`handleMessageSend` 入口检查限流，超限返回 `message.send.error`（code: `rate_limited`）。
 
 ### Admin 相关（最后）
 
@@ -90,8 +89,8 @@
 
 - **优先顺序**：
   1. ~~网关与五大 RPC 基础集成~~、~~消息投递 `message.push`~~（已完成）。
-  2. **当前建议**：会话 WS 暴露（conversation.create / addMember / removeMember）→ 未读计数 → 已读回执 `message.read`。
-  3. 随后：单聊会话解析、限流、测试与部署文档。
+  2. ~~会话 WS 暴露~~、~~未读计数~~、~~已读回执 `message.read`~~、~~单聊会话解析~~、~~限流~~（已完成）。
+  3. 随后：测试与部署文档、可选已读事件发布。
   4. **最后**：Admin 权限中间件与占位接口对接。
 
 - 实现前请对照：

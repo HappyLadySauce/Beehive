@@ -94,6 +94,19 @@
 - **配置**：`etc/beehive.presence.yaml`（ListenOn、Etcd 注册 Key: `beehive.presence.rpc`、Redis、SessionTTLSeconds）。
 - **与 Gateway**：登录成功后 Gateway 调 RegisterSession；心跳时调 RefreshSession；登出时调 UnregisterSession。
 
+### 7. Admin 服务（`services/adminapi`）
+
+| 能力 | 状态 | 说明 |
+|------|------|------|
+| **HTTP API 骨架** | ✅ | `api/admin.api` 定义，goctl 生成；BasePath `/admin`，默认端口 8888 |
+| **认证** | ✅ | Bearer Token + AuthService.ValidateToken；除 `/admin/healthz` 外均需认证 |
+| **权限** | ✅ | 按路由 CheckPermission：admin.user.read/ban、admin.conversation.read、admin.message.read、admin.config.read/write、admin.ops.use |
+| **已对接 RPC** | ✅ | GetUser、GetUserSessions、KickUser（User/Presence）；GetConversation、ListMembers、ListConversationMessages（Conversation/Message） |
+| **占位** | - | ListUsers、ListConversations、Ban/Unban、ListConfig/PutConfig、Ops 返回空或 ok，后续可对接 RPC/etcd |
+
+- **配置**：`etc/admin-api.yaml`（Host、Port、AuthRpc/UserRpc/PresenceRpc/MessageRpc/ConversationRpc，均通过 Etcd 发现）。
+- **文档**：`docs/API/admin-http-api.md`。
+
 ---
 
 ## 二、本地运行测试（敏捷验证）
@@ -149,6 +162,13 @@ cd services/conversation && go run . -f etc/beehive.conversation.yaml
 cd services/message && go run . -f etc/beehive.message.yaml
 ```
 
+若需使用 **Admin 管理后台 API**（用户/会话/消息管理等），须先启动 Auth、User、Presence、Message、Conversation（Admin 通过 etcd 发现上述 RPC）：
+
+```bash
+# 7. Admin API（依赖上述 5 个 RPC，HTTP 默认 0.0.0.0:8888）
+cd services/adminapi && go run . -f etc/admin-api.yaml
+```
+
 若需**消息实时推送 `message.push`**（对端/多端收消息）：Message 服务须配置 RabbitMQ 并发布 `message.created`；Gateway 须在 `etc/gateway-api.yaml` 中配置相同 RabbitMQ（RabbitMQURL、RabbitMQExchange: im.events、RabbitMQQueue、RabbitMQRouteKey: message.created），并已启动 Conversation、Presence，否则推送消费者不启动。
 
 ### 测试用户与角色（可选）
@@ -198,6 +218,25 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 
 4. **实时推送 `message.push`**（需 Gateway 与 Message 均配置 RabbitMQ）：当会话内其他用户（或发件人其他端）在线时，发送 `message.send` 后其连接会收到 `type: "message.push"`，payload 与 4.2 节一致（serverMsgId、conversationId、fromUserId、body、serverTime 等）。
 
+### Admin 服务验证（需已启动 Auth、User、Presence、Message、Conversation 与 Admin）
+
+1. **获取 accessToken**（供 Admin 请求头使用）  
+   用 WebSocket 连接 `ws://127.0.0.1:8080/ws`，发送 `auth.login` 获取 token：
+   ```json
+   { "type": "auth.login", "tid": "1", "payload": { "username": "testuser", "password": "password123", "deviceId": "dev-1" } }
+   ```
+   响应 `auth.login.ok` 的 `payload.accessToken` 即为 Bearer Token。
+
+2. **健康检查（无需认证）**  
+   `GET http://127.0.0.1:8888/admin/healthz` → 应返回 `code: 0`（可用于负载均衡/就绪探针）。
+
+3. **认证与权限校验**  
+   - **无 Token**：`GET http://127.0.0.1:8888/admin/users` 不带 `Authorization` → 期望 `code: 1001`（未认证）。  
+   - **有 Token 但无权限**：若当前用户未分配 `admin.user.read` 等权限，请求 `GET /admin/users`（Header: `Authorization: Bearer <accessToken>`）→ 期望 `code: 1003`（权限不足）。  
+   - **有 Token 且有权限**：为用户分配对应权限（如 RBAC 中赋予 `admin.user.read`）后，同一请求 → 进入 handler，返回业务数据（当前 ListUsers 为占位，返回空列表属预期）。
+
+4. **权限与路由**：详见 `docs/API/admin-http-api.md`。例如 `admin.user.read` 对应 GET /users、GET /users/:id、GET /users/:id/sessions；`admin.user.ban` 对应 POST /users/:id/kick、ban、unban。
+
 ---
 
 ## 三、小结
@@ -207,5 +246,6 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 - **Conversation**：CreateConversation、AddMember、RemoveMember、ListUserConversations、GetConversation、ListMembers 已实现；Gateway 支持 `conversation.list`（聚合最后一条消息）。
 - **Message**：PostMessage（写库 + 可选 RabbitMQ 事件）、GetHistory、GetLastMessages 已实现；Gateway 支持 `message.send`、`message.history`。
 - **Gateway**：已接入 Auth、Presence、User、Conversation、Message；按配置通过 etcd 发现各 RPC；未配置的 Conversation/Message 时对应 WebSocket 类型返回 unavailable。可选配置 RabbitMQ 消费后，会消费 `message.created` 并向本实例在线连接推送 `message.push`。
+- **Admin**：独立 HTTP 服务，认证（Bearer + ValidateToken）+ 按路由 CheckPermission；依赖 Auth/User/Presence/Message/Conversation RPC；用户详情/会话/踢人、会话详情/成员/消息已对接，ListUsers/ListConversations/封禁/配置等为占位。
 
-按上述顺序启动各服务，并执行全部 DB 迁移与测试用户，即可进行敏捷运行测试（含登录、会话列表、发消息、历史消息）。启用 message.push 时须在 Gateway 与 Message 中配置同一 RabbitMQ（im.events / message.created）。
+按上述顺序启动各服务，并执行全部 DB 迁移与测试用户，即可进行敏捷运行测试（含登录、会话列表、发消息、历史消息、Admin 认证与权限）。启用 message.push 时须在 Gateway 与 Message 中配置同一 RabbitMQ（im.events / message.created）。

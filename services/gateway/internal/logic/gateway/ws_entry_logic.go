@@ -97,8 +97,12 @@ func (l *WsEntryLogic) handlePresencePing(c *ws.Connection, env *ws.Envelope) {
 	})
 }
 
-// handleUserMe 获取当前登录用户资料，需已登录；调用 UserService.GetUser。
+// handleUserMe 获取当前登录用户资料，需已登录；调用 UserService.GetUser。未配置 UserService 时返回不可用。
 func (l *WsEntryLogic) handleUserMe(c *ws.Connection, env *ws.Envelope) {
+	if l.svcCtx.UserSvc == nil {
+		l.sendError(c, env.Tid, "unavailable", "user service not configured")
+		return
+	}
 	resp, err := l.svcCtx.UserSvc.GetUser(l.ctx, &userservice.GetUserRequest{Id: c.UserID})
 	if err != nil {
 		l.Errorf("get user me failed for %s: %v", c.UserID, err)

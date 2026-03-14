@@ -38,6 +38,7 @@ func (l *RegisterSessionLogic) RegisterSession(in *pb.RegisterSessionRequest) (*
 
 	userConnsKey := session.UserConnsKey(in.GetUserId())
 	sessionKey := session.SessionKey(in.GetUserId(), in.GetConnId())
+	ttlDur := time.Duration(ttl) * time.Second
 
 	pipe := l.svcCtx.Redis.Pipeline()
 	pipe.SAdd(l.ctx, userConnsKey, in.GetConnId())
@@ -48,7 +49,8 @@ func (l *RegisterSessionLogic) RegisterSession(in *pb.RegisterSessionRequest) (*
 		session.HashDeviceType, in.GetDeviceType(),
 		session.HashLastPingAt, strconv.FormatInt(now, 10),
 	)
-	pipe.Expire(l.ctx, sessionKey, time.Duration(ttl)*time.Second)
+	pipe.Expire(l.ctx, sessionKey, ttlDur)
+	pipe.Expire(l.ctx, userConnsKey, ttlDur)
 	_, err := pipe.Exec(l.ctx)
 	if err != nil {
 		l.Errorf("register session redis error: %v", err)

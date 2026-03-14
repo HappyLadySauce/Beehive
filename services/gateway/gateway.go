@@ -32,9 +32,8 @@ func main() {
 		go ctx.PushConsumer.Run(context.Background())
 		defer ctx.PushConsumer.Close()
 	}
-	if ctx.MessageSendLimit != nil {
-		defer ctx.MessageSendLimit.Close()
-	}
+	// 不在此处 defer MessageSendLimit.Close()：server.Stop() 返回时仍有 in-flight 的 WebSocket 请求可能调用 Allow()，
+	// 若先关闭 Redis 会造成竞态。进程退出时由 OS 回收连接；需显式关闭时应在优雅退出流程中先停止接收请求并等待请求排空后再关闭。
 	handler.RegisterHandlers(server, ctx)
 
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
